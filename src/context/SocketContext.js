@@ -4,6 +4,7 @@ export const SocketContext = createContext(undefined);
 
 export const SocketProvider = ({ children }) => {
     const [socket, setSocket] = useState(null);
+    const [message, setMessage] = useState({});
 
     useEffect(() => {
         const ws = new WebSocket('ws://localhost:8080');
@@ -13,7 +14,7 @@ export const SocketProvider = ({ children }) => {
         };
 
         ws.onmessage = (message) => {
-            console.log('Received:', message.data);
+            setMessage(JSON.parse(message.data))
         };
 
         ws.onclose = () => {
@@ -32,7 +33,7 @@ export const SocketProvider = ({ children }) => {
 
     }, []);
 
-    const sendSocketMessage = (message) => {
+    const sendSocketMessage = (message,type) => {
         if (!socket) {
             console.error('WebSocket instance is not available');
             return;
@@ -46,14 +47,14 @@ export const SocketProvider = ({ children }) => {
             return;
         }
         try {
-            socket.send(JSON.stringify(message));
+            socket.send(JSON.stringify({type,message}));
         } catch (error) {
             console.error('Failed to send message:', error);
         }
     };
 
     return (
-        <SocketContext.Provider value={{ sendSocketMessage }}>
+        <SocketContext.Provider value={{ sendSocketMessage ,message}}>
             {children}
         </SocketContext.Provider>
     );

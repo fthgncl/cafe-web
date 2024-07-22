@@ -13,19 +13,26 @@ import InputAdornment from "@mui/material/InputAdornment";
 import IconButton from "@mui/material/IconButton";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import Visibility from "@mui/icons-material/Visibility";
-import {useState} from "react";
+import {useContext, useEffect, useState} from "react";
 import {useFormik} from 'formik';
 import {createUserSchema} from "../schemas/createUserSchema";
+import {SocketContext} from "../context/SocketContext";
+
+// TODO: Buraya sadece yönetici girebilecek şekilde ayarla.
 
 export default function SignUp() {
 
     const [showPassword, setShowPassword] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const {sendSocketMessage, message} = useContext(SocketContext);
+    const messageType = 'createUser';
 
     const onSubmit = async (values, actions) => {
-        console.log(values)
+        setIsLoading(true);
+        sendSocketMessage(values,messageType);
     }
 
-    const {values, touched, handleBlur, errors, isSubmitting, handleChange, handleSubmit, setErrors} = useFormik({
+    const {values, touched, handleBlur, errors, setErrors, isSubmitting, handleChange, handleSubmit} = useFormik({
         initialValues: {
             firstName: '',
             lastName: '',
@@ -37,6 +44,23 @@ export default function SignUp() {
         validationSchema: createUserSchema,
         onSubmit
     });
+
+    useEffect(() => {
+        if (message && message.type === messageType) {
+            let apiErrors = {};
+            if (message.error && message.error.code === 11000) { // Unique Errors
+                const nonUniqueKeys = Object.keys(message.error.keyValue);
+                nonUniqueKeys.forEach(key => apiErrors[key] = `${message.error.keyValue[key]} daha önceden kullanılmış.`);
+            } else if (errors) {   // Validator Errors
+                const nonUniqueKeys = Object.keys(errors);
+                nonUniqueKeys.forEach(key => apiErrors[key] = errors[key].message);
+            }
+            setErrors(apiErrors);
+            setIsLoading(false);
+        }
+        // eslint-disable-next-line
+    }, [message]);
+
 
     return (
         <Container component="main" maxWidth="xs">
@@ -181,13 +205,13 @@ export default function SignUp() {
                         </Grid>
                     </Grid>
                     <Button
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || isLoading}
                         type="submit"
                         fullWidth
                         variant="contained"
                         sx={{mt: 3, mb: 2}}
                     >
-                        {isSubmitting ? <CircularProgress color="inherit"/> : <>Kaydet</>}
+                        {isSubmitting || isLoading ? <CircularProgress color="inherit"/> : <>Kaydet</>}
                     </Button>
                 </Box>
             </Box>
