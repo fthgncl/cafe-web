@@ -1,4 +1,5 @@
-import { useContext, useState } from 'react'
+import {useContext, useEffect, useState} from 'react'
+import { useNavigate } from 'react-router-dom';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -14,24 +15,42 @@ import Visibility from "@mui/icons-material/Visibility";
 import InputAdornment from "@mui/material/InputAdornment";
 import IconButton from "@mui/material/IconButton";
 import { SocketContext } from "../context/SocketContext";
+import CircularProgress from "@mui/material/CircularProgress";
+import * as React from "react";
 
 export default function SignInSide() {
 
-    const {sendSocketMessage} = useContext(SocketContext);
     const [showPassword, setShowPassword] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+    const {sendSocketMessage, socketData} = useContext(SocketContext);
+    const messageType = 'login';
+    const navigate = useNavigate();
 
+    useEffect(() => {
+        if (socketData && socketData.type === messageType) {
+            setIsLoading(false);
+
+            if ( socketData.message.success ){
+                // Giriş Başarılı
+                navigate('/');
+                return;
+            }
+
+            setErrorMessage(socketData.message.message);
+        }
+
+    }, [socketData]);
 
     const handleSubmit = (event) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
         const loginData = {
-            type: 'auth',
             username: data.get('username'),
             password: data.get('password'),
         };
-        console.log(loginData);
-
-        sendSocketMessage(loginData);
+        setIsLoading(true);
+        sendSocketMessage(loginData, messageType);
     };
 
     return (
@@ -100,13 +119,15 @@ export default function SignInSide() {
                                 </InputAdornment>
                             }}
                         />
+                        <Typography sx={{textAlign: 'center', color: 'error.main'}} variant='body2'>{errorMessage}</Typography>
                         <Button
+                            disabled={isLoading}
                             type="submit"
                             fullWidth
                             variant="contained"
                             sx={{mt: 3, mb: 2}}
                         >
-                            Giriş Yap
+                            {isLoading ? <CircularProgress color="inherit"/> : <>Giriş Yap</>}
                         </Button>
                     </Box>
                 </Box>

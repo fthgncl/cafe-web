@@ -4,7 +4,7 @@ export const SocketContext = createContext(undefined);
 
 export const SocketProvider = ({ children }) => {
     const [socket, setSocket] = useState(null);
-    const [message, setMessage] = useState({});
+    const [socketData, setSocketData] = useState({});
 
     useEffect(() => {
         const ws = new WebSocket('ws://localhost:8080');
@@ -14,7 +14,7 @@ export const SocketProvider = ({ children }) => {
         };
 
         ws.onmessage = (message) => {
-            setMessage(JSON.parse(message.data))
+            setSocketData(JSON.parse(message.data))
         };
 
         ws.onclose = () => {
@@ -54,7 +54,7 @@ export const SocketProvider = ({ children }) => {
     };
 
     return (
-        <SocketContext.Provider value={{ sendSocketMessage ,message}}>
+        <SocketContext.Provider value={{ sendSocketMessage ,socketData}}>
             {children}
         </SocketContext.Provider>
     );

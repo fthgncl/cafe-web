@@ -24,7 +24,7 @@ export default function SignUp() {
 
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const {sendSocketMessage, message} = useContext(SocketContext);
+    const {sendSocketMessage, socketData} = useContext(SocketContext);
     const messageType = 'createUser';
 
     const onSubmit = async (values, actions) => {
@@ -46,11 +46,11 @@ export default function SignUp() {
     });
 
     useEffect(() => {
-        if (message && message.type === messageType) {
+        if (socketData && socketData.type === messageType) {
             let apiErrors = {};
-            if (message.error && message.error.code === 11000) { // Unique Errors
-                const nonUniqueKeys = Object.keys(message.error.keyValue);
-                nonUniqueKeys.forEach(key => apiErrors[key] = `${message.error.keyValue[key]} daha önceden kullanılmış.`);
+            if (socketData.error && socketData.error.code === 11000) { // Unique Errors
+                const nonUniqueKeys = Object.keys(socketData.error.keyValue);
+                nonUniqueKeys.forEach(key => apiErrors[key] = `${socketData.error.keyValue[key]} daha önceden kullanılmış.`);
             } else if (errors) {   // Validator Errors
                 const nonUniqueKeys = Object.keys(errors);
                 nonUniqueKeys.forEach(key => apiErrors[key] = errors[key].message);
@@ -59,7 +59,7 @@ export default function SignUp() {
             setIsLoading(false);
         }
         // eslint-disable-next-line
-    }, [message]);
+    }, [socketData]);
 
 
     return (
