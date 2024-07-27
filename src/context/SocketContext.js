@@ -1,11 +1,13 @@
-import { useState, useEffect, createContext } from 'react';
-import {apiSocketAddress, localStorageTokenName} from '../config';
+import {useState, useEffect, createContext, useContext} from 'react';
+import {apiSocketAddress} from '../config';
+import {AccountContext} from "./AccountContext";
 
 export const SocketContext = createContext(undefined);
 
 export const SocketProvider = ({ children }) => {
     const [socket, setSocket] = useState(null);
     const [socketData, setSocketData] = useState({});
+    const {accountProps} = useContext(AccountContext);
 
     useEffect(() => {
         const ws = new WebSocket(apiSocketAddress);
@@ -49,7 +51,7 @@ export const SocketProvider = ({ children }) => {
             return;
         }
         try {
-            const token = localStorage.getItem(localStorageTokenName);
+            const token = accountProps.token
             socket.send(JSON.stringify({type,message,token}));
         } catch (error) {
             console.error('Failed to send message:', error);

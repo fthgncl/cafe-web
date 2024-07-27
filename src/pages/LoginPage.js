@@ -15,9 +15,9 @@ import Visibility from "@mui/icons-material/Visibility";
 import InputAdornment from "@mui/material/InputAdornment";
 import IconButton from "@mui/material/IconButton";
 import {SocketContext} from "../context/SocketContext";
+import {AccountContext} from "../context/AccountContext";
 import CircularProgress from "@mui/material/CircularProgress";
 import * as React from "react";
-import {localStorageTokenName} from '../config';
 
 export default function SignInSide() {
 
@@ -25,6 +25,7 @@ export default function SignInSide() {
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const {sendSocketMessage, socketData} = useContext(SocketContext);
+    const {accountProps, setAccountProps} = useContext(AccountContext);
     const messageType = 'login';
     const navigate = useNavigate();
 
@@ -32,8 +33,8 @@ export default function SignInSide() {
         if (socketData && socketData.type === messageType) {
             setIsLoading(false);
 
-            if (socketData.message.success) {
-                localStorage.setItem(localStorageTokenName, socketData.message.token)
+            if (socketData.message.success && socketData.message.accountProps) {
+                setAccountProps(socketData.message.accountProps);
                 navigate('/');
                 return;
             }

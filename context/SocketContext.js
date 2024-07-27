@@ -1,5 +1,5 @@
 import { useState, useEffect, createContext } from 'react';
-import {apiSocketAddress, localStorageTokenName} from '../config';
+import {apiSocketAddress} from '../config';
 
 export const SocketContext = createContext(undefined);
 
@@ -49,7 +49,7 @@ export const SocketProvider = ({ children }) => {
             return;
         }
         try {
-            const token = localStorage.getItem(localStorageTokenName);
+            const token = localStorage.getItem(localStorageAccountName);
             socket.send(JSON.stringify({type,message,token}));
         } catch (error) {
             console.error('Failed to send message:', error);
