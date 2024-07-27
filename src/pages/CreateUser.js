@@ -22,6 +22,7 @@ import {SocketContext} from "../context/SocketContext";
 
 export default function SignUp() {
 
+    const [errorMessage, setErrorMessage] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const {sendSocketMessage, socketData} = useContext(SocketContext);
@@ -29,7 +30,7 @@ export default function SignUp() {
 
     const onSubmit = async (values, actions) => {
         setIsLoading(true);
-        sendSocketMessage(values,messageType);
+        sendSocketMessage(values, messageType);
     }
 
     const {values, touched, handleBlur, errors, setErrors, isSubmitting, handleChange, handleSubmit} = useFormik({
@@ -47,10 +48,15 @@ export default function SignUp() {
 
     useEffect(() => {
         if (socketData && socketData.type === messageType) {
+            if (socketData.message.status && socketData.message.status === 'error')
+                setErrorMessage(socketData.message.message);
+            else setErrorMessage('');
+
+
             let apiErrors = {};
-            if (socketData.error && socketData.error.code === 11000) { // Unique Errors
-                const nonUniqueKeys = Object.keys(socketData.error.keyValue);
-                nonUniqueKeys.forEach(key => apiErrors[key] = `${socketData.error.keyValue[key]} daha önceden kullanılmış.`);
+            if (socketData.message.error && socketData.message.error.code === 11000) { // Unique Errors
+                const nonUniqueKeys = Object.keys(socketData.message.error.keyValue);
+                nonUniqueKeys.forEach(key => apiErrors[key] = `${socketData.message.error.keyValue[key]} daha önceden kullanılmış.`);
             } else if (errors) {   // Validator Errors
                 const nonUniqueKeys = Object.keys(errors);
                 nonUniqueKeys.forEach(key => apiErrors[key] = errors[key].message);
@@ -204,6 +210,8 @@ export default function SignUp() {
                             />
                         </Grid>
                     </Grid>
+                    <Typography sx={{textAlign: 'center', color: 'error.main', paddingTop: '5px'}}
+                                variant='body2'>{errorMessage}</Typography>
                     <Button
                         disabled={isSubmitting || isLoading}
                         type="submit"

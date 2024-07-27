@@ -15,6 +15,7 @@ export const SocketProvider = ({ children }) => {
         };
 
         ws.onmessage = (message) => {
+            console.log(JSON.parse(message.data));
             setSocketData(JSON.parse(message.data))
         };
 
