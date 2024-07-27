@@ -56,7 +56,7 @@ export const SocketProvider = ({ children }) => {
     };
 
     return (
-        <SocketContext.Provider value={{ sendSocketMessage ,socketData }}>
+        <SocketContext.Provider value={{ sendSocketMessage ,socketData}}>
             {children}
         </SocketContext.Provider>
     );
