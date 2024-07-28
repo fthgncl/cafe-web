@@ -13,19 +13,21 @@ import InputAdornment from "@mui/material/InputAdornment";
 import IconButton from "@mui/material/IconButton";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import Visibility from "@mui/icons-material/Visibility";
-import {useContext, useEffect, useState} from "react";
-import {useFormik} from 'formik';
-import {createUserSchema} from "../schemas/createUserSchema";
-import {SocketContext} from "../context/SocketContext";
-
-// TODO: Buraya sadece yönetici girebilecek şekilde ayarla.
+import { useContext, useEffect, useState } from "react";
+import { useFormik } from 'formik';
+import { createUserSchema } from "../schemas/createUserSchema";
+import { SocketContext } from "../context/SocketContext";
+import FormGroup from '@mui/material/FormGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Checkbox from '@mui/material/Checkbox';
+import { systemPermissions } from '../config';
+import Alert from '@mui/material/Alert';
 
 export default function SignUp() {
-
     const [errorMessage, setErrorMessage] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const {sendSocketMessage, socketData} = useContext(SocketContext);
+    const { sendSocketMessage, socketData } = useContext(SocketContext);
     const messageType = 'createUser';
 
     const onSubmit = async (values, actions) => {
@@ -33,14 +35,15 @@ export default function SignUp() {
         sendSocketMessage(values, messageType);
     }
 
-    const {values, touched, handleBlur, errors, setErrors, isSubmitting, handleChange, handleSubmit} = useFormik({
+    const { values, touched, handleBlur, errors, setErrors, isSubmitting, handleChange, handleSubmit, setFieldValue } = useFormik({
         initialValues: {
             firstname: '',
             lastname: '',
             username: '',
             password: '',
             confirmPassword: '',
-            phone: ''
+            phone: '',
+            permissions: ''
         },
         validationSchema: createUserSchema,
         onSubmit
@@ -51,7 +54,6 @@ export default function SignUp() {
             if (socketData.message.status && socketData.message.status === 'error')
                 setErrorMessage(socketData.message.message);
             else setErrorMessage('');
-
 
             let apiErrors = {};
             if (socketData.message.error && socketData.message.error.code === 11000) { // Unique Errors
@@ -67,10 +69,30 @@ export default function SignUp() {
         // eslint-disable-next-line
     }, [socketData]);
 
+    const handleCheckboxChange = (event) => {
+        const { value, checked } = event.target;
+        const permission = value;
+
+        let currentPermissions = values.permissions;
+
+        if (checked) {
+            if (!currentPermissions.includes(permission)) {
+                currentPermissions += permission;
+            }
+        } else {
+            currentPermissions = currentPermissions.split('')
+                .filter(char => char !== permission)
+                .join('');
+        }
+
+        setFieldValue('permissions', currentPermissions);
+    };
+
+
 
     return (
         <Container component="main" maxWidth="xs">
-            <CssBaseline/>
+            <CssBaseline />
             <Box
                 sx={{
                     marginTop: 8,
@@ -79,13 +101,13 @@ export default function SignUp() {
                     alignItems: 'center',
                 }}
             >
-                <Avatar sx={{m: 1, bgcolor: 'secondary.main'}}>
-                    <LockOutlinedIcon/>
+                <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
+                    <LockOutlinedIcon />
                 </Avatar>
                 <Typography component="h1" variant="h5">
                     Kullanıcı Oluştur
                 </Typography>
-                <Box component="form" noValidate onSubmit={handleSubmit} sx={{mt: 3}}>
+                <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
                     <Grid container spacing={2}>
                         <Grid item xs={12} sm={6}>
                             <TextField
@@ -165,7 +187,6 @@ export default function SignUp() {
                                 onBlur={handleBlur}
                                 error={Boolean(errors.password) && touched.password}
                                 helperText={touched.password && errors.password}
-
                                 InputProps={{
                                     endAdornment: <InputAdornment position="end">
                                         <IconButton
@@ -174,7 +195,7 @@ export default function SignUp() {
                                             onClick={() => setShowPassword(true)}
                                             onMouseDown={() => setShowPassword(false)}
                                         >
-                                            {showPassword ? <VisibilityOff/> : <Visibility/>}
+                                            {showPassword ? <VisibilityOff /> : <Visibility />}
                                         </IconButton>
                                     </InputAdornment>
                                 }}
@@ -194,7 +215,6 @@ export default function SignUp() {
                                 type={showPassword ? 'text' : 'password'}
                                 id="confirmPassword"
                                 autoComplete="new-password"
-
                                 InputProps={{
                                     endAdornment: <InputAdornment position="end">
                                         <IconButton
@@ -203,26 +223,46 @@ export default function SignUp() {
                                             onClick={() => setShowPassword(true)}
                                             onMouseDown={() => setShowPassword(false)}
                                         >
-                                            {showPassword ? <VisibilityOff/> : <Visibility/>}
+                                            {showPassword ? <VisibilityOff /> : <Visibility />}
                                         </IconButton>
                                     </InputAdornment>
                                 }}
                             />
                         </Grid>
+                        <Grid item xs={12}>
+                            <UserPermissionsCheckboxGroup onChange={handleCheckboxChange} />
+                        </Grid>
                     </Grid>
-                    <Typography sx={{textAlign: 'center', color: 'error.main', paddingTop: '5px'}}
-                                variant='body2'>{errorMessage}</Typography>
+                    { !!errors.permissions && (<Alert sx={{mt:2}} severity="error">{errors.permissions}</Alert>)}
+                    { !!errorMessage && (<Alert sx={{mt:2}} severity="error">{errorMessage}</Alert>)}
                     <Button
                         disabled={isSubmitting || isLoading}
                         type="submit"
                         fullWidth
                         variant="contained"
-                        sx={{mt: 3, mb: 2}}
+                        sx={{ mt: 3, mb: 2 }}
                     >
-                        {isSubmitting || isLoading ? <CircularProgress color="inherit"/> : <>Kaydet</>}
+                        {isSubmitting || isLoading ? <CircularProgress color="inherit" /> : <>Kaydet</>}
                     </Button>
                 </Box>
             </Box>
         </Container>
+    );
+}
+
+function UserPermissionsCheckboxGroup({ onChange }) {
+    return (
+        <FormGroup>
+            <Typography variant="h6" gutterBottom>
+                Kullanıcı Yetkileri
+            </Typography>
+            {Object.entries(systemPermissions).map(([key, permission]) => (
+                <FormControlLabel
+                    key={key}
+                    control={<Checkbox value={permission.code} onChange={onChange} />}
+                    label={permission.description}
+                />
+            ))}
+        </FormGroup>
     );
 }

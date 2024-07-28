@@ -40,6 +40,10 @@ export const createUserSchema = yup.object().shape({
     confirmPassword: yup
         .string()
         .oneOf([yup.ref('password')], 'Şifreler eşleşmiyor')
-        .required('Tekrar şifre girmek zorunludur')
+        .required('Tekrar şifre girmek zorunludur'),
+
+    permissions: yup
+        .string()
+        .required('Lütfen en az bir yetki seçiniz')
 
 });
