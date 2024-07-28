@@ -1,9 +1,9 @@
-import { createContext, useEffect, useRef, useState } from 'react';
-import { localStorageAccountName } from "../config";
+import {createContext, useEffect, useRef, useState} from 'react';
+import {localStorageAccountName} from "../config";
 
 export const AccountContext = createContext(undefined);
 
-export const AccountProvider = ({ children }) => {
+export const AccountProvider = ({children}) => {
     const [accountProps, setAccountProps] = useState({});
     const [isActive, setIsActive] = useState(false);
     const timeoutRef = useRef(null);
@@ -65,8 +65,26 @@ export const AccountProvider = ({ children }) => {
         setAccountProps({});
     };
 
+
+    function checkPermissions(nesesarryPermissions, fullMatch = false) {
+        // Kullanıcının sahip olduğu yetkiler
+        const userPermissions = accountProps.permissions || "";
+
+        // Gereken yetkileri bir diziye ayır
+        const requiredPermissions = nesesarryPermissions.split("");
+
+        if (fullMatch) {
+            // Tüm yetkilerin bulunup bulunmadığını kontrol et
+            return requiredPermissions.every(permission => userPermissions.includes(permission));
+        } else {
+            // Herhangi bir yetkinin bulunup bulunmadığını kontrol et
+            return requiredPermissions.some(permission => userPermissions.includes(permission));
+        }
+    }
+
     return (
-        <AccountContext.Provider value={{ accountProps, setAccountProps: updateAccountProps, logout, isActive }}>
+        <AccountContext.Provider
+            value={{accountProps, setAccountProps: updateAccountProps, logout, isActive, checkPermissions}}>
             {children}
         </AccountContext.Provider>
     );
