@@ -35,7 +35,7 @@ export default function SignUp() {
         sendSocketMessage(values, messageType);
     }
 
-    const { values, touched, handleBlur, errors, setErrors, isSubmitting, handleChange, handleSubmit, setFieldValue } = useFormik({
+    const { values, touched, handleBlur, errors, setErrors, isSubmitting, handleChange, handleSubmit, setFieldValue, resetForm } = useFormik({
         initialValues: {
             firstname: '',
             lastname: '',
@@ -51,6 +51,9 @@ export default function SignUp() {
 
     useEffect(() => {
         if (socketData && socketData.type === messageType) {
+            if (socketData.message.status && socketData.message.status === 'success')
+                resetForm();
+
             if (socketData.message.status && socketData.message.status === 'error')
                 setErrorMessage(socketData.message.message);
             else setErrorMessage('');
@@ -230,7 +233,7 @@ export default function SignUp() {
                             />
                         </Grid>
                         <Grid item xs={12}>
-                            <UserPermissionsCheckboxGroup onChange={handleCheckboxChange} />
+                            <UserPermissionsCheckboxGroup onChange={handleCheckboxChange} selectedPermissions={values.permissions} />
                         </Grid>
                     </Grid>
                     { !!errors.permissions && (<Alert sx={{mt:2}} severity="error">{errors.permissions}</Alert>)}
@@ -250,7 +253,7 @@ export default function SignUp() {
     );
 }
 
-function UserPermissionsCheckboxGroup({ onChange }) {
+function UserPermissionsCheckboxGroup({ onChange, selectedPermissions }) {
     return (
         <FormGroup>
             <Typography variant="h6" gutterBottom>
@@ -261,6 +264,7 @@ function UserPermissionsCheckboxGroup({ onChange }) {
                     key={key}
                     control={<Checkbox value={permission.code} onChange={onChange} />}
                     label={permission.description}
+                    checked={selectedPermissions.includes(permission.code)}
                 />
             ))}
         </FormGroup>
