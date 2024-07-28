@@ -10,6 +10,16 @@ export const SocketProvider = ({ children }) => {
     const {accountProps, setAccountProps} = useContext(AccountContext);
 
     useEffect(() => {
+
+        if (socketData && socketData.type === 'updateToken') {
+            const newToken = socketData.message;
+            setAccountProps({...accountProps , token : newToken});
+        }
+
+        // eslint-disable-next-line
+    }, [socketData]);
+
+    useEffect(() => {
         const ws = new WebSocket(apiSocketAddress);
 
         ws.onopen = () => {
