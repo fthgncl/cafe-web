@@ -25,11 +25,12 @@ export default function SignInSide() {
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const {sendSocketMessage, socketData} = useContext(SocketContext);
-    const {accountProps, setAccountProps} = useContext(AccountContext);
+    const {setAccountProps} = useContext(AccountContext);
     const messageType = 'login';
     const navigate = useNavigate();
 
     useEffect(() => {
+
         if (socketData && socketData.type === messageType) {
             setIsLoading(false);
 

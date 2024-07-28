@@ -5,13 +5,13 @@ const phoneRules = /^[0-9]{10}$/;
 
 export const createUserSchema = yup.object().shape({
 
-    firstName: yup
+    firstname: yup
         .string()
         .min(3, 'İsminiz en az 3 karakter içermelidir.')
         .max(20, 'İsminiz 20 karakterden daha fazla olamaz.')
         .required('İsim boş bırakılamaz.'),
 
-    lastName: yup
+    lastname: yup
         .string()
         .min(3, 'Soyisminiz en az 3 karakter içermelidir.')
         .max(20, 'Soyisminiz 20 karakterden daha fazla olamaz.')

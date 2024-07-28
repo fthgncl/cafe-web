@@ -1,22 +1,72 @@
-import {createContext} from 'react';
-import {localStorageAccountName} from "../config";
+import { createContext, useEffect, useRef, useState } from 'react';
+import { localStorageAccountName } from "../config";
 
 export const AccountContext = createContext(undefined);
 
 export const AccountProvider = ({ children }) => {
+    const [accountProps, setAccountProps] = useState({});
+    const [isActive, setIsActive] = useState(false);
+    const timeoutRef = useRef(null);
 
-    const accountProps = () => {
-        return localStorage.getItem(localStorageAccountName);
-    }
+    useEffect(() => {
+        const storedAccountProps = localStorage.getItem(localStorageAccountName);
 
-    const setAccountProps = (newAccountProps) => {
-        return localStorage.setItem(localStorageAccountName, newAccountProps)
-    }
+        if (storedAccountProps) {
+            try {
+                const parsedProps = JSON.parse(storedAccountProps);
+                if (parsedProps.exp && isSessionValid(parsedProps.exp)) {
+                    setAccountProps(parsedProps);
+                    setIsActive(true);
 
+                    const timeUntilExpiration = parsedProps.exp - Date.now();
+                    timeoutRef.current = setTimeout(logout, timeUntilExpiration);
+                } else {
+                    console.warn("Session expired.");
+                    logout();
+                }
+            } catch (error) {
+                console.error("JSON parsing error:", error);
+                logout();
+            }
+        }
 
+        // Cleanup function to clear the timeout when the component unmounts
+        return () => {
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+            }
+        };
+    }, []);
+
+    const isSessionValid = (expirationTime) => {
+        const currentTime = Date.now();
+        return expirationTime > currentTime;
+    };
+
+    const updateAccountProps = (newAccountProps) => {
+        localStorage.setItem(localStorageAccountName, JSON.stringify(newAccountProps));
+        setAccountProps(newAccountProps);
+
+        const timeUntilExpiration = newAccountProps.exp - Date.now();
+        if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+        }
+        timeoutRef.current = setTimeout(logout, timeUntilExpiration);
+
+        setIsActive(true);
+    };
+
+    const logout = () => {
+        if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+        }
+        localStorage.removeItem(localStorageAccountName);
+        setIsActive(false);
+        setAccountProps({});
+    };
 
     return (
-        <AccountContext.Provider value={{ accountProps, setAccountProps }}>
+        <AccountContext.Provider value={{ accountProps, setAccountProps: updateAccountProps, logout, isActive }}>
             {children}
         </AccountContext.Provider>
     );

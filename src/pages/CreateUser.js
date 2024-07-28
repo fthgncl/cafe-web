@@ -35,8 +35,8 @@ export default function SignUp() {
 
     const {values, touched, handleBlur, errors, setErrors, isSubmitting, handleChange, handleSubmit} = useFormik({
         initialValues: {
-            firstName: '',
-            lastName: '',
+            firstname: '',
+            lastname: '',
             username: '',
             password: '',
             confirmPassword: '',
@@ -90,16 +90,16 @@ export default function SignUp() {
                         <Grid item xs={12} sm={6}>
                             <TextField
                                 autoComplete="given-name"
-                                name="firstName"
+                                name="firstname"
                                 required
                                 fullWidth
-                                id="firstName"
+                                id="firstname"
                                 label="İsim"
-                                value={values.firstName}
+                                value={values.firstname}
                                 onBlur={handleBlur}
                                 onChange={handleChange}
-                                error={Boolean(errors.firstName) && touched.firstName}
-                                helperText={touched.firstName && errors.firstName}
+                                error={Boolean(errors.firstname) && touched.firstname}
+                                helperText={touched.firstname && errors.firstname}
                                 autoFocus
                             />
                         </Grid>
@@ -107,15 +107,15 @@ export default function SignUp() {
                             <TextField
                                 required
                                 fullWidth
-                                id="lastName"
+                                id="lastname"
                                 label="Soy İsim"
-                                name="lastName"
+                                name="lastname"
                                 autoComplete="family-name"
                                 onBlur={handleBlur}
                                 onChange={handleChange}
-                                value={values.lastName}
-                                error={Boolean(errors.lastName) && touched.lastName}
-                                helperText={touched.lastName && errors.lastName}
+                                value={values.lastname}
+                                error={Boolean(errors.lastname) && touched.lastname}
+                                helperText={touched.lastname && errors.lastname}
                             />
                         </Grid>
                         <Grid item xs={12}>

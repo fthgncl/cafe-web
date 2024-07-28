@@ -7,7 +7,7 @@ export const SocketContext = createContext(undefined);
 export const SocketProvider = ({ children }) => {
     const [socket, setSocket] = useState(null);
     const [socketData, setSocketData] = useState({});
-    const {accountProps} = useContext(AccountContext);
+    const {accountProps, setAccountProps} = useContext(AccountContext);
 
     useEffect(() => {
         const ws = new WebSocket(apiSocketAddress);
@@ -17,7 +17,6 @@ export const SocketProvider = ({ children }) => {
         };
 
         ws.onmessage = (message) => {
-            console.log(JSON.parse(message.data));
             setSocketData(JSON.parse(message.data))
         };
 
@@ -36,6 +35,13 @@ export const SocketProvider = ({ children }) => {
         };
 
     }, []);
+
+    useEffect(() => {
+        const isEmpty = Object.keys(socketData).length === 0 && socketData.constructor === Object;
+        if ( !isEmpty )
+            setSocketData({});
+
+    }, [socketData]);
 
     const sendSocketMessage = (message,type) => {
         if (!socket) {
