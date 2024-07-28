@@ -1,18 +1,21 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
+import {BrowserRouter} from 'react-router-dom';
 import './index.css';
 import App from './App';
-import { SocketProvider } from "./context/SocketContext";
-import { AccountProvider } from "./context/AccountContext";
+import {SocketProvider} from "./context/SocketContext";
+import {AccountProvider} from "./context/AccountContext";
+import {SnackbarProvider} from 'notistack';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-    <AccountProvider>
-        <SocketProvider>
-            <BrowserRouter>
-                <App />
-            </BrowserRouter>
-        </SocketProvider>
-    </AccountProvider>
+    <SnackbarProvider maxSnack={3}>
+        <AccountProvider>
+            <SocketProvider>
+                <BrowserRouter>
+                    <App/>
+                </BrowserRouter>
+            </SocketProvider>
+        </AccountProvider>
+    </SnackbarProvider>
 );

@@ -22,8 +22,10 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import { systemPermissions } from '../config';
 import Alert from '@mui/material/Alert';
+import { useSnackbar } from 'notistack';
 
 export default function SignUp() {
+    const { enqueueSnackbar } = useSnackbar();
     const [errorMessage, setErrorMessage] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -51,8 +53,14 @@ export default function SignUp() {
 
     useEffect(() => {
         if (socketData && socketData.type === messageType) {
-            if (socketData.message.status && socketData.message.status === 'success')
+
+            if ( socketData.message.message && socketData.message.status ){
+                enqueueSnackbar(socketData.message.message, { variant : socketData.message.status });
+            }
+
+            if (socketData.message.status && socketData.message.status === 'success') {
                 resetForm();
+            }
 
             if (socketData.message.status && socketData.message.status === 'error')
                 setErrorMessage(socketData.message.message);
