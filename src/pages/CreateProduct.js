@@ -29,7 +29,7 @@ export default function ProductForm() {
     const messageType = 'createProduct';
 
     useEffect(() => {
-        console.log('mesaj geldi',socketData);
+
         if (socketData && socketData.type === messageType) {
             if (socketData.message.message && socketData.message.status) {
                 enqueueSnackbar(socketData.message.message, { variant: socketData.message.status });

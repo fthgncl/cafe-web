@@ -8,10 +8,6 @@ export const AccountProvider = ({ children }) => {
     const [isActive, setIsActive] = useState(false);
     const timeoutRef = useRef(null);
 
-    useEffect(() => {
-        console.log('accountProps : ',accountProps);
-    }, [accountProps]);
-
     const updateToken = (newProps) => {
 
         let storedAccountProps;

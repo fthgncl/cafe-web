@@ -42,6 +42,7 @@ export const SocketProvider = ({children}) => {
             ws.close();
         };
 
+        // eslint-disable-next-line
     }, []);
 
     useEffect(() => {
