@@ -3,7 +3,7 @@ import * as yup from 'yup'
 const passwordRules = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{5,}$/;
 const phoneRules = /^[0-9]{10}$/;
 
-export const createUserSchema = yup.object().shape({
+export const userSchema = yup.object().shape({
 
     firstname: yup
         .string()

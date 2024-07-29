@@ -1,6 +1,7 @@
 import {Routes, Route} from 'react-router-dom';
 import LoginPage from "./pages/LoginPage";
 import CreateUser from "./pages/CreateUser";
+import CreateProduct from "./pages/CreateProduct";
 import {useContext} from "react";
 import {AccountContext} from "./context/AccountContext";
 import AppBar from "./components/AppBar";
@@ -16,11 +17,19 @@ function App() {
             <AppBar/>
             <Routes>
                 <Route path="/" element={<div/>}/>
+
                 <Route path="/create-user" element={<PrivateRoute
                     element={<CreateUser/>}
                     requiredPermissions="a"
                     fullMatch={true}
                 />}/>
+
+                <Route path="/create-product" element={<PrivateRoute
+                    element={<CreateProduct/>}
+                    requiredPermissions="a"
+                    fullMatch={true}
+                />}/>
+
             </Routes>
         </>
     );

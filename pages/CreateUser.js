@@ -15,7 +15,7 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import Visibility from "@mui/icons-material/Visibility";
 import {useContext, useEffect, useState} from "react";
 import {useFormik} from 'formik';
-import {createUserSchema} from "../schemas/createUserSchema";
+import {userSchema} from "../schemas/userSchema";
 import {SocketContext} from "../context/SocketContext";
 
 // TODO: Buraya sadece yönetici girebilecek şekilde ayarla.
@@ -41,7 +41,7 @@ export default function SignUp() {
             confirmPassword: '',
             phone: ''
         },
-        validationSchema: createUserSchema,
+        validationSchema: userSchema,
         onSubmit
     });
 

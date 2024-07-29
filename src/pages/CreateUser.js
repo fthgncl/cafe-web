@@ -15,7 +15,7 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import Visibility from "@mui/icons-material/Visibility";
 import { useContext, useEffect, useState } from "react";
 import { useFormik } from 'formik';
-import { createUserSchema } from "../schemas/createUserSchema";
+import { userSchema } from "../schemas/userSchema";
 import { SocketContext } from "../context/SocketContext";
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -47,7 +47,7 @@ export default function SignUp() {
             phone: '',
             permissions: ''
         },
-        validationSchema: createUserSchema,
+        validationSchema: userSchema,
         onSubmit
     });
 
