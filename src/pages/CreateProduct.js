@@ -7,9 +7,6 @@ import {
     Grid,
     TextField,
     InputAdornment,
-    FormControl,
-    FormControlLabel,
-    Checkbox,
     Typography,
     IconButton,
     CircularProgress
@@ -42,7 +39,7 @@ export default function ProductForm() {
                 formik.setErrors(apiErrors);
             }
 
-            if ( Object.keys(apiErrors).length === 0 && socketData.message.message && socketData.message.status) {
+            if (Object.keys(apiErrors).length === 0 && socketData.message.message && socketData.message.status) {
                 enqueueSnackbar(socketData.message.message, { variant: socketData.message.status });
             }
 
@@ -59,12 +56,7 @@ export default function ProductForm() {
         initialValues: {
             productname: '',
             productcategory: '',
-            productprice: '',
-            sizes: {
-                small: false,
-                medium: false,
-                large: false,
-            },
+            sizes: [{ size: 'Standart', price: '' }],
             contents: []
         },
         validationSchema: productSchema,
@@ -73,6 +65,29 @@ export default function ProductForm() {
             sendSocketMessage(values, messageType);
         },
     });
+
+    const handleAddSize = () => {
+        if (formik.values.sizes.length < 1) {
+            // En az bir boyut olması gerekiyor
+            return;
+        }
+        formik.setFieldValue('sizes', [...formik.values.sizes, { size: '', price: '' }]);
+    };
+
+    const handleRemoveSize = (index) => {
+        if (formik.values.sizes.length > 1) {
+            const newSizes = formik.values.sizes.filter((_, i) => i !== index);
+            formik.setFieldValue('sizes', newSizes);
+        }
+    };
+
+    const handleSizeChange = (index, event) => {
+        const { name, value } = event.target;
+        const newSizes = formik.values.sizes.map((size, i) =>
+            i === index ? { ...size, [name]: value } : size
+        );
+        formik.setFieldValue('sizes', newSizes);
+    };
 
     const handleAddContent = () => {
         formik.setFieldValue('contents', [...formik.values.contents, { name: '', extraFee: '' }]);
@@ -114,7 +129,7 @@ export default function ProductForm() {
                     backgroundColor: '#ffffff',
                     overflow: 'hidden',
                     boxShadow: 3,
-                    mt:3
+                    mt: 3
                 }}>
 
                     <Box sx={{ width: 1, display: 'flex', padding: 2 }}>
@@ -152,69 +167,54 @@ export default function ProductForm() {
                                 </Grid>
 
                                 <Grid item xs={12}>
-                                    <TextField
-                                        required
-                                        fullWidth
-                                        id="productprice"
-                                        label="Ürün Fiyatı"
-                                        name="productprice"
-                                        type="number"
-                                        value={formik.values.productprice}
-                                        onChange={formik.handleChange}
-                                        onBlur={formik.handleBlur}
-                                        error={Boolean(formik.errors.productprice) && formik.touched.productprice}
-                                        helperText={formik.touched.productprice && formik.errors.productprice}
-                                        InputProps={{
-                                            startAdornment: <InputAdornment position="start">₺</InputAdornment>,
-                                        }}
-                                    />
-                                </Grid>
-
-                                <Grid item xs={12}>
                                     <Box sx={{ marginTop: 2, textAlign: 'center' }}>
                                         <Typography variant="h6" gutterBottom>
                                             Ürün Boyutları
                                         </Typography>
-                                        <FormControl component="fieldset">
-                                            <Grid container spacing={2} justifyContent="center">
-                                                <Grid item>
-                                                    <FormControlLabel
-                                                        control={
-                                                            <Checkbox
-                                                                checked={formik.values.sizes.small}
-                                                                onChange={formik.handleChange}
-                                                                name="sizes.small"
-                                                            />
-                                                        }
-                                                        label="Küçük Boy"
+                                        {formik.values.sizes.map((size, index) => (
+                                            <Box key={index} sx={{ marginBottom: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                                <Box sx={{ display: 'flex', gap: 2, flexGrow: 1 }}>
+                                                    <TextField
+                                                        required
+                                                        fullWidth
+                                                        label="Boyut Adı"
+                                                        name="size"
+                                                        value={size.size}
+                                                        onChange={(event) => handleSizeChange(index, event)}
                                                     />
-                                                </Grid>
-                                                <Grid item>
-                                                    <FormControlLabel
-                                                        control={
-                                                            <Checkbox
-                                                                checked={formik.values.sizes.medium}
-                                                                onChange={formik.handleChange}
-                                                                name="sizes.medium"
-                                                            />
-                                                        }
-                                                        label="Orta Boy"
+                                                    <TextField
+                                                        required
+                                                        fullWidth
+                                                        label="Fiyat (₺)"
+                                                        name="price"
+                                                        type="number"
+                                                        value={size.price}
+                                                        InputProps={{
+                                                            startAdornment: <InputAdornment position="start">₺</InputAdornment>,
+                                                        }}
+                                                        onChange={(event) => handleSizeChange(index, event)}
                                                     />
-                                                </Grid>
-                                                <Grid item>
-                                                    <FormControlLabel
-                                                        control={
-                                                            <Checkbox
-                                                                checked={formik.values.sizes.large}
-                                                                onChange={formik.handleChange}
-                                                                name="sizes.large"
-                                                            />
-                                                        }
-                                                        label="Büyük Boy"
-                                                    />
-                                                </Grid>
-                                            </Grid>
-                                        </FormControl>
+                                                </Box>
+                                                <IconButton
+                                                    color="error"
+                                                    onClick={() => handleRemoveSize(index)}
+                                                    sx={{ marginLeft: 2 }}
+                                                >
+                                                    <CancelOutlinedIcon />
+                                                </IconButton>
+                                            </Box>
+                                        ))}
+                                        <Button
+                                            sx={{
+                                                height: '30px',
+                                                textTransform: 'none'
+                                            }}
+                                            variant="outlined"
+                                            startIcon={<AddIcon />}
+                                            onClick={handleAddSize}
+                                        >
+                                            Boyut Ekle
+                                        </Button>
                                     </Box>
                                 </Grid>
 
