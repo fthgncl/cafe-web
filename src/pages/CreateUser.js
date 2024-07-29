@@ -20,7 +20,7 @@ import { SocketContext } from "../context/SocketContext";
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
-import { systemPermissions } from '../config';
+import { systemPermissions } from '../../config';
 import Alert from '@mui/material/Alert';
 import { useSnackbar } from 'notistack';
 

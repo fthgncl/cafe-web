@@ -1,5 +1,5 @@
 import {useState, useEffect, createContext, useContext} from 'react';
-import {apiSocketAddress} from '../config';
+import {apiSocketAddress} from '../../config';
 import {AccountContext} from "./AccountContext";
 
 export const SocketContext = createContext(undefined);
