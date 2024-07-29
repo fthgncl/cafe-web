@@ -4,20 +4,10 @@ import {AccountContext} from "./AccountContext";
 
 export const SocketContext = createContext(undefined);
 
-export const SocketProvider = ({ children }) => {
+export const SocketProvider = ({children}) => {
     const [socket, setSocket] = useState(null);
     const [socketData, setSocketData] = useState({});
-    const {accountProps, setAccountProps} = useContext(AccountContext);
-
-    useEffect(() => {
-
-        if (socketData && socketData.type === 'updateToken') {
-            const newToken = socketData.message;
-            setAccountProps({...accountProps , token : newToken});
-        }
-
-        // eslint-disable-next-line
-    }, [socketData]);
+    const {accountProps, updateToken} = useContext(AccountContext);
 
     useEffect(() => {
         const ws = new WebSocket(apiSocketAddress);
@@ -27,7 +17,15 @@ export const SocketProvider = ({ children }) => {
         };
 
         ws.onmessage = (message) => {
-            setSocketData(JSON.parse(message.data))
+            const data = JSON.parse(message.data);
+
+            if (data) {
+
+                if (data.type === 'updateToken')
+                    updateToken(data.message);
+                else setSocketData(data);
+            }
+
         };
 
         ws.onclose = () => {
@@ -48,12 +46,12 @@ export const SocketProvider = ({ children }) => {
 
     useEffect(() => {
         const isEmpty = Object.keys(socketData).length === 0 && socketData.constructor === Object;
-        if ( !isEmpty )
+        if (!isEmpty)
             setSocketData({});
 
     }, [socketData]);
 
-    const sendSocketMessage = (message,type) => {
+    const sendSocketMessage = (message, type) => {
         if (!socket) {
             console.error('WebSocket instance is not available');
             return;
@@ -68,14 +66,14 @@ export const SocketProvider = ({ children }) => {
         }
         try {
             const token = accountProps.token
-            socket.send(JSON.stringify({type,message,token}));
+            socket.send(JSON.stringify({type, message, token}));
         } catch (error) {
             console.error('Failed to send message:', error);
         }
     };
 
     return (
-        <SocketContext.Provider value={{ sendSocketMessage ,socketData }}>
+        <SocketContext.Provider value={{sendSocketMessage, socketData}}>
             {children}
         </SocketContext.Provider>
     );

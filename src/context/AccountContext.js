@@ -3,10 +3,33 @@ import {localStorageAccountName} from "../config";
 
 export const AccountContext = createContext(undefined);
 
-export const AccountProvider = ({children}) => {
+export const AccountProvider = ({ children }) => {
     const [accountProps, setAccountProps] = useState({});
     const [isActive, setIsActive] = useState(false);
     const timeoutRef = useRef(null);
+
+    useEffect(() => {
+        console.log('accountProps : ',accountProps);
+    }, [accountProps]);
+
+    const updateToken = (newProps) => {
+
+        let storedAccountProps;
+        try {
+            storedAccountProps = JSON.parse(localStorage.getItem(localStorageAccountName));
+        } catch (error) {
+            console.error("JSON parsing error in updateToken:", error);
+            return;
+        }
+
+        if (typeof storedAccountProps === 'object' && storedAccountProps !== null) {
+            const updatedProps = { ...storedAccountProps, ...newProps };
+            updateAccountProps(updatedProps);
+        } else {
+            console.warn("Stored account props is not an object or is null");
+        }
+    };
+
 
     useEffect(() => {
         const storedAccountProps = localStorage.getItem(localStorageAccountName);
@@ -84,7 +107,7 @@ export const AccountProvider = ({children}) => {
 
     return (
         <AccountContext.Provider
-            value={{accountProps, setAccountProps: updateAccountProps, logout, isActive, checkPermissions}}>
+            value={{accountProps, setAccountProps: updateAccountProps, logout, isActive, checkPermissions, updateToken}}>
             {children}
         </AccountContext.Provider>
     );
