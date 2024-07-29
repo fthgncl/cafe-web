@@ -29,9 +29,18 @@ export default function ProductForm() {
     const messageType = 'createProduct';
 
     useEffect(() => {
-
         if (socketData && socketData.type === messageType) {
-            if (socketData.message.message && socketData.message.status) {
+
+            let apiErrors = {};
+            if (socketData.message.status === 'error') {
+                if (socketData.message.error && socketData.message.error.code === 11000) { // Unique Errors
+                    const nonUniqueKeys = Object.keys(socketData.message.error.keyValue);
+                    nonUniqueKeys.forEach(key => apiErrors[key] = `${socketData.message.error.keyValue[key]} daha önceden kullanılmış.`);
+                }
+                formik.setErrors(apiErrors);
+            }
+
+            if ( Object.keys(apiErrors).length === 0 && socketData.message.message && socketData.message.status) {
                 enqueueSnackbar(socketData.message.message, { variant: socketData.message.status });
             }
 
