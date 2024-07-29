@@ -7,6 +7,7 @@ export const SocketContext = createContext(undefined);
 export const SocketProvider = ({children}) => {
     const [socket, setSocket] = useState(null);
     const [socketData, setSocketData] = useState({});
+    const [isConnected, setIsConnected] = useState(false);
     const {accountProps, updateToken} = useContext(AccountContext);
 
     useEffect(() => {
@@ -14,6 +15,7 @@ export const SocketProvider = ({children}) => {
 
         ws.onopen = () => {
             console.log('Connected to WebSocket server');
+            setIsConnected(true);
         };
 
         ws.onmessage = (message) => {
@@ -39,6 +41,7 @@ export const SocketProvider = ({children}) => {
         setSocket(ws);
 
         return () => { // Cleanup on unmount
+            setIsConnected(false);
             ws.close();
         };
 
@@ -74,7 +77,7 @@ export const SocketProvider = ({children}) => {
     };
 
     return (
-        <SocketContext.Provider value={{sendSocketMessage, socketData}}>
+        <SocketContext.Provider value={{sendSocketMessage, socketData, isConnected }}>
             {children}
         </SocketContext.Provider>
     );

@@ -2,6 +2,7 @@ import {Routes, Route} from 'react-router-dom';
 import LoginPage from "./pages/LoginPage";
 import CreateUser from "./pages/CreateUser";
 import CreateProduct from "./pages/CreateProduct";
+import OrderEntry from "./pages/OrderEntry";
 import {useContext} from "react";
 import {AccountContext} from "./context/AccountContext";
 import AppBar from "./components/AppBar";
@@ -27,6 +28,12 @@ function App() {
                 <Route path="/create-product" element={<PrivateRoute
                     element={<CreateProduct/>}
                     requiredPermissions="ab"
+                    fullMatch={false}
+                />}/>
+
+                <Route path="/order-entry" element={<PrivateRoute
+                    element={<OrderEntry/>}
+                    requiredPermissions="ad"
                     fullMatch={false}
                 />}/>
 
