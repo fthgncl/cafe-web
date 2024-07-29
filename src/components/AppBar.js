@@ -7,7 +7,7 @@ import IconButton from '@mui/material/IconButton';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
-import {cafeName} from '../../config';
+import {cafeName} from '../config';
 import {AccountContext} from "../context/AccountContext";
 
 

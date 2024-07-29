@@ -1,5 +1,5 @@
 import {createContext, useEffect, useRef, useState} from 'react';
-import {localStorageAccountName} from "../../config";
+import {localStorageAccountName} from "../config";
 
 export const AccountContext = createContext(undefined);
 
