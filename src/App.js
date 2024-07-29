@@ -21,13 +21,13 @@ function App() {
                 <Route path="/create-user" element={<PrivateRoute
                     element={<CreateUser/>}
                     requiredPermissions="a"
-                    fullMatch={true}
+                    fullMatch={false}
                 />}/>
 
                 <Route path="/create-product" element={<PrivateRoute
                     element={<CreateProduct/>}
-                    requiredPermissions="a"
-                    fullMatch={true}
+                    requiredPermissions="ab"
+                    fullMatch={false}
                 />}/>
 
             </Routes>

@@ -53,9 +53,8 @@ export default function SignUp() {
 
     useEffect(() => {
         if (socketData && socketData.type === messageType) {
-
-            if ( socketData.message.message && socketData.message.status ){
-                enqueueSnackbar(socketData.message.message, { variant : socketData.message.status });
+            if (socketData.message.message && socketData.message.status) {
+                enqueueSnackbar(socketData.message.message, { variant: socketData.message.status });
             }
 
             if (socketData.message.status && socketData.message.status === 'success') {
@@ -70,7 +69,7 @@ export default function SignUp() {
             if (socketData.message.error && socketData.message.error.code === 11000) { // Unique Errors
                 const nonUniqueKeys = Object.keys(socketData.message.error.keyValue);
                 nonUniqueKeys.forEach(key => apiErrors[key] = `${socketData.message.error.keyValue[key]} daha önceden kullanılmış.`);
-            } else if (errors) {   // Validator Errors
+            } else if (errors) { // Validator Errors
                 const nonUniqueKeys = Object.keys(errors);
                 nonUniqueKeys.forEach(key => apiErrors[key] = errors[key].message);
             }
@@ -84,22 +83,29 @@ export default function SignUp() {
         const { value, checked } = event.target;
         const permission = value;
 
-        let currentPermissions = values.permissions;
+        let currentPermissions = values.permissions.split('');
 
-        if (checked) {
-            if (!currentPermissions.includes(permission)) {
-                currentPermissions += permission;
+        if (permission === systemPermissions.sys_admin.code) {
+            // 'sys_admin' checkbox'u işaretlendiğinde
+            if (checked) {
+                currentPermissions = Object.values(systemPermissions).map(p => p.code);
+            } else {
+                // 'sys_admin' checkbox'u işaretlenmediyse, tüm checkbox'ları temizle
+                currentPermissions = [];
             }
         } else {
-            currentPermissions = currentPermissions.split('')
-                .filter(char => char !== permission)
-                .join('');
+            // Diğer checkbox'lar için
+            if (checked) {
+                if (!currentPermissions.includes(permission)) {
+                    currentPermissions.push(permission);
+                }
+            } else {
+                currentPermissions = currentPermissions.filter(char => char !== permission);
+            }
         }
 
-        setFieldValue('permissions', currentPermissions);
+        setFieldValue('permissions', currentPermissions.join(''));
     };
-
-
 
     return (
         <Container component="main" maxWidth="xs">
@@ -241,11 +247,14 @@ export default function SignUp() {
                             />
                         </Grid>
                         <Grid item xs={12}>
-                            <UserPermissionsCheckboxGroup onChange={handleCheckboxChange} selectedPermissions={values.permissions} />
+                            <UserPermissionsCheckboxGroup
+                                onChange={handleCheckboxChange}
+                                selectedPermissions={values.permissions}
+                            />
                         </Grid>
                     </Grid>
-                    { !!errors.permissions && (<Alert sx={{mt:2}} severity="error">{errors.permissions}</Alert>)}
-                    { !!errorMessage && (<Alert sx={{mt:2}} severity="error">{errorMessage}</Alert>)}
+                    {!!errors.permissions && (<Alert sx={{ mt: 2 }} severity="error">{errors.permissions}</Alert>)}
+                    {!!errorMessage && (<Alert sx={{ mt: 2 }} severity="error">{errorMessage}</Alert>)}
                     <Button
                         disabled={isSubmitting || isLoading}
                         type="submit"
