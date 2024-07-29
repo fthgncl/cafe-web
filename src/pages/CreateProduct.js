@@ -21,6 +21,8 @@ import { productSchema } from '../schemas/productSchema';
 import { useContext, useEffect, useState } from 'react';
 import { SocketContext } from '../context/SocketContext';
 import { useSnackbar } from 'notistack';
+import Avatar from "@mui/material/Avatar";
+import EmojiFoodBeverageTwoToneIcon from '@mui/icons-material/EmojiFoodBeverageTwoTone';
 
 export default function ProductForm() {
     const { enqueueSnackbar } = useSnackbar();
@@ -100,33 +102,20 @@ export default function ProductForm() {
                     alignItems: 'center',
                 }}
             >
+                <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
+                    <EmojiFoodBeverageTwoToneIcon />
+                </Avatar>
+                <Typography component="h1" variant="h5">
+                    Ürün Ekle
+                </Typography>
                 <Box sx={{
                     width: 450,
                     borderRadius: '5px',
                     backgroundColor: '#ffffff',
                     overflow: 'hidden',
-                    boxShadow: 3
+                    boxShadow: 3,
+                    mt:3
                 }}>
-                    <Box sx={{
-                        backgroundColor: 'rgba(25,117,209,0.24)',
-                        width: 1,
-                        height: '140px',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center'
-                    }}>
-                        <Button
-                            sx={{
-                                height: '30px',
-                                textTransform: 'none'
-                            }}
-                            variant="contained"
-                            size="large"
-                            startIcon={<AddIcon />}
-                        >
-                            Görsel Ekle
-                        </Button>
-                    </Box>
 
                     <Box sx={{ width: 1, display: 'flex', padding: 2 }}>
                         <form onSubmit={formik.handleSubmit}>
