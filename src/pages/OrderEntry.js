@@ -170,6 +170,7 @@ export default function OrderEntry() {
                     >
                         <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
                             <Typography variant="h6">Ürünler</Typography>
+                            <Box sx={{ width:0.8, display:'flex', justifyContent:'center'}} >
                             <TextField
                                 variant="outlined"
                                 placeholder="Ürün ara..."
@@ -183,8 +184,9 @@ export default function OrderEntry() {
                                         </IconButton>
                                     )
                                 }}
-                                sx={{maxWidth: 300}}
+                                sx={{width: 0.7}}
                             />
+                            </Box>
                         </Box>
                         <List>
                             {filteredProducts.map(product => (
