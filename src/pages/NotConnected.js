@@ -31,7 +31,7 @@ const ConnectionErrorPage = () => {
                     gutterBottom
                     align="center"
                 >
-                    Şu anda sunucuya bağlanılamıyor.
+                    Şu anda sunucuya ulaşılamıyor.
                 </Typography>
                 <Typography
                     variant="body1"

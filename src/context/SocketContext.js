@@ -1,16 +1,16 @@
-import { useState, useEffect, createContext, useContext } from 'react';
-import { apiSocketAddress } from '../config';
-import { AccountContext } from "./AccountContext";
+import {useState, useEffect, createContext, useContext} from 'react';
+import {apiSocketAddress} from '../config';
+import {AccountContext} from "./AccountContext";
 
 export const SocketContext = createContext(undefined);
 
 const RECONNECT_DELAY = 3000;
 
-export const SocketProvider = ({ children }) => {
+export const SocketProvider = ({children}) => {
     const [socket, setSocket] = useState(null);
     const [socketData, setSocketData] = useState({});
     const [isConnected, setIsConnected] = useState(false);
-    const { accountProps, updateToken } = useContext(AccountContext);
+    const {accountProps, updateToken} = useContext(AccountContext);
 
     const createSocket = () => {
         const ws = new WebSocket(apiSocketAddress);
@@ -56,7 +56,7 @@ export const SocketProvider = ({ children }) => {
         };
 
 
-
+        // eslint-disable-next-line
     }, []);
 
     useEffect(() => {
@@ -81,14 +81,14 @@ export const SocketProvider = ({ children }) => {
         }
         try {
             const token = accountProps.token;
-            socket.send(JSON.stringify({ type, message, token }));
+            socket.send(JSON.stringify({type, message, token}));
         } catch (error) {
             console.error('Failed to send message:', error);
         }
     };
 
     return (
-        <SocketContext.Provider value={{ sendSocketMessage, socketData, isConnected }}>
+        <SocketContext.Provider value={{sendSocketMessage, socketData, isConnected}}>
             {children}
         </SocketContext.Provider>
     );
