@@ -1,5 +1,7 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {
+    Stack,
+    Chip,
     Grid,
     Typography,
     Box,
@@ -27,12 +29,12 @@ import {
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import CloseIcon from '@mui/icons-material/Close';
-import { SocketContext } from '../context/SocketContext';
-import { turkishToLower } from '../helper/stringTurkish';
+import {SocketContext} from '../context/SocketContext';
+import {turkishToLower} from '../helper/stringTurkish';
 import SearchIcon from '@mui/icons-material/Search';
 
 export default function OrderEntry() {
-    const { sendSocketMessage, socketData, isConnected } = useContext(SocketContext);
+    const {sendSocketMessage, socketData, isConnected} = useContext(SocketContext);
     const [products, setProducts] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedProduct, setSelectedProduct] = useState(null);
@@ -131,9 +133,10 @@ export default function OrderEntry() {
 
     return (
         <>
-            <Grid container spacing={0} sx={{ height: '100vh', overflow: 'hidden' }}>
+            <Grid container spacing={0} sx={{height: '100vh', overflow: 'hidden'}}>
                 {/* Sol Taraf - Ürünler */}
-                <Grid item xs={12} sm={6} sx={{ borderRight: '1px solid #ddd', display: isMobile && showCart ? 'none' : 'block' }}>
+                <Grid item xs={12} sm={6}
+                      sx={{borderRight: '1px solid #ddd', display: isMobile && showCart ? 'none' : 'block'}}>
                     <Box
                         sx={{
                             padding: 2,
@@ -143,7 +146,7 @@ export default function OrderEntry() {
                             gap: 2
                         }}
                     >
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
                             <Typography variant="h6">Ürünler</Typography>
                             <TextField
                                 variant="outlined"
@@ -154,25 +157,44 @@ export default function OrderEntry() {
                                 InputProps={{
                                     startAdornment: (
                                         <IconButton>
-                                            <SearchIcon />
+                                            <SearchIcon/>
                                         </IconButton>
                                     )
                                 }}
-                                sx={{ maxWidth: 300 }}
+                                sx={{maxWidth: 300}}
                             />
                         </Box>
                         <List>
                             {filteredProducts.map(product => (
                                 <ListItem
-                                    button
                                     key={product._id}
                                     onClick={() => handleProductClick(product)}
-                                    sx={{ '&:hover': { backgroundColor: '#f5f5f5' } }}
+                                    sx={{
+                                        '&:hover': {backgroundColor: '#f5f5f5'},
+                                        display: 'flex',
+                                        justifyContent: 'space-between'
+                                    }}
                                 >
                                     <ListItemText
                                         primary={product.productname}
                                         secondary={product.productcategory}
                                     />
+                                    <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 1}}>
+                                        {product.contents.map(content => (
+                                            <Chip
+                                                size='small'
+                                                key={content.name}
+                                                label={`${content.name}`}
+                                                sx={{
+                                                    fontSize: {
+                                                        xs: '0.6rem', // Small screens
+                                                        sm: '0.7rem', // Medium screens
+                                                        md: '1rem' // Large screens
+                                                    }, fontStyle: 'italic'
+                                                }}
+                                            />
+                                        ))}
+                                    </Box>
                                 </ListItem>
                             ))}
                         </List>
@@ -180,7 +202,7 @@ export default function OrderEntry() {
                 </Grid>
 
                 {/* Sağ Taraf - Sipariş Ayrıntıları */}
-                <Grid item xs={12} sm={6} md={6} sx={{ display: isMobile && !showCart ? 'none' : 'block' }}>
+                <Grid item xs={12} sm={6} md={6} sx={{display: isMobile && !showCart ? 'none' : 'block'}}>
                     <Box
                         sx={{
                             backgroundColor: '#f9fafc',
@@ -193,16 +215,16 @@ export default function OrderEntry() {
                         }}
                     >
                         <Typography variant="h6">Sipariş Ayrıntıları</Typography>
-                        <Divider />
+                        <Divider/>
                         {orders.length > 0 ? (
-                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
                                 {orders.map((order, index) => (
-                                    <Card key={index} sx={{ marginBottom: 1 }}>
+                                    <Card key={index} sx={{marginBottom: 1}}>
                                         <CardContent>
-                                            <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                                            <Box sx={{display: 'flex', alignItems: 'flex-start'}}>
                                                 <Typography
                                                     variant="caption"
-                                                    sx={{ marginRight: 2, fontWeight: 'bold' }}
+                                                    sx={{marginRight: 2, fontWeight: 'bold'}}
                                                 >
                                                     {order.quantity}x
                                                 </Typography>
@@ -248,22 +270,23 @@ export default function OrderEntry() {
                         right: 16,
                         backgroundColor: '#f9fafc',
                         boxShadow: 3,
-                        '&:hover': { backgroundColor: '#e0e0e0' }
+                        '&:hover': {backgroundColor: '#e0e0e0'}
                     }}
                     onClick={handleCartToggle}
                     aria-label={showCart ? 'Kapat' : 'Sepet'}
                 >
-                    {showCart ? <CloseIcon /> : <ShoppingCartIcon />}
+                    {showCart ? <CloseIcon/> : <ShoppingCartIcon/>}
                 </IconButton>
             )}
 
             {/* Ürün Seçimi Dialog */}
-            <Dialog open={open} onClose={handleClose}>
-                <DialogTitle>Ürün Seçimi</DialogTitle>
-                <DialogContent>
-                    {selectedProduct && (
-                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                            <Typography variant="h6">{selectedProduct.productname}</Typography>
+            <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
+                <DialogContent dividers>
+                    {selectedProduct ? (
+                        <Box sx={{display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center'}}>
+                            <Typography variant="h6" sx={{textAlign: 'center'}}>
+                                {selectedProduct.productname}
+                            </Typography>
                             <FormControl fullWidth>
                                 <InputLabel>Boyut</InputLabel>
                                 <Select
@@ -302,17 +325,37 @@ export default function OrderEntry() {
                                 value={quantity}
                                 onChange={(e) => setQuantity(parseInt(e.target.value, 10))}
                                 fullWidth
-                                InputProps={{ inputProps: { min: 1 } }}
+                                InputProps={{inputProps: {min: 1}}}
                                 required
                             />
                         </Box>
+                    ) : (
+                        <Typography variant="body1" sx={{textAlign: 'center'}}>
+                            Lütfen bir ürün seçin.
+                        </Typography>
                     )}
                 </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleClose}>İptal</Button>
-                    <Button onClick={handleAddToOrder} variant="contained">Sipariş Ver</Button>
-                </DialogActions>
+                {selectedProduct && (
+                    <DialogActions sx={{justifyContent: 'space-around'}}>
+                        <Typography variant="subtitle1" sx={{fontStyle: 'italic'}}>
+                            {selectedProduct && selectedProduct.sizes && (
+                                (() => {
+                                    const size = selectedProduct.sizes.find(size => size.size === selectedSize);
+                                    if (size)
+                                        return `Fiyat : ${size.price * quantity} ₺`
+                                })()
+                            )}
+                        </Typography>
+                        <Stack direction="row" spacing={1}>
+                            <Button onClick={handleClose}>İptal</Button>
+                            <Button onClick={handleAddToOrder} variant="contained">Ekle</Button>
+                        </Stack>
+                    </DialogActions>
+
+                )}
             </Dialog>
+
+
         </>
     );
 }
