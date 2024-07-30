@@ -1,6 +1,7 @@
 import '../index.css';
 import React, {useContext, useEffect, useState} from 'react';
 import {
+    Badge,
     Stack,
     Chip,
     Grid,
@@ -48,7 +49,7 @@ export default function OrderEntry() {
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     const calculateOrderPrice = (order) => {
-        console.log(order);
+
         const product = order.product;
         const selectedSize = order.size;
         const selectedContent = order.content;
@@ -313,20 +314,23 @@ export default function OrderEntry() {
 
             {/* Sepet Düğmesi */}
             {isMobile && (
-                <IconButton
-                    sx={{
-                        position: 'fixed',
-                        bottom: 16,
-                        right: 16,
-                        backgroundColor: '#f9fafc',
-                        boxShadow: 3,
-                        '&:hover': {backgroundColor: '#e0e0e0'}
-                    }}
-                    onClick={handleCartToggle}
-                    aria-label={showCart ? 'Kapat' : 'Sepet'}
-                >
-                    {showCart ? <CloseIcon/> : <ShoppingCartIcon/>}
-                </IconButton>
+                    <IconButton
+                        sx={{
+                            position: 'fixed',
+                            bottom: 16,
+                            right: 16,
+                            color:'white',
+                            backgroundColor: 'primary.dark',
+                            boxShadow: 3,
+                            '&:hover': {backgroundColor: 'primary.main'}
+                        }}
+                        onClick={handleCartToggle}
+                        aria-label={showCart ? 'Kapat' : 'Sepet'}
+                    >
+                        <Badge color="error" badgeContent={orders.length}>
+                        {showCart ? <CloseIcon /> : <ShoppingCartIcon />}
+                        </Badge>
+                    </IconButton>
             )}
 
             {/* Ürün Seçimi Dialog */}
