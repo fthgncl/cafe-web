@@ -30,7 +30,7 @@ export default function MenuAppBar() {
 
     return (
         <Box id='AppBar' sx={{flexGrow: 1}}>
-            <AppBar position="static" sx={{borderBottomLeftRadius: 30, borderBottomRightRadius: 30}}>
+            <AppBar position="static" sx={{boxShadow: 'none', borderBottomLeftRadius: 30, borderBottomRightRadius: 30}}>
                 <Toolbar>
                     <Typography onClick={() => window.location.href = '/'} variant="h6" component="div"
                                 sx={{flexGrow: 1, cursor: 'pointer'}}>
