@@ -48,6 +48,28 @@ export default function OrderEntry() {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
+    const calculateOrderPrice = (order) => {
+        console.log(order);
+        const product = order.product;
+        const selectedSize = order.size;
+        const selectedContent = order.content;
+        const quantity = order.quantity;
+
+
+        if (!product || !product.sizes || quantity <= 0) return 0;
+
+        // Boyut fiyatını bul
+        const size = product.sizes.find(size => size.size === selectedSize);
+        if (!size) return 0;
+
+        // İçerik ek ücreti
+        const content = product.contents.find(content => content.name === selectedContent);
+        const contentFee = content ? content.extraFee : 0;
+
+        // Toplam fiyat hesapla
+        return (size.price + contentFee) * quantity;
+    }
+
     useEffect(() => {
         if (isConnected) {
             sendSocketMessage({}, messageType);
@@ -237,12 +259,27 @@ export default function OrderEntry() {
                                                     </Typography>
                                                     {order.content && (
                                                         <Typography variant="body2">
-                                                            İçerik: {order.content}
+                                                            İçerik: {order.content} {(()=>{
+                                                                const extraFee = order.product.contents.find(content => content.name === order.content).extraFee;
+                                                            if ( extraFee !== 0 )
+                                                                return `(+${extraFee} ₺)`;
+                                                        })()}
+                                                            <Chip
+                                                                size='small'
+                                                                label='+10 ₺'
+                                                                sx={{
+                                                                    fontSize: {
+                                                                        xs: '0.6rem', // Small screens
+                                                                        sm: '0.6rem', // Medium screens
+                                                                        md: '0.8rem', // Large screens
+                                                                        lg: '0.9rem'
+                                                                    }, fontStyle: 'italic'
+                                                                }}
+                                                            />
                                                         </Typography>
                                                     )}
                                                     <Typography variant="body2">
-                                                        Fiyat: {order.product.sizes.find(size => size.size === order.size)?.price || 0} TL
-                                                        {order.content && ` (+${order.product.contents.find(content => content.name === order.content)?.extraFee || 0} TL)`}
+                                                       Fiyat : {calculateOrderPrice(order)} ₺
                                                     </Typography>
                                                 </Box>
                                             </Box>
