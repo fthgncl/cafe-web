@@ -1,3 +1,4 @@
+import '../index.css';
 import React, {useContext, useEffect, useState} from 'react';
 import {
     Stack,
@@ -170,15 +171,18 @@ export default function OrderEntry() {
                         {/* Ürünler Başlığı */}
                         <Box
                             sx={{
+                                display: 'flex', alignItems: 'center', justifyContent:'space-around',
                                 padding: 2,
+                                gap: 2,
                                 backgroundColor: '#fff',
                                 borderBottom: '1px solid #ddd',
                                 position: 'sticky',
                                 top: 0,
-                                zIndex: 1 // Başlığın diğer içeriklerin üstünde olmasını sağlar
+                                zIndex: 1
                             }}
                         >
                             <Typography variant="h6">Ürünler</Typography>
+                            <Box sx={{ width:0.6, display:'flex', justifyContent:'center'}} >
                             <TextField
                                 variant="outlined"
                                 placeholder="Ürün ara..."
@@ -194,10 +198,11 @@ export default function OrderEntry() {
                                 }}
                                 sx={{ width: '100%' }}
                             />
+                            </Box>
                         </Box>
 
                         {/* Ürünler Listesi */}
-                        <Box
+                        <Box className="custom-scrollbar"
                             sx={{
                                 padding: 2,
                                 overflowY: 'auto',
@@ -245,7 +250,7 @@ export default function OrderEntry() {
 
                 {/* Sağ Taraf - Sipariş Ayrıntıları */}
                 <Grid item xs={12} sm={6} md={6} sx={{ display: isMobile && !showCart ? 'none' : 'block' }}>
-                    <Box
+                    <Box className="custom-scrollbar"
                         sx={{
                             backgroundColor: '#f5f4f6',
                             padding: 2,
