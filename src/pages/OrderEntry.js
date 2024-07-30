@@ -249,66 +249,86 @@ export default function OrderEntry() {
 
                 {/* Sağ Taraf - Sipariş Ayrıntıları */}
                 <Grid item xs={12} sm={6} md={6} sx={{ display: isMobile && !showCart ? 'none' : 'block' }}>
-                    <Box className="custom-scrollbar"
-                        sx={{
-                            backgroundColor: '#f5f4f6',
-                            padding: 2,
-                            borderRadius: 1,
-                            height: 'calc(100vh - 64px)', // Başlık veya üst bölüm varsa bu yüksekliği ayarlayın
-                            overflowY: 'auto',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: 2
-                        }}
+                    <Box
+                         sx={{
+                             backgroundColor: '#f5f4f6',
+                             padding: 1,
+                             borderRadius: 1,
+                             height: 'calc(100vh)', // Başlık ve içerik için toplam yüksekliği ayarlayın
+                             display: 'flex',
+                             flexDirection: 'column'
+                         }}
                     >
-                        <Typography variant="h6">Sipariş Ayrıntıları</Typography>
-                        <Divider />
-                        {orders.length > 0 ? (
-                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                {orders.map((order, index) => (
-                                    <Card key={index} sx={{ marginBottom: 1 }}>
-                                        <CardContent>
-                                            <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                                                <Typography
-                                                    variant="h6"
-                                                    sx={{ marginRight: 2, fontWeight: 'bold', transform: 'rotate(-15deg)' }}
-                                                >
-                                                    {order.quantity}x
-                                                </Typography>
-                                                <Box>
-                                                    <Typography variant="h6">
-                                                        {order.product.productname}
+                        {/* Sabit Başlık */}
+                        <Box
+                            sx={{
+                                position: 'sticky',
+                                top: 0,
+                                backgroundColor: '#f5f4f6',
+                                padding: 2,
+                                borderBottom: '1px solid #ddd',
+                                zIndex: 1
+                            }}
+                        >
+                            <Typography variant="h6">Sipariş Ayrıntıları</Typography>
+                        </Box>
+
+                        {/* Kaydırılabilir İçerik */}
+                        <Box  className="custom-scrollbar"
+                            sx={{
+                                flex: 1, // İçeriğin kalan tüm alanı kaplamasını sağlar
+                                overflowY: 'auto',
+                                padding: 2
+                            }}
+                        >
+                            {orders.length > 0 ? (
+                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                    {orders.map((order, index) => (
+                                        <Card key={index} sx={{ marginBottom: 1 }}>
+                                            <CardContent>
+                                                <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                                                    <Typography
+                                                        variant="h6"
+                                                        sx={{ marginRight: 2, fontWeight: 'bold', transform: 'rotate(-15deg)' }}
+                                                    >
+                                                        {order.quantity}x
                                                     </Typography>
-                                                    <Typography variant="body2">
-                                                        Boyut: {order.size}
-                                                    </Typography>
-                                                    {order.content && (
-                                                        <Typography variant="body2">
-                                                            İçerik: {order.content} {(() => {
-                                                            const extraFee = order.product.contents.find(content => content.name === order.content).extraFee;
-                                                            if (extraFee !== 0)
-                                                                return `(+${extraFee} ₺)`;
-                                                        })()}
+                                                    <Box>
+                                                        <Typography variant="h6">
+                                                            {order.product.productname}
                                                         </Typography>
-                                                    )}
-                                                    <Typography variant="body2">
-                                                        Fiyat : {calculateOrderPrice(order)} ₺
-                                                    </Typography>
+                                                        <Typography variant="body2">
+                                                            Boyut: {order.size}
+                                                        </Typography>
+                                                        {order.content && (
+                                                            <Typography variant="body2">
+                                                                İçerik: {order.content} {(() => {
+                                                                const extraFee = order.product.contents.find(content => content.name === order.content).extraFee;
+                                                                if (extraFee !== 0)
+                                                                    return `(+${extraFee} ₺)`;
+                                                            })()}
+                                                            </Typography>
+                                                        )}
+                                                        <Typography variant="body2">
+                                                            Fiyat : {calculateOrderPrice(order)} ₺
+                                                        </Typography>
+                                                    </Box>
                                                 </Box>
-                                            </Box>
-                                        </CardContent>
-                                        <CardActions>
-                                            <Button size="small" color="primary">Düzenle</Button>
-                                            <Button size="small" color="error">Sil</Button>
-                                        </CardActions>
-                                    </Card>
-                                ))}
-                            </Box>
-                        ) : (
-                            <Typography variant="body2">Sipariş yok.</Typography>
-                        )}
+                                            </CardContent>
+                                            <CardActions>
+                                                <Button size="small" color="primary">Düzenle</Button>
+                                                <Button size="small" color="error">Sil</Button>
+                                            </CardActions>
+                                        </Card>
+                                    ))}
+                                </Box>
+                            ) : (
+                                <Typography variant="body2">Sipariş yok.</Typography>
+                            )}
+                        </Box>
                     </Box>
                 </Grid>
+
             </Grid>
 
 
