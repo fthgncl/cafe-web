@@ -1,16 +1,18 @@
-import {useState, useEffect, createContext, useContext} from 'react';
-import {apiSocketAddress} from '../config';
-import {AccountContext} from "./AccountContext";
+import { useState, useEffect, createContext, useContext } from 'react';
+import { apiSocketAddress } from '../config';
+import { AccountContext } from "./AccountContext";
 
 export const SocketContext = createContext(undefined);
 
-export const SocketProvider = ({children}) => {
+const RECONNECT_DELAY = 3000;
+
+export const SocketProvider = ({ children }) => {
     const [socket, setSocket] = useState(null);
     const [socketData, setSocketData] = useState({});
     const [isConnected, setIsConnected] = useState(false);
-    const {accountProps, updateToken} = useContext(AccountContext);
+    const { accountProps, updateToken } = useContext(AccountContext);
 
-    useEffect(() => {
+    const createSocket = () => {
         const ws = new WebSocket(apiSocketAddress);
 
         ws.onopen = () => {
@@ -22,16 +24,18 @@ export const SocketProvider = ({children}) => {
             const data = JSON.parse(message.data);
 
             if (data) {
-
-                if (data.type === 'updateToken')
+                if (data.type === 'updateToken') {
                     updateToken(data.message);
-                else setSocketData(data);
+                } else {
+                    setSocketData(data);
+                }
             }
-
         };
 
         ws.onclose = () => {
+            setIsConnected(false);
             console.log('Disconnected from WebSocket server');
+            setTimeout(createSocket, RECONNECT_DELAY); // Bağlantı koparsa yeniden bağlanmayı dene
         };
 
         ws.onerror = (error) => {
@@ -39,20 +43,27 @@ export const SocketProvider = ({children}) => {
         };
 
         setSocket(ws);
+    };
+
+    useEffect(() => {
+        createSocket();
 
         return () => { // Cleanup on unmount
-            setIsConnected(false);
-            ws.close();
+            if (socket) {
+                setIsConnected(false);
+                socket.close();
+            }
         };
 
-        // eslint-disable-next-line
+
+
     }, []);
 
     useEffect(() => {
         const isEmpty = Object.keys(socketData).length === 0 && socketData.constructor === Object;
-        if (!isEmpty)
+        if (!isEmpty) {
             setSocketData({});
-
+        }
     }, [socketData]);
 
     const sendSocketMessage = (message, type) => {
@@ -69,15 +80,15 @@ export const SocketProvider = ({children}) => {
             return;
         }
         try {
-            const token = accountProps.token
-            socket.send(JSON.stringify({type, message, token}));
+            const token = accountProps.token;
+            socket.send(JSON.stringify({ type, message, token }));
         } catch (error) {
             console.error('Failed to send message:', error);
         }
     };
 
     return (
-        <SocketContext.Provider value={{sendSocketMessage, socketData, isConnected }}>
+        <SocketContext.Provider value={{ sendSocketMessage, socketData, isConnected }}>
             {children}
         </SocketContext.Provider>
     );
