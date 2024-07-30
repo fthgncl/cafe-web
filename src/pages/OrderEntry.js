@@ -245,8 +245,8 @@ export default function OrderEntry() {
                                         <CardContent>
                                             <Box sx={{display: 'flex', alignItems: 'flex-start'}}>
                                                 <Typography
-                                                    variant="caption"
-                                                    sx={{marginRight: 2, fontWeight: 'bold'}}
+                                                    variant="h6"
+                                                    sx={{marginRight: 2, fontWeight: 'bold', transform: 'rotate(-15deg)'}}
                                                 >
                                                     {order.quantity}x
                                                 </Typography>
@@ -264,18 +264,6 @@ export default function OrderEntry() {
                                                             if ( extraFee !== 0 )
                                                                 return `(+${extraFee} ₺)`;
                                                         })()}
-                                                            <Chip
-                                                                size='small'
-                                                                label='+10 ₺'
-                                                                sx={{
-                                                                    fontSize: {
-                                                                        xs: '0.6rem', // Small screens
-                                                                        sm: '0.6rem', // Medium screens
-                                                                        md: '0.8rem', // Large screens
-                                                                        lg: '0.9rem'
-                                                                    }, fontStyle: 'italic'
-                                                                }}
-                                                            />
                                                         </Typography>
                                                     )}
                                                     <Typography variant="body2">
@@ -320,8 +308,8 @@ export default function OrderEntry() {
             <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
                 <DialogContent dividers>
                     {selectedProduct ? (
-                        <Box sx={{display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center'}}>
-                            <Typography variant="h6" sx={{textAlign: 'center'}}>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center' }}>
+                            <Typography variant="h6" sx={{ textAlign: 'center' }}>
                                 {selectedProduct.productname}
                             </Typography>
                             <FormControl fullWidth>
@@ -334,7 +322,10 @@ export default function OrderEntry() {
                                 >
                                     {selectedProduct.sizes.map(size => (
                                         <MenuItem key={size.size} value={size.size}>
-                                            {size.size}
+                                            <Box sx={{ display: 'flex', justifyContent: 'space-around', width: '100%' }}>
+                                                <Typography>{size.size}</Typography>
+                                                {size.price > 0 && <Typography>+{size.price} ₺</Typography>}
+                                            </Box>
                                         </MenuItem>
                                     ))}
                                 </Select>
@@ -350,7 +341,10 @@ export default function OrderEntry() {
                                     >
                                         {selectedProduct.contents.map(content => (
                                             <MenuItem key={content.name} value={content.name}>
-                                                {content.name}
+                                                <Box sx={{ display: 'flex', justifyContent: 'space-evenly', width: '100%' }}>
+                                                    <Typography>{content.name}</Typography>
+                                                    {content.extraFee > 0 && <Typography>+{content.extraFee} ₺</Typography>}
+                                                </Box>
                                             </MenuItem>
                                         ))}
                                     </Select>
@@ -362,35 +356,39 @@ export default function OrderEntry() {
                                 value={quantity}
                                 onChange={(e) => setQuantity(parseInt(e.target.value, 10))}
                                 fullWidth
-                                InputProps={{inputProps: {min: 1}}}
+                                InputProps={{ inputProps: { min: 1 } }}
                                 required
                             />
                         </Box>
                     ) : (
-                        <Typography variant="body1" sx={{textAlign: 'center'}}>
+                        <Typography variant="body1" sx={{ textAlign: 'center' }}>
                             Lütfen bir ürün seçin.
                         </Typography>
                     )}
                 </DialogContent>
                 {selectedProduct && (
-                    <DialogActions sx={{justifyContent: 'space-around'}}>
-                        <Typography variant="subtitle1" sx={{fontStyle: 'italic'}}>
-                            {selectedProduct && selectedProduct.sizes && (
-                                (() => {
+                    <DialogActions sx={{ justifyContent: 'space-evenly' }}>
+                        <Typography variant="subtitle1" sx={{ fontStyle: 'italic' }}>
+                            {(() => {
+                                if (selectedProduct && selectedProduct.sizes) {
                                     const size = selectedProduct.sizes.find(size => size.size === selectedSize);
-                                    if (size)
-                                        return `Fiyat : ${size.price * quantity} ₺`
-                                })()
-                            )}
+                                    if (size) {
+                                        const basePrice = size.price * quantity;
+                                        const extraFee = selectedProduct.contents.find(content => content.name === selectedContent)?.extraFee || 0;
+                                        return `Fiyat : ${basePrice + extraFee} ₺`;
+                                    }
+                                }
+                            })()}
                         </Typography>
                         <Stack direction="row" spacing={1}>
                             <Button onClick={handleClose}>İptal</Button>
                             <Button onClick={handleAddToOrder} variant="contained">Ekle</Button>
                         </Stack>
                     </DialogActions>
-
                 )}
             </Dialog>
+
+
 
 
         </>
