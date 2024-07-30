@@ -11,7 +11,6 @@ import {
     ListItem,
     ListItemText,
     Dialog,
-    DialogTitle,
     DialogContent,
     DialogActions,
     Button,
@@ -27,7 +26,6 @@ import {
     useMediaQuery,
     useTheme
 } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import CloseIcon from '@mui/icons-material/Close';
 import {SocketContext} from '../context/SocketContext';
@@ -378,6 +376,9 @@ export default function OrderEntry() {
                                 </FormControl>
                             )}
                             <TextField
+                                sx={{
+                                    '& input': { textAlign: 'center' }
+                                }}
                                 type="number"
                                 label="Adet"
                                 value={quantity}
