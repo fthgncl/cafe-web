@@ -155,22 +155,30 @@ export default function OrderEntry() {
 
     return (
         <>
-            <Grid container spacing={0} sx={{height: '100vh', overflow: 'hidden'}}>
+            <Grid container spacing={0} sx={{ height: 'calc(100vh - 64px)', overflow: 'hidden' }}>
                 {/* Sol Taraf - Ürünler */}
                 <Grid item xs={12} sm={6}
-                      sx={{borderRight: '1px solid #ddd', display: isMobile && showCart ? 'none' : 'block'}}>
+                      sx={{ borderRight: '1px solid #ddd', display: isMobile && showCart ? 'none' : 'block' }}>
                     <Box
                         sx={{
-                            padding: 2,
-                            height: '100%',
                             display: 'flex',
                             flexDirection: 'column',
-                            gap: 2
+                            height: 'calc(100vh - 64px)', // Başlık veya üst bölüm varsa bu yüksekliği ayarlayın
+                            overflow: 'hidden'
                         }}
                     >
-                        <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
+                        {/* Ürünler Başlığı */}
+                        <Box
+                            sx={{
+                                padding: 2,
+                                backgroundColor: '#fff',
+                                borderBottom: '1px solid #ddd',
+                                position: 'sticky',
+                                top: 0,
+                                zIndex: 1 // Başlığın diğer içeriklerin üstünde olmasını sağlar
+                            }}
+                        >
                             <Typography variant="h6">Ürünler</Typography>
-                            <Box sx={{ width:0.8, display:'flex', justifyContent:'center'}} >
                             <TextField
                                 variant="outlined"
                                 placeholder="Ürün ara..."
@@ -180,75 +188,86 @@ export default function OrderEntry() {
                                 InputProps={{
                                     startAdornment: (
                                         <IconButton>
-                                            <SearchIcon/>
+                                            <SearchIcon />
                                         </IconButton>
                                     )
                                 }}
-                                sx={{width: 0.7}}
+                                sx={{ width: '100%' }}
                             />
-                            </Box>
                         </Box>
-                        <List>
-                            {filteredProducts.map(product => (
-                                <ListItem
-                                    key={product._id}
-                                    onClick={() => handleProductClick(product)}
-                                    sx={{
-                                        '&:hover': {backgroundColor: '#f5f5f5'},
-                                        display: 'flex',
-                                        justifyContent: 'space-between'
-                                    }}
-                                >
-                                    <ListItemText
-                                        primary={product.productname}
-                                        secondary={product.productcategory}
-                                    />
-                                    <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 1}}>
-                                        {product.contents.map(content => (
-                                            <Chip
-                                                size='small'
-                                                key={content.name}
-                                                label={`${content.name}`}
-                                                sx={{
-                                                    fontSize: {
-                                                        xs: '0.6rem', // Small screens
-                                                        sm: '0.7rem', // Medium screens
-                                                        md: '1rem' // Large screens
-                                                    }, fontStyle: 'italic'
-                                                }}
-                                            />
-                                        ))}
-                                    </Box>
-                                </ListItem>
-                            ))}
-                        </List>
+
+                        {/* Ürünler Listesi */}
+                        <Box
+                            sx={{
+                                padding: 2,
+                                overflowY: 'auto',
+                                flex: 1 // Kalan alanın tamamını kaplar
+                            }}
+                        >
+                            <List>
+                                {filteredProducts.map(product => (
+                                    <ListItem
+                                        key={product._id}
+                                        onClick={() => handleProductClick(product)}
+                                        sx={{
+                                            '&:hover': { backgroundColor: '#f5f5f5' },
+                                            display: 'flex',
+                                            justifyContent: 'space-between'
+                                        }}
+                                    >
+                                        <ListItemText
+                                            primary={product.productname}
+                                            secondary={product.productcategory}
+                                        />
+                                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                                            {product.contents.map(content => (
+                                                <Chip
+                                                    size='small'
+                                                    key={content.name}
+                                                    label={`${content.name}`}
+                                                    sx={{
+                                                        fontSize: {
+                                                            xs: '0.6rem', // Small screens
+                                                            sm: '0.7rem', // Medium screens
+                                                            md: '1rem' // Large screens
+                                                        },
+                                                        fontStyle: 'italic'
+                                                    }}
+                                                />
+                                            ))}
+                                        </Box>
+                                    </ListItem>
+                                ))}
+                            </List>
+                        </Box>
                     </Box>
                 </Grid>
 
                 {/* Sağ Taraf - Sipariş Ayrıntıları */}
-                <Grid item xs={12} sm={6} md={6} sx={{display: isMobile && !showCart ? 'none' : 'block'}}>
+                <Grid item xs={12} sm={6} md={6} sx={{ display: isMobile && !showCart ? 'none' : 'block' }}>
                     <Box
                         sx={{
-                            backgroundColor: '#f9fafc',
+                            backgroundColor: '#f5f4f6',
                             padding: 2,
                             borderRadius: 1,
-                            height: '100%',
+                            height: 'calc(100vh - 64px)', // Başlık veya üst bölüm varsa bu yüksekliği ayarlayın
+                            overflowY: 'auto',
                             display: 'flex',
                             flexDirection: 'column',
                             gap: 2
                         }}
                     >
                         <Typography variant="h6">Sipariş Ayrıntıları</Typography>
-                        <Divider/>
+                        <Divider />
                         {orders.length > 0 ? (
-                            <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                                 {orders.map((order, index) => (
-                                    <Card key={index} sx={{marginBottom: 1}}>
+                                    <Card key={index} sx={{ marginBottom: 1 }}>
                                         <CardContent>
-                                            <Box sx={{display: 'flex', alignItems: 'flex-start'}}>
+                                            <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
                                                 <Typography
                                                     variant="h6"
-                                                    sx={{marginRight: 2, fontWeight: 'bold', transform: 'rotate(-15deg)'}}
+                                                    sx={{ marginRight: 2, fontWeight: 'bold', transform: 'rotate(-15deg)' }}
                                                 >
                                                     {order.quantity}x
                                                 </Typography>
@@ -261,15 +280,15 @@ export default function OrderEntry() {
                                                     </Typography>
                                                     {order.content && (
                                                         <Typography variant="body2">
-                                                            İçerik: {order.content} {(()=>{
-                                                                const extraFee = order.product.contents.find(content => content.name === order.content).extraFee;
-                                                            if ( extraFee !== 0 )
+                                                            İçerik: {order.content} {(() => {
+                                                            const extraFee = order.product.contents.find(content => content.name === order.content).extraFee;
+                                                            if (extraFee !== 0)
                                                                 return `(+${extraFee} ₺)`;
                                                         })()}
                                                         </Typography>
                                                     )}
                                                     <Typography variant="body2">
-                                                       Fiyat : {calculateOrderPrice(order)} ₺
+                                                        Fiyat : {calculateOrderPrice(order)} ₺
                                                     </Typography>
                                                 </Box>
                                             </Box>
@@ -287,6 +306,7 @@ export default function OrderEntry() {
                     </Box>
                 </Grid>
             </Grid>
+
 
             {/* Sepet Düğmesi */}
             {isMobile && (
