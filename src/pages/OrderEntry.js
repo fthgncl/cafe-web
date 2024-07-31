@@ -34,6 +34,7 @@ import {turkishToLower} from '../helper/stringTurkish';
 import SearchIcon from '@mui/icons-material/Search';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import OrderSummary from "../components/OrderSummary";
 
 export default function OrderEntry() {
     const {sendSocketMessage, socketData, isConnected} = useContext(SocketContext);
@@ -71,6 +72,12 @@ export default function OrderEntry() {
         // Toplam fiyat hesapla
         return (size.price + contentFee) * quantity;
     }
+
+    const calculateTotalPrice = () => {
+        return orders.reduce((total, order) => total + calculateOrderPrice(order), 0);
+    };
+
+
 
     useEffect(() => {
         if (isConnected) {
@@ -250,13 +257,19 @@ export default function OrderEntry() {
                 </Grid>
 
                 {/* Sağ Taraf - Sipariş Ayrıntıları */}
-                <Grid item xs={12} sm={6} md={6} sx={{ display: isMobile && !showCart ? 'none' : 'block' }}>
+                <Grid
+                    item
+                    xs={12}
+                    sm={6}
+                    md={6}
+                    sx={{ height: 'calc(100vh)', display: isMobile && !showCart ? 'none' : 'block' }} // 64px: Sipariş özeti yüksekliği
+                >
                     <Box
                         sx={{
                             backgroundColor: '#f5f4f6',
                             padding: 1,
                             borderRadius: 1,
-                            height: 'calc(100vh)', // Başlık ve içerik için toplam yüksekliği ayarlayın
+                            height: 1,
                             display: 'flex',
                             flexDirection: 'column'
                         }}
@@ -272,16 +285,23 @@ export default function OrderEntry() {
                                 zIndex: 1
                             }}
                         >
-                            <Typography variant="h6">Sipariş Ayrıntıları</Typography>
+                            <Typography sx={{
+                                textAlign: {
+                                    xs: 'center',
+                                    sm: 'left'
+                                }
+                            }} variant="h6">Sipariş Ayrıntıları</Typography>
                         </Box>
 
                         {/* Kaydırılabilir İçerik */}
-                        <Box  className="custom-scrollbar"
-                              sx={{
-                                  flex: 1, // İçeriğin kalan tüm alanı kaplamasını sağlar
-                                  overflowY: 'auto',
-                                  padding: 2
-                              }}
+                        <Box
+                            className="custom-scrollbar"
+                            sx={{
+                                flex: 1, // İçeriğin kalan tüm alanı kaplamasını sağlar
+                                overflowY: 'auto',
+                                padding: 2,
+                                marginBottom: '64px' // Sipariş özeti bölümünün yüksekliği kadar boşluk bırakın
+                            }}
                         >
                             {orders.length > 0 ? (
                                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -355,7 +375,6 @@ export default function OrderEntry() {
                                                         Düzenle
                                                     </Button>
                                                 </Box>
-
                                             </CardActions>
                                         </Card>
                                     ))}
@@ -365,10 +384,13 @@ export default function OrderEntry() {
                                     Sipariş yok.
                                 </Typography>
                             )}
-
                         </Box>
+
+                        {/* Sipariş Özeti Bölümü */}
+                        <OrderSummary/>
                     </Box>
                 </Grid>
+
 
             </Grid>
 
@@ -381,6 +403,7 @@ export default function OrderEntry() {
                         bottom: 16,
                         right: 16,
                         color:'white',
+                        zIndex: 10,
                         backgroundColor: 'primary.dark',
                         boxShadow: 3,
                         '&:hover': {backgroundColor: 'primary.main'}
