@@ -124,11 +124,8 @@ export default function ProductForm() {
                     Ürün Ekle
                 </Typography>
                 <Box sx={{
-                    width: 450,
-                    borderRadius: '5px',
                     backgroundColor: '#ffffff',
                     overflow: 'hidden',
-                    boxShadow: 3,
                     mt: 3
                 }}>
 
