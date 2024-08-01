@@ -20,7 +20,6 @@ import {
     InputLabel,
     FormControl,
     IconButton,
-    Divider,
     Card,
     CardContent,
     CardActions,
@@ -77,7 +76,9 @@ export default function OrderEntry() {
         return orders.reduce((total, order) => total + calculateOrderPrice(order), 0);
     };
 
-
+    const handleDeleteOrder = (orderIndex) => {
+        setOrders(prevOrders => prevOrders.filter((_, index) => index !== orderIndex));
+    };
 
     useEffect(() => {
         if (isConnected) {
@@ -164,10 +165,10 @@ export default function OrderEntry() {
 
     return (
         <>
-            <Grid container spacing={0} sx={{ height: 'calc(100vh - 64px)', overflow: 'hidden' }}>
+            <Grid container spacing={0} sx={{height: 'calc(100vh - 64px)', overflow: 'hidden'}}>
                 {/* Sol Taraf - Ürünler */}
                 <Grid item xs={12} sm={6}
-                      sx={{ borderRight: '1px solid #ddd', display: isMobile && showCart ? 'none' : 'block' }}>
+                      sx={{borderRight: '1px solid #ddd', display: isMobile && showCart ? 'none' : 'block'}}>
                     <Box
                         sx={{
                             display: 'flex',
@@ -179,7 +180,7 @@ export default function OrderEntry() {
                         {/* Ürünler Başlığı */}
                         <Box
                             sx={{
-                                display: 'flex', alignItems: 'center', justifyContent:'space-around',
+                                display: 'flex', alignItems: 'center', justifyContent: 'space-around',
                                 padding: 2,
                                 gap: 2,
                                 backgroundColor: '#fff',
@@ -190,7 +191,7 @@ export default function OrderEntry() {
                             }}
                         >
                             <Typography variant="h6">Ürünler</Typography>
-                            <Box sx={{ width:0.6, display:'flex', justifyContent:'center'}} >
+                            <Box sx={{width: 0.6, display: 'flex', justifyContent: 'center'}}>
                                 <TextField
                                     variant="outlined"
                                     placeholder="Ürün ara..."
@@ -200,11 +201,11 @@ export default function OrderEntry() {
                                     InputProps={{
                                         startAdornment: (
                                             <IconButton>
-                                                <SearchIcon />
+                                                <SearchIcon/>
                                             </IconButton>
                                         )
                                     }}
-                                    sx={{ width: '100%' }}
+                                    sx={{width: '100%'}}
                                 />
                             </Box>
                         </Box>
@@ -223,7 +224,7 @@ export default function OrderEntry() {
                                         key={product._id}
                                         onClick={() => handleProductClick(product)}
                                         sx={{
-                                            '&:hover': { backgroundColor: '#f5f5f5' },
+                                            '&:hover': {backgroundColor: '#f5f5f5'},
                                             display: 'flex',
                                             justifyContent: 'space-between'
                                         }}
@@ -232,7 +233,7 @@ export default function OrderEntry() {
                                             primary={product.productname}
                                             secondary={product.productcategory}
                                         />
-                                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                                        <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 1}}>
                                             {product.contents.map(content => (
                                                 <Chip
                                                     size='small'
@@ -262,7 +263,10 @@ export default function OrderEntry() {
                     xs={12}
                     sm={6}
                     md={6}
-                    sx={{ height: 'calc(100vh)', display: isMobile && !showCart ? 'none' : 'block' }} // 64px: Sipariş özeti yüksekliği
+                    sx={{
+                        height: 'calc(100vh)',
+                        display: isMobile && !showCart ? 'none' : 'block'
+                    }} // 64px: Sipariş özeti yüksekliği
                 >
                     <Box
                         sx={{
@@ -304,7 +308,7 @@ export default function OrderEntry() {
                             }}
                         >
                             {orders.length > 0 ? (
-                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
                                     {orders.map((order, index) => (
                                         <Card
                                             key={index}
@@ -319,8 +323,8 @@ export default function OrderEntry() {
                                                 backgroundColor: '#fff'
                                             }}
                                         >
-                                            <CardContent sx={{ flex: 1 }}>
-                                                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+                                            <CardContent sx={{flex: 1}}>
+                                                <Box sx={{display: 'flex', alignItems: 'flex-start', gap: 2}}>
                                                     <Typography
                                                         variant="h6"
                                                         sx={{
@@ -332,7 +336,7 @@ export default function OrderEntry() {
                                                         {order.quantity}x
                                                     </Typography>
                                                     <Box>
-                                                        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                                                        <Typography variant="h6" sx={{fontWeight: 'bold'}}>
                                                             {order.product.productname}
                                                         </Typography>
                                                         <Typography variant="body2">
@@ -348,20 +352,21 @@ export default function OrderEntry() {
                                                                 })()}
                                                             </Typography>
                                                         )}
-                                                        <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                                                        <Typography variant="body2" sx={{fontWeight: 'bold'}}>
                                                             Fiyat: {calculateOrderPrice(order)} ₺
                                                         </Typography>
                                                     </Box>
                                                 </Box>
                                             </CardContent>
                                             <CardActions>
-                                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, width: 1 }}>
+                                                <Box sx={{display: 'flex', flexDirection: 'column', gap: 2, width: 1}}>
                                                     <Button
                                                         size="small"
                                                         color="error"
                                                         variant="contained"
-                                                        startIcon={<DeleteIcon />}
-                                                        sx={{ textAlign: 'left' }} // İkon ve metni sola yasla
+                                                        startIcon={<DeleteIcon/>}
+                                                        sx={{textAlign: 'left'}}
+                                                        onClick={() => handleDeleteOrder(index)}
                                                     >
                                                         Sil
                                                     </Button>
@@ -369,8 +374,8 @@ export default function OrderEntry() {
                                                         size="small"
                                                         color="primary"
                                                         variant="contained"
-                                                        startIcon={<EditIcon />}
-                                                        sx={{ textAlign: 'left' }} // İkon ve metni sola yasla
+                                                        startIcon={<EditIcon/>}
+                                                        sx={{textAlign: 'left'}}
                                                     >
                                                         Düzenle
                                                     </Button>
@@ -380,14 +385,17 @@ export default function OrderEntry() {
                                     ))}
                                 </Box>
                             ) : (
-                                <Typography variant="body2" sx={{ textAlign: 'center', marginTop: 2 }}>
+                                <Typography variant="body2" sx={{textAlign: 'center', marginTop: 2}}>
                                     Sipariş yok.
                                 </Typography>
                             )}
                         </Box>
 
                         {/* Sipariş Özeti Bölümü */}
-                        <OrderSummary/>
+                        <OrderSummary
+                            orders={orders}
+                            calculateOrderPrice={calculateOrderPrice}
+                            calculateTotalPrice={calculateTotalPrice}/>
                     </Box>
                 </Grid>
 
@@ -402,7 +410,7 @@ export default function OrderEntry() {
                         position: 'fixed',
                         bottom: 16,
                         right: 16,
-                        color:'white',
+                        color: 'white',
                         zIndex: 10,
                         backgroundColor: 'primary.dark',
                         boxShadow: 3,
@@ -412,7 +420,7 @@ export default function OrderEntry() {
                     aria-label={showCart ? 'Kapat' : 'Sepet'}
                 >
                     <Badge color="error" badgeContent={orders.length}>
-                        {showCart ? <CloseIcon /> : <ShoppingCartIcon />}
+                        {showCart ? <CloseIcon/> : <ShoppingCartIcon/>}
                     </Badge>
                 </IconButton>
             )}
@@ -421,8 +429,8 @@ export default function OrderEntry() {
             <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
                 <DialogContent dividers>
                     {selectedProduct ? (
-                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center' }}>
-                            <Typography variant="h6" sx={{ textAlign: 'center' }}>
+                        <Box sx={{display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center'}}>
+                            <Typography variant="h6" sx={{textAlign: 'center'}}>
                                 {selectedProduct.productname}
                             </Typography>
                             <FormControl fullWidth>
@@ -435,7 +443,7 @@ export default function OrderEntry() {
                                 >
                                     {selectedProduct.sizes.map(size => (
                                         <MenuItem key={size.size} value={size.size}>
-                                            <Box sx={{ display: 'flex', justifyContent: 'space-around', width: '100%' }}>
+                                            <Box sx={{display: 'flex', justifyContent: 'space-around', width: '100%'}}>
                                                 <Typography>{size.size}</Typography>
                                                 {size.price > 0 && <Typography>+{size.price} ₺</Typography>}
                                             </Box>
@@ -454,9 +462,14 @@ export default function OrderEntry() {
                                     >
                                         {selectedProduct.contents.map(content => (
                                             <MenuItem key={content.name} value={content.name}>
-                                                <Box sx={{ display: 'flex', justifyContent: 'space-evenly', width: '100%' }}>
+                                                <Box sx={{
+                                                    display: 'flex',
+                                                    justifyContent: 'space-evenly',
+                                                    width: '100%'
+                                                }}>
                                                     <Typography>{content.name}</Typography>
-                                                    {content.extraFee > 0 && <Typography>+{content.extraFee} ₺</Typography>}
+                                                    {content.extraFee > 0 &&
+                                                        <Typography>+{content.extraFee} ₺</Typography>}
                                                 </Box>
                                             </MenuItem>
                                         ))}
@@ -465,26 +478,26 @@ export default function OrderEntry() {
                             )}
                             <TextField
                                 sx={{
-                                    '& input': { textAlign: 'center' }
+                                    '& input': {textAlign: 'center'}
                                 }}
                                 type="number"
                                 label="Adet"
                                 value={quantity}
                                 onChange={(e) => setQuantity(parseInt(e.target.value, 10))}
                                 fullWidth
-                                InputProps={{ inputProps: { min: 1 } }}
+                                InputProps={{inputProps: {min: 1}}}
                                 required
                             />
                         </Box>
                     ) : (
-                        <Typography variant="body1" sx={{ textAlign: 'center' }}>
+                        <Typography variant="body1" sx={{textAlign: 'center'}}>
                             Lütfen bir ürün seçin.
                         </Typography>
                     )}
                 </DialogContent>
                 {selectedProduct && (
-                    <DialogActions sx={{ justifyContent: 'space-evenly' }}>
-                        <Typography variant="subtitle1" sx={{ fontStyle: 'italic' }}>
+                    <DialogActions sx={{justifyContent: 'space-evenly'}}>
+                        <Typography variant="subtitle1" sx={{fontStyle: 'italic'}}>
                             {(() => {
                                 if (selectedProduct && selectedProduct.sizes) {
                                     const size = selectedProduct.sizes.find(size => size.size === selectedSize);
@@ -503,8 +516,6 @@ export default function OrderEntry() {
                     </DialogActions>
                 )}
             </Dialog>
-
-
 
 
         </>

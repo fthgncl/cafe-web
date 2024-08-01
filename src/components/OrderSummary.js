@@ -13,18 +13,22 @@ import {
 import ArrowUpward from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 
-const OrderSummary = () => {
+const OrderSummary = ({ orders, calculateOrderPrice , calculateTotalPrice}) => {
     const [isSummaryOpen, setIsSummaryOpen] = useState(true); // Başlangıçta büyük form açık
     const [orderNote, setOrderNote] = useState('');
-    const [paymentStatus, setPaymentStatus] = useState('Hediye');
-
-    const calculateTotalPrice = () => {
-        // Fiyat hesaplama işlevi
-        return 100.00; // Örnek bir fiyat
-    };
+    const [paymentStatus, setPaymentStatus] = useState('');
 
     const handleToggleSummary = () => {
         setIsSummaryOpen(prevState => !prevState);
+    };
+
+    const handleConfirmOrder = () => {
+        if (!paymentStatus) {
+            alert('Lütfen ödeme durumunu seçiniz.');
+        } else {
+            alert('Siparişiniz başarıyla onaylandı!');
+            // Siparişi onaylama işlemleri buraya eklenecek
+        }
     };
 
     return (
@@ -50,19 +54,21 @@ const OrderSummary = () => {
                     onClick={handleToggleSummary}
                     sx={{
                         position: 'absolute',
-                        top: isSummaryOpen?0:25,
+                        top: isSummaryOpen ? 0 : 25,
                         left: 0,
                         zIndex: 3
                     }}
                 >
                     {isSummaryOpen ? <ArrowDownwardIcon /> : <ArrowUpward />}
                 </IconButton>
-                {isSummaryOpen && <Typography
-                    variant="h6"
-                    sx={{ fontWeight: 600, color: '#333', marginBottom: 2, textAlign:'center' }}
-                >
-                    Sipariş Özeti
-                </Typography>}
+                {isSummaryOpen && (
+                    <Typography
+                        variant="h6"
+                        sx={{ fontWeight: 600, color: '#333', marginBottom: 2, textAlign: 'center' }}
+                    >
+                        Sipariş Özeti
+                    </Typography>
+                )}
             </Box>
 
             {isSummaryOpen && (
@@ -92,7 +98,7 @@ const OrderSummary = () => {
                 </>
             )}
 
-            <Box sx={{ display: 'flex', justifyContent: 'space-around', textAlign:'center' ,alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-around', textAlign: 'center', alignItems: 'center' }}>
                 <Box>
                     <Typography
                         variant="h6"
@@ -111,8 +117,7 @@ const OrderSummary = () => {
                     <Button
                         variant="contained"
                         color="primary"
-                        onClick={() => alert('Siparişiniz başarıyla onaylandı!')}
-
+                        onClick={handleConfirmOrder}
                     >
                         Siparişi Onayla
                     </Button>
