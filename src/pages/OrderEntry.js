@@ -417,10 +417,13 @@ export default function OrderEntry() {
                         </Box>
 
                         {/* Sipariş Özeti Bölümü */}
-                        <OrderSummary
-                            orders={orders}
-                            calculateOrderPrice={calculateOrderPrice}
-                            calculateTotalPrice={calculateTotalPrice}/>
+                        { orders.length > 0 && (
+                            <OrderSummary
+                                orders={orders}
+                                calculateOrderPrice={calculateOrderPrice}
+                                calculateTotalPrice={calculateTotalPrice}/>
+                        )}
+
                     </Box>
                 </Grid>
 
