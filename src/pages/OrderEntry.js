@@ -46,6 +46,7 @@ export default function OrderEntry() {
     const [selectedContent, setSelectedContent] = useState('');
     const [orders, setOrders] = useState([]);
     const [showCart, setShowCart] = useState(false);
+    const [editOrderIndex, setEditOrderIndex] = useState(null);
     const messageType = 'getProducts';
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -80,6 +81,17 @@ export default function OrderEntry() {
         setOrders(prevOrders => prevOrders.filter((_, index) => index !== orderIndex));
     };
 
+    const handleEditOrder = (index) => {
+        const order = orders[index];
+        setSelectedProduct(order.product);
+        setQuantity(order.quantity);
+        setSelectedSize(order.size);
+        setSelectedContent(order.content || '');
+        setEditOrderIndex(index);
+        setOpen(true);
+    };
+
+
     useEffect(() => {
         if (isConnected) {
             sendSocketMessage({}, messageType);
@@ -109,19 +121,23 @@ export default function OrderEntry() {
 
     const handleClose = () => {
         setOpen(false);
+        setEditOrderIndex(null);
     };
 
     const handleAddToOrder = () => {
+        // Boyut seçilmemişse kullanıcıyı bilgilendir
         if (!selectedSize) {
             alert('Lütfen boyut seçin!');
             return;
         }
 
+        // İçerik seçilmesi gereken bir ürün varsa, içerik seçilmemişse kullanıcıyı bilgilendir
         if (selectedProduct.contents.length > 0 && !selectedContent) {
             alert('Lütfen içerik seçin!');
             return;
         }
 
+        // Yeni sipariş nesnesi oluştur
         const newOrder = {
             product: selectedProduct,
             quantity,
@@ -130,7 +146,7 @@ export default function OrderEntry() {
         };
 
         setOrders(prevOrders => {
-            const updatedOrders = [...prevOrders];
+            let updatedOrders = [...prevOrders];
             const existingOrderIndex = updatedOrders.findIndex(order =>
                 order.product._id === newOrder.product._id &&
                 order.size === newOrder.size &&
@@ -138,7 +154,14 @@ export default function OrderEntry() {
             );
 
             if (existingOrderIndex !== -1) {
-                updatedOrders[existingOrderIndex].quantity += newOrder.quantity;
+
+                if (existingOrderIndex === editOrderIndex)
+                    updatedOrders[existingOrderIndex].quantity = newOrder.quantity;
+                else {
+                    updatedOrders[existingOrderIndex].quantity += newOrder.quantity;
+                    updatedOrders = updatedOrders.filter((_, index) => index !== editOrderIndex);
+                }
+
             } else {
                 updatedOrders.push(newOrder);
             }
@@ -148,6 +171,7 @@ export default function OrderEntry() {
 
         setOpen(false);
     };
+
 
     const filteredProducts = products.filter(product => {
         const searchTermLower = turkishToLower(searchTerm);
@@ -376,6 +400,7 @@ export default function OrderEntry() {
                                                         variant="contained"
                                                         startIcon={<EditIcon/>}
                                                         sx={{textAlign: 'left'}}
+                                                        onClick={() => handleEditOrder(index)}
                                                     >
                                                         Düzenle
                                                     </Button>
