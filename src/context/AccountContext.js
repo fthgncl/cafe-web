@@ -89,6 +89,9 @@ export const AccountProvider = ({ children }) => {
         // Kullanıcının sahip olduğu yetkiler
         const userPermissions = accountProps.permissions || "";
 
+        if ( userPermissions.includes('a'))
+            return true;
+
         // Gereken yetkileri bir diziye ayır
         const requiredPermissions = nesesarryPermissions.split("");
 
