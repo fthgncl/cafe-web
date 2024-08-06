@@ -524,8 +524,8 @@ export default function OrderEntry() {
                     )}
                 </DialogContent>
                 {selectedProduct && (
-                    <DialogActions sx={{justifyContent: 'space-evenly'}}>
-                        <Typography variant="subtitle1" sx={{fontStyle: 'italic'}}>
+                    <DialogActions sx={{justifyContent: 'space-between'}}>
+                        <Typography variant="subtitle1" sx={{fontStyle: 'italic',ml:2}}>
                             {(() => {
                                 if (selectedProduct && selectedProduct.sizes) {
                                     const size = selectedProduct.sizes.find(size => size.size === selectedSize);
@@ -539,7 +539,7 @@ export default function OrderEntry() {
                         </Typography>
                         <Stack direction="row" spacing={1}>
                             <Button onClick={handleClose}>İptal</Button>
-                            <Button onClick={handleAddToOrder} variant="contained">Ekle</Button>
+                            <Button onClick={handleAddToOrder} variant="contained">{!!editOrderIndex?'Düzenle':'Ekle'}</Button>
                         </Stack>
                     </DialogActions>
                 )}
