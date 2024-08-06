@@ -19,6 +19,7 @@ import {
     MenuItem,
     InputLabel,
     FormControl,
+    FormHelperText,
     IconButton,
     Card,
     CardContent,
@@ -47,6 +48,7 @@ export default function OrderEntry() {
     const [orders, setOrders] = useState([]);
     const [showCart, setShowCart] = useState(false);
     const [editOrderIndex, setEditOrderIndex] = useState(null);
+    const [sizeError, setSizeError] = useState(false);
     const messageType = 'getProducts';
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -122,14 +124,18 @@ export default function OrderEntry() {
     const handleClose = () => {
         setOpen(false);
         setEditOrderIndex(null);
+        setSizeError(false);
     };
 
     const handleAddToOrder = () => {
-        // Boyut seçilmemişse kullanıcıyı bilgilendir
+
+        // Boyut seçilmemişse hata durumunu güncelle
         if (!selectedSize) {
-            alert('Lütfen boyut seçin!');
+            setSizeError(true);
             return;
         }
+        setSizeError(false);
+
 
         // İçerik seçilmesi gereken bir ürün varsa, içerik seçilmemişse kullanıcıyı bilgilendir
         if (selectedProduct.contents.length > 0 && !selectedContent) {
@@ -461,11 +467,14 @@ export default function OrderEntry() {
                             <Typography variant="h6" sx={{textAlign: 'center'}}>
                                 {selectedProduct.productname}
                             </Typography>
-                            <FormControl fullWidth>
+                            <FormControl fullWidth error={sizeError}>
                                 <InputLabel>Boyut</InputLabel>
                                 <Select
                                     value={selectedSize}
-                                    onChange={(e) => setSelectedSize(e.target.value)}
+                                    onChange={(e) => {
+                                        setSelectedSize(e.target.value);
+                                        setSizeError(false);
+                                    }}
                                     label="Boyut"
                                     required
                                 >
@@ -478,6 +487,7 @@ export default function OrderEntry() {
                                         </MenuItem>
                                     ))}
                                 </Select>
+                                {sizeError && <FormHelperText>Lütfen boyut seçiniz</FormHelperText>}
                             </FormControl>
                             {selectedProduct.contents.length > 0 && (
                                 <FormControl fullWidth>
