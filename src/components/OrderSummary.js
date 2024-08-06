@@ -39,6 +39,7 @@ const OrderSummary = ({orders, calculateTotalPrice}) => {
             setShowDiscountField(true);
             setDiscount(100);
         }
+        // eslint-disable-next-line
     }, [paymentStatus]);
 
     const handleToggleSummary = () => {
