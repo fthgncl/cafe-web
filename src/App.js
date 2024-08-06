@@ -42,19 +42,19 @@ function App() {
 
                     <Route path="/create-user" element={<PrivateRoute
                         element={<CreateUser />}
-                        requiredPermissions="a"
+                        requiredPermissions=""
                         fullMatch={false}
                     />} />
 
                     <Route path="/create-product" element={<PrivateRoute
                         element={<CreateProduct />}
-                        requiredPermissions="ab"
+                        requiredPermissions="b"
                         fullMatch={false}
                     />} />
 
                     <Route path="/order-entry" element={<PrivateRoute
                         element={<OrderEntry />}
-                        requiredPermissions="ad"
+                        requiredPermissions="d"
                         fullMatch={false}
                     />} />
                 </Routes>
