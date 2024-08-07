@@ -19,6 +19,13 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import {AccountContext} from "../context/AccountContext";
 
 const OrderSummary = ({orders, calculateTotalPrice}) => {
+
+    const PaymentStatusEnum = Object.freeze({
+        GIFT: 'Hediye',
+        PAID: 'Ödendi',
+        PAY_LATER: 'Daha Sonra Ödenecek'
+    });
+
     const [isSummaryOpen, setIsSummaryOpen] = useState(true);
     const [orderNote, setOrderNote] = useState('');
     const [paymentStatus, setPaymentStatus] = useState('');
@@ -26,19 +33,28 @@ const OrderSummary = ({orders, calculateTotalPrice}) => {
     const [discount, setDiscount] = useState(0);
     const [showDiscountField, setShowDiscountField] = useState(false);
     const [isDiscountApplied, setIsDiscountApplied] = useState(false);
-    const { checkPermissions } = useContext(AccountContext);
-    const PaymentStatusEnum = Object.freeze({
-        GIFT: 'Hediye',
-        PAID: 'Ödendi',
-        PAY_LATER: 'Daha Sonra Ödenecek'
+    const [lastDiscoundFields, setLastDiscoundFields] = useState({
+        gift: paymentStatus === PaymentStatusEnum.GIFT,
+        showDiscountField,
+        isDiscountApplied,
+        discount
     });
+    const {checkPermissions} = useContext(AccountContext);
+
 
     useEffect(() => {
         if (paymentStatus === PaymentStatusEnum.GIFT) {
+            setLastDiscoundFields({gift: true, showDiscountField, isDiscountApplied,discount})
             setIsDiscountApplied(true);
             setShowDiscountField(true);
             setDiscount(100);
+        } else if (lastDiscoundFields.gift) {
+            setLastDiscoundFields(prevState => ({...prevState, gift: false}));
+            setIsDiscountApplied(lastDiscoundFields.isDiscountApplied);
+            setShowDiscountField(lastDiscoundFields.showDiscountField);
+            setDiscount(lastDiscoundFields.discount);
         }
+
         // eslint-disable-next-line
     }, [paymentStatus]);
 
@@ -54,9 +70,19 @@ const OrderSummary = ({orders, calculateTotalPrice}) => {
         }
         setPaymentStatusError(false);
 
+        console.log({
+            orders,
+            orderNote,
+            paymentStatus,
+            discount,
+            discountedPrice: parseFloat(discountedPrice.toFixed(2)),
+            totalPrice: parseFloat(totalPrice.toFixed(2))
+        });
+
     };
 
     const handleApplyDiscount = () => {
+        setLastDiscoundFields(prevState => ({...prevState, discount}));
         setIsDiscountApplied(true);
         setShowDiscountField(true);
     };
@@ -68,10 +94,6 @@ const OrderSummary = ({orders, calculateTotalPrice}) => {
 
     const totalPrice = calculateTotalPrice();
     const discountedPrice = totalPrice * (1 - discount / 100);
-
-    const changeDiscount = discount => {
-        setDiscount(discount);
-    }
 
     const discountMarks = [
         {value: 0, label: '0%'},
@@ -154,10 +176,10 @@ const OrderSummary = ({orders, calculateTotalPrice}) => {
                                 {PaymentStatusEnum.PAY_LATER}
                             </MenuItem>
                         </Select>
-                        { paymentStatusError && <FormHelperText>Ödeme durumu seçilmelidir.</FormHelperText>}
+                        {paymentStatusError && <FormHelperText>Ödeme durumu seçilmelidir.</FormHelperText>}
                     </FormControl>
 
-                    { checkPermissions('f') && paymentStatus !== PaymentStatusEnum.GIFT && (<>
+                    {checkPermissions('f') && paymentStatus !== PaymentStatusEnum.GIFT && (<>
                         {!isDiscountApplied ? (
                             <Button
                                 variant="contained"
@@ -183,8 +205,8 @@ const OrderSummary = ({orders, calculateTotalPrice}) => {
                                     >
                                         <Slider
                                             aria-label="Small steps"
-                                            defaultValue={10}
-                                            getAriaValueText={changeDiscount}
+                                            defaultValue={lastDiscoundFields.discount}
+                                            onChange={(e, newValue) => setDiscount(newValue)}
                                             step={5}
                                             min={0}
                                             max={100}
