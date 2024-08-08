@@ -17,6 +17,7 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import {AccountContext} from "../context/AccountContext";
+import { SocketContext } from "../context/SocketContext";
 
 const OrderSummary = ({orders, calculateTotalPrice}) => {
 
@@ -26,6 +27,8 @@ const OrderSummary = ({orders, calculateTotalPrice}) => {
         PAY_LATER: 'Daha Sonra Ödenecek'
     });
 
+    const messageType = 'orderEntry';
+    const {sendSocketMessage, socketData} = useContext(SocketContext);
     const [isSummaryOpen, setIsSummaryOpen] = useState(true);
     const [orderNote, setOrderNote] = useState('');
     const [paymentStatus, setPaymentStatus] = useState('');
@@ -41,6 +44,16 @@ const OrderSummary = ({orders, calculateTotalPrice}) => {
     });
     const {checkPermissions} = useContext(AccountContext);
 
+    useEffect(() => {
+
+        if (socketData && socketData.type === messageType) {
+
+            console.log('Socket Data : ',socketData)
+
+        }
+
+        // eslint-disable-next-line
+    }, [socketData]);
 
     useEffect(() => {
         if (paymentStatus === PaymentStatusEnum.GIFT) {
@@ -70,14 +83,15 @@ const OrderSummary = ({orders, calculateTotalPrice}) => {
         }
         setPaymentStatusError(false);
 
-        console.log({
+        const orderData = {
             orders,
             orderNote,
             paymentStatus,
             discount,
             discountedPrice: parseFloat(discountedPrice.toFixed(2)),
             totalPrice: parseFloat(totalPrice.toFixed(2))
-        });
+        }
+        sendSocketMessage(orderData,messageType);
 
     };
 
