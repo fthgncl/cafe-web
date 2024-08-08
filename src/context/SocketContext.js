@@ -16,7 +16,6 @@ export const SocketProvider = ({children}) => {
         const ws = new WebSocket(apiSocketAddress);
 
         ws.onopen = () => {
-            console.log('Connected to WebSocket server');
             setIsConnected(true);
         };
 
@@ -34,7 +33,6 @@ export const SocketProvider = ({children}) => {
 
         ws.onclose = () => {
             setIsConnected(false);
-            console.log('Disconnected from WebSocket server');
             setTimeout(createSocket, RECONNECT_DELAY); // Bağlantı koparsa yeniden bağlanmayı dene
         };
 
