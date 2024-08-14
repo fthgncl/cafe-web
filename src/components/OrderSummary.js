@@ -36,7 +36,7 @@ const OrderSummary = ({orders, calculateTotalPrice}) => {
     const [discount, setDiscount] = useState(0);
     const [showDiscountField, setShowDiscountField] = useState(false);
     const [isDiscountApplied, setIsDiscountApplied] = useState(false);
-    const [lastDiscoundFields, setLastDiscoundFields] = useState({
+    const [lastDiscountFields, setLastDiscountFields] = useState({
         gift: paymentStatus === PaymentStatusEnum.GIFT,
         showDiscountField,
         isDiscountApplied,
@@ -57,15 +57,15 @@ const OrderSummary = ({orders, calculateTotalPrice}) => {
 
     useEffect(() => {
         if (paymentStatus === PaymentStatusEnum.GIFT) {
-            setLastDiscoundFields({gift: true, showDiscountField, isDiscountApplied,discount})
+            setLastDiscountFields({gift: true, showDiscountField, isDiscountApplied,discount})
             setIsDiscountApplied(true);
             setShowDiscountField(true);
             setDiscount(100);
-        } else if (lastDiscoundFields.gift) {
-            setLastDiscoundFields(prevState => ({...prevState, gift: false}));
-            setIsDiscountApplied(lastDiscoundFields.isDiscountApplied);
-            setShowDiscountField(lastDiscoundFields.showDiscountField);
-            setDiscount(lastDiscoundFields.discount);
+        } else if (lastDiscountFields.gift) {
+            setLastDiscountFields(prevState => ({...prevState, gift: false}));
+            setIsDiscountApplied(lastDiscountFields.isDiscountApplied);
+            setShowDiscountField(lastDiscountFields.showDiscountField);
+            setDiscount(lastDiscountFields.discount);
         }
 
         // eslint-disable-next-line
@@ -96,7 +96,7 @@ const OrderSummary = ({orders, calculateTotalPrice}) => {
     };
 
     const handleApplyDiscount = () => {
-        setLastDiscoundFields(prevState => ({...prevState, discount}));
+        setLastDiscountFields(prevState => ({...prevState, discount}));
         setIsDiscountApplied(true);
         setShowDiscountField(true);
     };
@@ -219,7 +219,7 @@ const OrderSummary = ({orders, calculateTotalPrice}) => {
                                     >
                                         <Slider
                                             aria-label="Small steps"
-                                            defaultValue={lastDiscoundFields.discount}
+                                            defaultValue={lastDiscountFields.discount}
                                             onChange={(e, newValue) => setDiscount(newValue)}
                                             step={5}
                                             min={0}
