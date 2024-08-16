@@ -5,6 +5,7 @@ import LoginPage from "./pages/LoginPage";
 import CreateUser from "./pages/CreateUser";
 import CreateProduct from "./pages/CreateProduct";
 import OrderEntry from "./pages/OrderEntry";
+import OrdersPage from "./pages/OrdersPage";
 import NotConnected from "./pages/NotConnected";
 import { AccountContext } from "./context/AccountContext";
 import { SocketContext } from "./context/SocketContext";
@@ -56,6 +57,12 @@ function App() {
                     <Route path="/order-entry" element={<PrivateRoute
                         element={<OrderEntry />}
                         requiredPermissions="d"
+                        fullMatch={false}
+                    />} />
+
+                    <Route path="/orders" element={<PrivateRoute
+                        element={<OrdersPage />}
+                        requiredPermissions="defg"
                         fullMatch={false}
                     />} />
                 </Routes>

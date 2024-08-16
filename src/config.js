@@ -31,5 +31,10 @@ export const systemPermissions = {
         code: 'f',
         name: 'İndirim Uygulama Yetkisi',
         description: 'Dilerse ödemeye indirim uygulayabilir.'
+    },
+    order_handling: {
+        code: 'g',
+        name: 'Mutfak Sipariş Yönetimi',
+        description: 'Mutfakta siparişleri karşılayabilir ve tamamlandığında onaylayabilir.'
     }
 };
