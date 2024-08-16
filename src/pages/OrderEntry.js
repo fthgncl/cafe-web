@@ -197,7 +197,7 @@ export default function OrderEntry() {
         <>
             <Grid container spacing={0} sx={{height: 'calc(100vh - 64px)', overflow: 'hidden'}}>
                 {/* Sol Taraf - Ürünler */}
-                <Grid item xs={12} sm={6}
+                <Grid item xs={12} sm={orders.length > 0 ? 6 : 12}
                       sx={{borderRight: '1px solid #ddd', display: isMobile && showCart ? 'none' : 'block'}}>
                     <Box
                         sx={{
@@ -287,57 +287,58 @@ export default function OrderEntry() {
                     </Box>
                 </Grid>
 
-                {/* Sağ Taraf - Sipariş Ayrıntıları */}
-                <Grid
-                    item
-                    xs={12}
-                    sm={6}
-                    md={6}
-                    sx={{
-                        height: 'calc(100vh)',
-                        display: isMobile && !showCart ? 'none' : 'block'
-                    }} // 64px: Sipariş özeti yüksekliği
-                >
-                    <Box
-                        sx={{
-                            backgroundColor: '#f5f4f6',
-                            padding: 1,
-                            borderRadius: 1,
-                            height: 1,
-                            display: 'flex',
-                            flexDirection: 'column'
-                        }}
-                    >
-                        {/* Sabit Başlık */}
-                        <Box
-                            sx={{
-                                position: 'sticky',
-                                top: 0,
-                                backgroundColor: '#f5f4f6',
-                                padding: 2,
-                                borderBottom: '1px solid #ddd',
-                                zIndex: 1
-                            }}
-                        >
-                            <Typography sx={{
-                                textAlign: {
-                                    xs: 'center',
-                                    sm: 'left'
-                                }
-                            }} variant="h6">Sipariş Ayrıntıları</Typography>
-                        </Box>
 
-                        {/* Kaydırılabilir İçerik */}
+                {/* Sağ Taraf - Sipariş Ayrıntıları */}
+                {orders.length > 0 && (
+                    <Grid
+                        item
+                        xs={12}
+                        sm={6}
+                        md={6}
+                        sx={{
+                            height: 'calc(100vh)',
+                            display: isMobile && !showCart ? 'none' : 'block'
+                        }} // 64px: Sipariş özeti yüksekliği
+                    >
                         <Box
-                            className="custom-scrollbar"
                             sx={{
-                                flex: 1, // İçeriğin kalan tüm alanı kaplamasını sağlar
-                                overflowY: 'auto',
-                                padding: 2,
-                                marginBottom: '64px' // Sipariş özeti bölümünün yüksekliği kadar boşluk bırakın
+                                backgroundColor: '#f5f4f6',
+                                padding: 1,
+                                borderRadius: 1,
+                                height: 1,
+                                display: 'flex',
+                                flexDirection: 'column'
                             }}
                         >
-                            {orders.length > 0 ? (
+                            {/* Sabit Başlık */}
+                            <Box
+                                sx={{
+                                    position: 'sticky',
+                                    top: 0,
+                                    backgroundColor: '#f5f4f6',
+                                    padding: 2,
+                                    borderBottom: '1px solid #ddd',
+                                    zIndex: 1
+                                }}
+                            >
+                                <Typography sx={{
+                                    textAlign: {
+                                        xs: 'center',
+                                        sm: 'left'
+                                    }
+                                }} variant="h6">Sipariş Ayrıntıları</Typography>
+                            </Box>
+
+                            {/* Kaydırılabilir İçerik */}
+                            <Box
+                                className="custom-scrollbar"
+                                sx={{
+                                    flex: 1, // İçeriğin kalan tüm alanı kaplamasını sağlar
+                                    overflowY: 'auto',
+                                    padding: 2,
+                                    marginBottom: '64px' // Sipariş özeti bölümünün yüksekliği kadar boşluk bırakın
+                                }}
+                            >
                                 <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
                                     {orders.map((order, index) => (
                                         <Card
@@ -415,30 +416,30 @@ export default function OrderEntry() {
                                         </Card>
                                     ))}
                                 </Box>
-                            ) : (
-                                <Typography variant="body2" sx={{textAlign: 'center', marginTop: 2}}>
-                                    Sipariş yok.
-                                </Typography>
-                            )}
-                        </Box>
+                            </Box>
 
-                        {/* Sipariş Özeti Bölümü */}
-                        { orders.length > 0 && (
+                            {/* Sipariş Özeti Bölümü */}
+
                             <OrderSummary
                                 orders={orders}
+                                clearOrders={() => {
+                                    setOrders([]);
+                                    setShowCart(false);
+                                }}
                                 calculateOrderPrice={calculateOrderPrice}
                                 calculateTotalPrice={calculateTotalPrice}/>
-                        )}
 
-                    </Box>
-                </Grid>
+
+                        </Box>
+                    </Grid>
+                )}
 
 
             </Grid>
 
 
             {/* Sepet Düğmesi */}
-            {isMobile && (
+            {isMobile && orders.length > 0 && (
                 <IconButton
                     sx={{
                         position: 'fixed',
@@ -535,7 +536,7 @@ export default function OrderEntry() {
                 </DialogContent>
                 {selectedProduct && (
                     <DialogActions sx={{justifyContent: 'space-between'}}>
-                        <Typography variant="subtitle1" sx={{fontStyle: 'italic',ml:2}}>
+                        <Typography variant="subtitle1" sx={{fontStyle: 'italic', ml: 2}}>
                             {(() => {
                                 if (selectedProduct && selectedProduct.sizes) {
                                     const size = selectedProduct.sizes.find(size => size.size === selectedSize);
@@ -549,7 +550,8 @@ export default function OrderEntry() {
                         </Typography>
                         <Stack direction="row" spacing={1}>
                             <Button onClick={handleClose}>İptal</Button>
-                            <Button onClick={handleAddToOrder} variant="contained">{!!editOrderIndex?'Düzenle':'Ekle'}</Button>
+                            <Button onClick={handleAddToOrder}
+                                    variant="contained">{!!editOrderIndex ? 'Düzenle' : 'Ekle'}</Button>
                         </Stack>
                     </DialogActions>
                 )}

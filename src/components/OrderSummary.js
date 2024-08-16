@@ -18,8 +18,13 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import {AccountContext} from "../context/AccountContext";
 import { SocketContext } from "../context/SocketContext";
+import LoadingButton from '@mui/lab/LoadingButton';
+import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck';
+import {useSnackbar} from "notistack";
 
-const OrderSummary = ({orders, calculateTotalPrice}) => {
+const OrderSummary = ({orders, clearOrders, calculateTotalPrice}) => {
+
+    const { enqueueSnackbar } = useSnackbar();
 
     const PaymentStatusEnum = Object.freeze({
         GIFT: 'Hediye',
@@ -29,6 +34,7 @@ const OrderSummary = ({orders, calculateTotalPrice}) => {
 
     const messageType = 'orderEntry';
     const {sendSocketMessage, socketData} = useContext(SocketContext);
+    const [isLoading, setIsLoading] = useState(false);
     const [isSummaryOpen, setIsSummaryOpen] = useState(true);
     const [orderNote, setOrderNote] = useState('');
     const [paymentStatus, setPaymentStatus] = useState('');
@@ -44,12 +50,23 @@ const OrderSummary = ({orders, calculateTotalPrice}) => {
     });
     const {checkPermissions} = useContext(AccountContext);
 
+    const resetForm = () =>{
+        setOrderNote('');
+        setPaymentStatus('');
+        setPaymentStatusError(false);
+        setDiscount(0);
+        setShowDiscountField(false)
+        setIsDiscountApplied(false)
+        clearOrders();
+    }
+
     useEffect(() => {
 
         if (socketData && socketData.type === messageType) {
 
-            console.log('Socket Data : ',socketData)
-
+            enqueueSnackbar(socketData.message.message, { variant: socketData.message.status });
+            setIsLoading(false);
+            resetForm();
         }
 
         // eslint-disable-next-line
@@ -91,6 +108,8 @@ const OrderSummary = ({orders, calculateTotalPrice}) => {
             discountedPrice: parseFloat(discountedPrice.toFixed(2)),
             totalPrice: parseFloat(totalPrice.toFixed(2))
         }
+
+        setIsLoading(true);
         sendSocketMessage(orderData,messageType);
 
     };
@@ -278,13 +297,15 @@ const OrderSummary = ({orders, calculateTotalPrice}) => {
                     )}
                 </Box>
                 {isSummaryOpen && (
-                    <Button
+                    <LoadingButton
                         variant="contained"
-                        color="primary"
+                        loading={isLoading}
+                        loadingPosition="start"
+                        startIcon={<PlaylistAddCheckIcon/>}
                         onClick={handleConfirmOrder}
                     >
                         Siparişi Onayla
-                    </Button>
+                    </LoadingButton>
                 )}
             </Box>
         </Box>
