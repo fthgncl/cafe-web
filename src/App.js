@@ -1,5 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { Routes, Route } from 'react-router-dom';
+import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import CreateUser from "./pages/CreateUser";
 import CreateProduct from "./pages/CreateProduct";
@@ -38,7 +39,7 @@ function App() {
             <>
                 <AppBar />
                 <Routes>
-                    <Route path="/" element={<div />} />
+                    <Route path="/" element={<HomePage/>} />
 
                     <Route path="/create-user" element={<PrivateRoute
                         element={<CreateUser />}
