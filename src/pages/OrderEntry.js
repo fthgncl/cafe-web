@@ -33,6 +33,7 @@ import {SocketContext} from '../context/SocketContext';
 import {turkishToLower} from '../helper/stringTurkish';
 import SearchIcon from '@mui/icons-material/Search';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ClearIcon from '@mui/icons-material/Clear';
 import EditIcon from '@mui/icons-material/Edit';
 import OrderSummary from "../components/OrderSummary";
 
@@ -231,7 +232,16 @@ export default function OrderEntry() {
                                     InputProps={{
                                         startAdornment: (
                                             <IconButton>
-                                                <SearchIcon/>
+                                                <SearchIcon />
+                                            </IconButton>
+                                        ),
+                                        endAdornment: (
+                                            <IconButton
+                                                onClick={() => setSearchTerm('')}
+                                                edge="end"
+                                                sx={{ visibility: searchTerm ? 'visible' : 'hidden' }}
+                                            >
+                                                <ClearIcon />
                                             </IconButton>
                                         )
                                     }}
