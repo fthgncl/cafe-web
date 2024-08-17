@@ -1,3 +1,312 @@
-export default function OrdersPage(){
-    return <>Siparişler Sayfası</>
+import * as React from "react";
+import { useContext, useEffect, useState } from "react";
+import {
+    Box,
+    Card,
+    Chip,
+    CircularProgress,
+    Container,
+    Divider,
+    Grid,
+    Stack,
+    Typography,
+    Avatar,
+    Paper,
+    MenuItem,
+    Select,
+    FormControl,
+} from "@mui/material";
+import {
+    Kitchen as KitchenIcon,
+    Done as DoneIcon,
+    Cancel as CancelIcon,
+    HourglassEmpty as HourglassEmptyIcon,
+    CardGiftcard as CardGiftcardIcon,
+    Payment as PaymentIcon,
+    Timer as TimerIcon,
+} from "@mui/icons-material";
+import {keyframes, styled} from "@mui/system";
+import { SocketContext } from "../context/SocketContext";
+
+export default function OrdersPage() {
+    const { sendSocketMessage, socketData, isConnected } = useContext(SocketContext);
+    const [orders, setOrders] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const messageType = "getOrders";
+
+    useEffect(() => {
+        if (isConnected) {
+            sendSocketMessage({}, messageType);
+        }
+    }, [isConnected]);
+
+    useEffect(() => {
+        if (socketData && socketData.type === messageType) {
+            if (socketData.message && socketData.message.status === "success" && socketData.message.orders) {
+                const ordersArray = Object.values(socketData.message.orders);
+                setOrders(ordersArray);
+            }
+            setLoading(false);
+        }
+    }, [socketData]);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setOrders((prevOrders) =>
+                prevOrders.map((order) => ({
+                    ...order,
+                    formattedDuration: formatDuration(order.createdDate),
+                }))
+            );
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, []);
+
+    const handlePaymentStatusChange = (event, orderId) => {
+        const updatedOrders = orders.map((order) => {
+            if (order._id === orderId) {
+                return { ...order, paymentStatus: event.target.value };
+            }
+            return order;
+        });
+        setOrders(updatedOrders);
+    };
+
+    const handleKitchenStatusChange = (event, orderId) => {
+        const updatedOrders = orders.map((order) => {
+            if (order._id === orderId) {
+                return { ...order, kitchenStatus: event.target.value };
+            }
+            return order;
+        });
+        setOrders(updatedOrders);
+    };
+
+    const getPaymentStatusColor = (paymentStatus) => {
+        switch (paymentStatus) {
+            case "Ödendi":
+                return "success";
+            case "Bekliyor":
+                return "warning";
+            case "İptal Edildi":
+                return "error";
+            case "Hediye":
+                return "info";
+            case "Daha Sonra Ödenecek":
+                return "default";
+            default:
+                return "default";
+        }
+    };
+
+    const getPaymentStatusIcon = (paymentStatus) => {
+        switch (paymentStatus) {
+            case "Ödendi":
+                return <DoneIcon />;
+            case "Bekliyor":
+                return <HourglassEmptyIcon />;
+            case "İptal Edildi":
+                return <CancelIcon />;
+            case "Hediye":
+                return <CardGiftcardIcon />;
+            case "Daha Sonra Ödenecek":
+                return <PaymentIcon />;
+            default:
+                return null;
+        }
+    };
+
+    const getKitchenStatusColor = (kitchenStatus) => {
+        switch (kitchenStatus) {
+            case "Beklemede":
+                return "default";
+            case "Hazırlanıyor":
+                return "warning";
+            case "Hazırlandı":
+                return "success";
+            case "İptal Edildi":
+                return "error";
+            default:
+                return "default";
+        }
+    };
+
+    const blink = keyframes`
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+    `;
+
+    const kitchenStatusIcons = {
+        "Beklemede": <HourglassEmptyIcon />,
+        "Hazırlanıyor": <KitchenIcon sx={{ animation: `${blink} 1s infinite` }} />,
+        "Hazırlandı": <DoneIcon />,
+        "İptal Edildi": <CancelIcon />,
+    };
+
+    const formatDuration = (createdAt) => {
+        const now = new Date();
+        const created = new Date(createdAt);
+        const diffMs = now - created;
+        const diffSecs = Math.floor(diffMs / 1000);
+        const diffMinutes = Math.floor(diffSecs / 60);
+        const remainingSecs = diffSecs % 60;
+
+        if (diffMinutes > 0) {
+            return `${diffMinutes} dakika ${remainingSecs} saniye önce`;
+        } else {
+            return `${remainingSecs} saniye önce`;
+        }
+    };
+
+    const CustomSelect = styled(Select)({
+        '& .MuiOutlinedInput-notchedOutline': {
+            border: 'none',
+        },
+        '&:hover .MuiOutlinedInput-notchedOutline': {
+            border: 'none',
+        },
+        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+            border: 'none',
+        },
+        '& .MuiSelect-icon': {
+            color: 'black', // İkon rengini ayarlamak için
+        },
+    });
+
+    return (
+        <Container maxWidth="lg" sx={{ mt: 4 }}>
+            <Typography variant="h4" component="h1" gutterBottom>
+                Siparişler
+            </Typography>
+            {loading ? (
+                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "80vh" }}>
+                    <CircularProgress />
+                </Box>
+            ) : orders.length > 0 ? (
+                <Grid container spacing={3}>
+                    {orders.map((order) => (
+                        <Grid item xs={12} md={6} lg={4} key={order._id}>
+                            <Card variant="outlined" sx={{ borderRadius: 3, boxShadow: 3, overflow: "hidden" }}>
+                                <Box sx={{ p: 3 }}>
+                                    <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+                                        <Typography variant="h6" component="div" fontWeight="bold">
+                                            Sipariş #{order._id.slice(-5).toUpperCase()}
+                                        </Typography>
+                                        <Stack direction="row" alignItems="center" spacing={1}>
+                                            <TimerIcon color="action" />
+                                            <Typography variant="body2" color="textSecondary">
+                                                {order.formattedDuration || formatDuration(order.createdDate)}
+                                            </Typography>
+                                        </Stack>
+                                    </Stack>
+                                    <Typography variant="body1" color="primary" fontWeight="medium" sx={{ mb: 2 }}>
+                                        {order.totalPrice} ₺
+                                    </Typography>
+                                    <Divider sx={{ mb: 2 }} />
+                                    <Stack direction="row" spacing={2} alignItems="center">
+                                        <FormControl sx={{ minWidth: 120 }}>
+                                            <CustomSelect
+                                                label='aa'
+                                                value={order.paymentStatus}
+                                                onChange={(event) => handlePaymentStatusChange(event, order._id)}
+                                                displayEmpty
+                                                renderValue={(selected) => (
+                                                    <Chip
+                                                        icon={getPaymentStatusIcon(order.paymentStatus)}
+                                                        label={`Ödeme: ${order.paymentStatus}`}
+                                                        color={getPaymentStatusColor(order.paymentStatus)}
+                                                        sx={{ flexGrow: 1 }}
+                                                    />
+                                                )}
+                                            >
+                                                <MenuItem value="Ödendi">Ödendi</MenuItem>
+                                                <MenuItem value="Bekliyor">Bekliyor</MenuItem>
+                                                <MenuItem value="İptal Edildi">İptal Edildi</MenuItem>
+                                                <MenuItem value="Hediye">Hediye</MenuItem>
+                                                <MenuItem value="Daha Sonra Ödenecek">Daha Sonra Ödenecek</MenuItem>
+                                            </CustomSelect>
+                                        </FormControl>
+                                        <FormControl sx={{ minWidth: 120 }}>
+                                            <Select
+                                                sx={{
+                                                    '& .MuiOutlinedInput-notchedOutline': {
+                                                        border: 'none',
+                                                    },
+                                                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                                                        border: 'none',
+                                                    },
+                                                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                                        border: 'none',
+                                                    }
+                                                }}
+                                                value={order.kitchenStatus}
+                                                onChange={(event) => handleKitchenStatusChange(event, order._id)}
+                                                displayEmpty
+                                                renderValue={(selected) => (
+                                                    <Chip
+                                                        icon={kitchenStatusIcons[order.kitchenStatus]}
+                                                        label={`Mutfak: ${order.kitchenStatus}`}
+                                                        color={getKitchenStatusColor(order.kitchenStatus)}
+                                                        sx={{ flexGrow: 1 }}
+                                                    />
+                                                )}
+                                            >
+                                                <MenuItem value="Beklemede">Beklemede</MenuItem>
+                                                <MenuItem value="Hazırlanıyor">Hazırlanıyor</MenuItem>
+                                                <MenuItem value="Hazırlandı">Hazırlandı</MenuItem>
+                                                <MenuItem value="İptal Edildi">İptal Edildi</MenuItem>
+                                            </Select>
+                                        </FormControl>
+                                    </Stack>
+                                </Box>
+                                <Divider />
+                                <Box sx={{ p: 3 }}>
+                                    <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
+                                        <strong>Not:</strong> {order.orderNote || "Sipariş notu yok"}
+                                    </Typography>
+                                    <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+                                        <strong>Müşteri:</strong> {order.user}
+                                    </Typography>
+                                    <Divider sx={{ mb: 2 }} />
+                                    <Typography variant="body1" fontWeight="bold" gutterBottom>
+                                        Ürünler
+                                    </Typography>
+                                    <Grid container spacing={2}>
+                                        {order.orders.map((product) => (
+                                            <Grid item xs={12} key={product._id}>
+                                                <Paper elevation={2} sx={{ p: 2, borderRadius: 2 }}>
+                                                    <Stack direction="row" spacing={2} alignItems="center">
+                                                        <Avatar sx={{ bgcolor: "secondary.main" }}>
+                                                            {product.size[0]}
+                                                        </Avatar>
+                                                        <Box>
+                                                            <Typography variant="body2" fontWeight="bold">
+                                                                {product.product} ({product.quantity} adet)
+                                                            </Typography>
+                                                            <Typography variant="body2" color="textSecondary">
+                                                                Boyut: {product.size} - {product.content}
+                                                            </Typography>
+                                                        </Box>
+                                                    </Stack>
+                                                </Paper>
+                                            </Grid>
+                                        ))}
+                                    </Grid>
+                                </Box>
+                            </Card>
+                        </Grid>
+                    ))}
+                </Grid>
+            ) : (
+                <Box sx={{ textAlign: "center", py: 5 }}>
+                    <Typography variant="h6" color="textSecondary">
+                        Henüz sipariş bulunmamaktadır.
+                    </Typography>
+                </Box>
+            )}
+        </Container>
+    );
 }
+
