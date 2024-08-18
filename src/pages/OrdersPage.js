@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useContext, useEffect, useState } from "react";
+import {useContext, useEffect, useState} from "react";
 import {
     Box,
     Card,
@@ -26,28 +26,42 @@ import {
     Timer as TimerIcon,
 } from "@mui/icons-material";
 import {keyframes, styled} from "@mui/system";
-import { SocketContext } from "../context/SocketContext";
+import {SocketContext} from "../context/SocketContext";
 
 export default function OrdersPage() {
-    const { sendSocketMessage, socketData, isConnected } = useContext(SocketContext);
+    const {sendSocketMessage, socketData, isConnected} = useContext(SocketContext);
+    const [products, setProducts] = useState([]);
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
-    const messageType = "getOrders";
+    const getOrdersmessageType = "getOrders";
+    const getProductsMessageType = 'getProducts';
 
     useEffect(() => {
         if (isConnected) {
-            sendSocketMessage({}, messageType);
+            sendSocketMessage({}, getProductsMessageType);
         }
     }, [isConnected]);
 
     useEffect(() => {
-        if (socketData && socketData.type === messageType) {
+        if ( !socketData )
+            return;
+
+        if (socketData.type === getOrdersmessageType) {
             if (socketData.message && socketData.message.status === "success" && socketData.message.orders) {
                 const ordersArray = Object.values(socketData.message.orders);
-                setOrders(ordersArray);
+                setOrders(ordersArray.reverse());
             }
             setLoading(false);
+            return;
         }
+
+        if (socketData.type === getProductsMessageType) {
+            if (socketData.message && socketData.message.status === 'success' && socketData.message.products) {
+                setProducts(socketData.message.products);
+                sendSocketMessage({}, getOrdersmessageType);
+            }
+        }
+
     }, [socketData]);
 
     useEffect(() => {
@@ -66,7 +80,7 @@ export default function OrdersPage() {
     const handlePaymentStatusChange = (event, orderId) => {
         const updatedOrders = orders.map((order) => {
             if (order._id === orderId) {
-                return { ...order, paymentStatus: event.target.value };
+                return {...order, paymentStatus: event.target.value};
             }
             return order;
         });
@@ -76,7 +90,7 @@ export default function OrdersPage() {
     const handleKitchenStatusChange = (event, orderId) => {
         const updatedOrders = orders.map((order) => {
             if (order._id === orderId) {
-                return { ...order, kitchenStatus: event.target.value };
+                return {...order, kitchenStatus: event.target.value};
             }
             return order;
         });
@@ -103,15 +117,15 @@ export default function OrdersPage() {
     const getPaymentStatusIcon = (paymentStatus) => {
         switch (paymentStatus) {
             case "Ödendi":
-                return <DoneIcon />;
+                return <DoneIcon/>;
             case "Bekliyor":
-                return <HourglassEmptyIcon />;
+                return <HourglassEmptyIcon/>;
             case "İptal Edildi":
-                return <CancelIcon />;
+                return <CancelIcon/>;
             case "Hediye":
-                return <CardGiftcardIcon />;
+                return <CardGiftcardIcon/>;
             case "Daha Sonra Ödenecek":
-                return <PaymentIcon />;
+                return <PaymentIcon/>;
             default:
                 return null;
         }
@@ -133,16 +147,22 @@ export default function OrdersPage() {
     };
 
     const blink = keyframes`
-        0% { opacity: 1; }
-        50% { opacity: 0.5; }
-        100% { opacity: 1; }
+      0% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.5;
+      }
+      100% {
+        opacity: 1;
+      }
     `;
 
     const kitchenStatusIcons = {
-        "Beklemede": <HourglassEmptyIcon />,
-        "Hazırlanıyor": <KitchenIcon sx={{ animation: `${blink} 1s infinite` }} />,
-        "Hazırlandı": <DoneIcon />,
-        "İptal Edildi": <CancelIcon />,
+        "Beklemede": <HourglassEmptyIcon/>,
+        "Hazırlanıyor": <KitchenIcon sx={{animation: `${blink} 1s infinite`}}/>,
+        "Hazırlandı": <DoneIcon/>,
+        "İptal Edildi": <CancelIcon/>,
     };
 
     const formatDuration = (createdAt) => {
@@ -176,39 +196,50 @@ export default function OrdersPage() {
     });
 
     return (
-        <Container maxWidth="lg" sx={{ mt: 4 }}>
+        <Container maxWidth="lg" sx={{mt: 4}}>
             <Typography variant="h4" component="h1" gutterBottom>
                 Siparişler
             </Typography>
             {loading ? (
-                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "80vh" }}>
-                    <CircularProgress />
+                <Box sx={{display: "flex", justifyContent: "center", alignItems: "center", height: "80vh"}}>
+                    <CircularProgress/>
                 </Box>
             ) : orders.length > 0 ? (
                 <Grid container spacing={3}>
                     {orders.map((order) => (
-                        <Grid item xs={12} md={6} lg={4} key={order._id}>
-                            <Card variant="outlined" sx={{ borderRadius: 3, boxShadow: 3, overflow: "hidden" }}>
-                                <Box sx={{ p: 3 }}>
-                                    <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+                        <Grid item xs={12} md={6} key={order._id}>
+                            <Card variant="outlined" sx={{borderRadius: 3, boxShadow: 3, overflow: "hidden"}}>
+                                <Box sx={{p: 3}}>
+                                    <Stack direction="row" justifyContent="space-between" alignItems="center"
+                                           sx={{mb: 2}}>
                                         <Typography variant="h6" component="div" fontWeight="bold">
                                             Sipariş #{order._id.slice(-5).toUpperCase()}
                                         </Typography>
                                         <Stack direction="row" alignItems="center" spacing={1}>
-                                            <TimerIcon color="action" />
+                                            <TimerIcon color="action"/>
                                             <Typography variant="body2" color="textSecondary">
                                                 {order.formattedDuration || formatDuration(order.createdDate)}
                                             </Typography>
                                         </Stack>
                                     </Stack>
-                                    <Typography variant="body1" color="primary" fontWeight="medium" sx={{ mb: 2 }}>
+                                    <Typography variant="body1" color="primary" fontWeight="medium" sx={{mb: 2}}>
                                         {order.totalPrice} ₺
                                     </Typography>
-                                    <Divider sx={{ mb: 2 }} />
+                                    <Divider sx={{mb: 2}}/>
                                     <Stack direction="row" spacing={2} alignItems="center">
-                                        <FormControl sx={{ minWidth: 120 }}>
-                                            <CustomSelect
-                                                label='aa'
+                                        <FormControl sx={{minWidth: 120}}>
+                                            <Select
+                                                sx={{
+                                                    '& .MuiOutlinedInput-notchedOutline': {
+                                                        border: 'none',
+                                                    },
+                                                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                                                        border: 'none',
+                                                    },
+                                                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                                        border: 'none',
+                                                    }
+                                                }}
                                                 value={order.paymentStatus}
                                                 onChange={(event) => handlePaymentStatusChange(event, order._id)}
                                                 displayEmpty
@@ -217,7 +248,7 @@ export default function OrdersPage() {
                                                         icon={getPaymentStatusIcon(order.paymentStatus)}
                                                         label={`Ödeme: ${order.paymentStatus}`}
                                                         color={getPaymentStatusColor(order.paymentStatus)}
-                                                        sx={{ flexGrow: 1 }}
+                                                        sx={{flexGrow: 1}}
                                                     />
                                                 )}
                                             >
@@ -226,9 +257,9 @@ export default function OrdersPage() {
                                                 <MenuItem value="İptal Edildi">İptal Edildi</MenuItem>
                                                 <MenuItem value="Hediye">Hediye</MenuItem>
                                                 <MenuItem value="Daha Sonra Ödenecek">Daha Sonra Ödenecek</MenuItem>
-                                            </CustomSelect>
+                                            </Select>
                                         </FormControl>
-                                        <FormControl sx={{ minWidth: 120 }}>
+                                        <FormControl sx={{minWidth: 120}}>
                                             <Select
                                                 sx={{
                                                     '& .MuiOutlinedInput-notchedOutline': {
@@ -249,7 +280,7 @@ export default function OrdersPage() {
                                                         icon={kitchenStatusIcons[order.kitchenStatus]}
                                                         label={`Mutfak: ${order.kitchenStatus}`}
                                                         color={getKitchenStatusColor(order.kitchenStatus)}
-                                                        sx={{ flexGrow: 1 }}
+                                                        sx={{flexGrow: 1}}
                                                     />
                                                 )}
                                             >
@@ -261,46 +292,63 @@ export default function OrdersPage() {
                                         </FormControl>
                                     </Stack>
                                 </Box>
-                                <Divider />
-                                <Box sx={{ p: 3 }}>
-                                    <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
+                                <Divider/>
+                                <Box sx={{p: 3}}>
+                                    <Typography variant="body2" color="textSecondary" sx={{mb: 1}}>
                                         <strong>Not:</strong> {order.orderNote || "Sipariş notu yok"}
                                     </Typography>
-                                    <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+                                    <Typography variant="body2" color="textSecondary" sx={{mb: 2}}>
                                         <strong>Müşteri:</strong> {order.user}
                                     </Typography>
-                                    <Divider sx={{ mb: 2 }} />
+                                    <Divider sx={{mb: 2}}/>
                                     <Typography variant="body1" fontWeight="bold" gutterBottom>
                                         Ürünler
                                     </Typography>
                                     <Grid container spacing={2}>
-                                        {order.orders.map((product) => (
-                                            <Grid item xs={12} key={product._id}>
-                                                <Paper elevation={2} sx={{ p: 2, borderRadius: 2 }}>
-                                                    <Stack direction="row" spacing={2} alignItems="center">
-                                                        <Avatar sx={{ bgcolor: "secondary.main" }}>
-                                                            {product.size[0]}
-                                                        </Avatar>
-                                                        <Box>
-                                                            <Typography variant="body2" fontWeight="bold">
-                                                                {product.product} ({product.quantity} adet)
+                                        {order.orders.map((product) => {
+                                            const savedProduct = products.find(p => p._id === product.product);
+
+                                            return (
+                                                <Grid item xs={12} key={product._id}>
+                                                    <Paper elevation={4} sx={{ p: 3, borderRadius: 4, backgroundColor: '#f9f9f9' }}>
+                                                        <Stack direction="row" spacing={3} alignItems="center">
+                                                            <Typography
+                                                                variant="h5"
+                                                                sx={{
+                                                                    fontWeight: 'bold',
+                                                                    transform: 'rotate(-10deg)',
+                                                                    color: '#333'
+                                                                }}
+                                                            >
+                                                                {product.quantity}x
                                                             </Typography>
-                                                            <Typography variant="body2" color="textSecondary">
-                                                                Boyut: {product.size} - {product.content}
-                                                            </Typography>
-                                                        </Box>
-                                                    </Stack>
-                                                </Paper>
-                                            </Grid>
-                                        ))}
+                                                            <Box>
+                                                                <Typography variant="h6" fontWeight="bold" color="textPrimary">
+                                                                    {savedProduct?.productname || 'Ürün bulunamadı'}
+                                                                </Typography>
+                                                                <Typography variant="body2" color="textSecondary">
+                                                                    Boyut: {product.size}
+                                                                </Typography>
+                                                                {product.content && (
+                                                                    <Typography variant="body2" color="textSecondary">
+                                                                        İçerik: {product.content}
+                                                                    </Typography>
+                                                                )}
+                                                            </Box>
+                                                        </Stack>
+                                                    </Paper>
+                                                </Grid>
+                                            );
+                                        })}
                                     </Grid>
+
                                 </Box>
                             </Card>
                         </Grid>
                     ))}
                 </Grid>
             ) : (
-                <Box sx={{ textAlign: "center", py: 5 }}>
+                <Box sx={{textAlign: "center", py: 5}}>
                     <Typography variant="h6" color="textSecondary">
                         Henüz sipariş bulunmamaktadır.
                     </Typography>
