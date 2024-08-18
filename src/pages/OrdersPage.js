@@ -23,6 +23,7 @@ import {
     HourglassEmpty as HourglassEmptyIcon,
     CardGiftcard as CardGiftcardIcon,
     Payment as PaymentIcon,
+    HistoryToggleOff as HistoryToggleOff,
     Timer as TimerIcon,
 } from "@mui/icons-material";
 import {keyframes, styled} from "@mui/system";
@@ -102,14 +103,12 @@ export default function OrdersPage() {
         switch (paymentStatus) {
             case "Ödendi":
                 return "success";
-            case "Bekliyor":
+            case "Daha Sonra Ödenecek":
                 return "warning";
             case "İptal Edildi":
                 return "error";
             case "Hediye":
                 return "info";
-            case "Daha Sonra Ödenecek":
-                return "default";
             default:
                 return "default";
         }
@@ -119,14 +118,19 @@ export default function OrdersPage() {
         switch (paymentStatus) {
             case "Ödendi":
                 return <DoneIcon/>;
+
             case "Bekliyor":
                 return <HourglassEmptyIcon/>;
+
             case "İptal Edildi":
                 return <CancelIcon/>;
+
             case "Hediye":
                 return <CardGiftcardIcon/>;
+
             case "Daha Sonra Ödenecek":
-                return <PaymentIcon/>;
+                return <HistoryToggleOff/>;
+
             default:
                 return null;
         }
@@ -160,7 +164,7 @@ export default function OrdersPage() {
     `;
 
     const kitchenStatusIcons = {
-        "Beklemede": <HourglassEmptyIcon/>,
+        "Beklemede": <HourglassEmptyIcon sx={{animation: `${blink} 1s infinite`}}/>,
         "Hazırlanıyor": <KitchenIcon sx={{animation: `${blink} 1s infinite`}}/>,
         "Hazırlandı": <DoneIcon/>,
         "İptal Edildi": <CancelIcon/>,
@@ -265,10 +269,9 @@ export default function OrdersPage() {
                                                     )}
                                                 >
                                                     <MenuItem value="Ödendi">Ödendi</MenuItem>
-                                                    <MenuItem value="Bekliyor">Bekliyor</MenuItem>
-                                                    <MenuItem value="İptal Edildi">İptal Edildi</MenuItem>
-                                                    <MenuItem value="Hediye">Hediye</MenuItem>
                                                     <MenuItem value="Daha Sonra Ödenecek">Daha Sonra Ödenecek</MenuItem>
+                                                    <MenuItem value="Hediye">Hediye</MenuItem>
+                                                    <MenuItem value="İptal Edildi">İptal Edildi</MenuItem>
                                                 </Select>
                                             </FormControl>
 
