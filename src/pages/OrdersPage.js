@@ -174,27 +174,14 @@ export default function OrdersPage() {
         const diffMinutes = Math.floor(diffSecs / 60);
         const remainingSecs = diffSecs % 60;
 
-        if (diffMinutes > 0) {
-            return `${diffMinutes} dakika ${remainingSecs} saniye önce`;
+        if (diffMinutes >= 2) {
+            return `${diffMinutes} dakika önce`;
         } else {
-            return `${remainingSecs} saniye önce`;
+            if ( diffMinutes > 0 )
+                return `${diffMinutes} dakika ${remainingSecs} saniye önce`;
+            else return `${remainingSecs} saniye önce`;
         }
     };
-
-    const CustomSelect = styled(Select)({
-        '& .MuiOutlinedInput-notchedOutline': {
-            border: 'none',
-        },
-        '&:hover .MuiOutlinedInput-notchedOutline': {
-            border: 'none',
-        },
-        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-            border: 'none',
-        },
-        '& .MuiSelect-icon': {
-            color: 'black', // İkon rengini ayarlamak için
-        },
-    });
 
     return (
         <Container maxWidth="xl" sx={{mt: 4}}>
@@ -222,7 +209,7 @@ export default function OrdersPage() {
                                     <Stack direction="row" justifyContent="space-between" alignItems="center"
                                            sx={{mb: 2}}>
                                         <Typography variant="h6" component="div" fontWeight="bold">
-                                            Sipariş #{order._id.slice(-5).toUpperCase()}
+                                            {order.customerName}
                                         </Typography>
                                         <Stack direction="row" alignItems="center" spacing={1}>
                                             <TimerIcon color="action"/>
@@ -343,8 +330,11 @@ export default function OrdersPage() {
                                     <Typography variant="body2" color="textSecondary" sx={{mb: 1}}>
                                         <strong>Not:</strong> {order.orderNote || "Sipariş notu yok"}
                                     </Typography>
-                                    <Typography variant="body2" color="textSecondary" sx={{mb: 2}}>
+                                    <Typography variant="body2" color="textSecondary" sx={{mb: 1}}>
                                         <strong>Siparişi Alan:</strong> {order.user}
+                                    </Typography>
+                                    <Typography variant="body2" color="textSecondary" sx={{mb: 1}}>
+                                        <strong>Müşteri Adı:</strong> {order.customerName}
                                     </Typography>
                                     <Divider sx={{mb: 2}}/>
                                     <Typography variant="body1" fontWeight="bold" gutterBottom>
