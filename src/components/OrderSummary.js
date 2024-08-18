@@ -37,6 +37,8 @@ const OrderSummary = ({orders, clearOrders, calculateTotalPrice}) => {
     const [isLoading, setIsLoading] = useState(false);
     const [isSummaryOpen, setIsSummaryOpen] = useState(true);
     const [orderNote, setOrderNote] = useState('');
+    const [customerName, setCustomerName] = useState('');
+    const [customerNameError, setCustomerNameError] = useState(false);
     const [paymentStatus, setPaymentStatus] = useState('');
     const [paymentStatusError, setPaymentStatusError] = useState(false);
     const [discount, setDiscount] = useState(0);
@@ -94,17 +96,18 @@ const OrderSummary = ({orders, clearOrders, calculateTotalPrice}) => {
 
     const handleConfirmOrder = () => {
 
-        if (paymentStatus === '') {
-            setPaymentStatusError('Lütfen ödeme durumunu seçiniz.');
+        if ( customerName === '' || paymentStatus  === '') {
+            setCustomerNameError(customerName === ''?'Lütfen müşteri adını giriniz.':false);
+            setPaymentStatusError(paymentStatus === ''?'Lütfen ödeme durumunu seçiniz.':false);
             return;
         }
-        setPaymentStatusError(false);
 
         const orderData = {
             orders,
             orderNote,
             paymentStatus,
             discount,
+            customerName,
             discountedPrice: parseFloat(discountedPrice.toFixed(2)),
             totalPrice: parseFloat(totalPrice.toFixed(2))
         }
@@ -186,6 +189,17 @@ const OrderSummary = ({orders, clearOrders, calculateTotalPrice}) => {
                         variant="outlined"
                         value={orderNote}
                         onChange={(e) => setOrderNote(e.target.value)}
+                        sx={{marginBottom: 2}}
+                    />
+
+                    <TextField
+                        label="Müşteri Adı"
+                        rows={2}
+                        variant="outlined"
+                        value={customerName}
+                        error={!!customerNameError}
+                        helperText={customerNameError}
+                        onChange={(e) => setCustomerName(e.target.value)}
                         sx={{marginBottom: 2}}
                     />
 
