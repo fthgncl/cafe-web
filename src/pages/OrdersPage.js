@@ -334,7 +334,7 @@ export default function OrdersPage() {
                                         <strong>Not:</strong> {order.orderNote || "Sipariş notu yok"}
                                     </Typography>
                                     <Typography variant="body2" color="textSecondary" sx={{mb: 1}}>
-                                        <strong>Siparişi Alan:</strong> {order.user}
+                                        <strong>Siparişi Alan:</strong> {order.createdBy}
                                     </Typography>
                                     <Typography variant="body2" color="textSecondary" sx={{mb: 1}}>
                                         <strong>Müşteri Adı:</strong> {order.customerName}
