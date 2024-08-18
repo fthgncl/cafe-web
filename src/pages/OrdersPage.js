@@ -14,6 +14,7 @@ import {
     MenuItem,
     Select,
     FormControl,
+    InputLabel
 } from "@mui/material";
 import {
     Kitchen as KitchenIcon,
@@ -43,7 +44,7 @@ export default function OrdersPage() {
     }, [isConnected]);
 
     useEffect(() => {
-        if ( !socketData )
+        if (!socketData)
             return;
 
         if (socketData.type === getOrdersmessageType) {
@@ -233,72 +234,109 @@ export default function OrdersPage() {
                                     <Typography variant="body1" color="primary" fontWeight="medium" sx={{mb: 2}}>
                                         {order.totalPrice} ₺
                                     </Typography>
-                                    <Divider sx={{mb: 2}}/>
-                                    <Stack direction="row" spacing={2} alignItems="center">
-                                        <FormControl sx={{minWidth: 120}}>
-                                            <Select
-                                                sx={{
-                                                    '& .MuiOutlinedInput-notchedOutline': {
-                                                        border: 'none',
-                                                    },
-                                                    '&:hover .MuiOutlinedInput-notchedOutline': {
-                                                        border: 'none',
-                                                    },
-                                                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                                        border: 'none',
-                                                    }
-                                                }}
-                                                value={order.paymentStatus}
-                                                onChange={(event) => handlePaymentStatusChange(event, order._id)}
-                                                displayEmpty
-                                                renderValue={(selected) => (
-                                                    <Chip
-                                                        icon={getPaymentStatusIcon(order.paymentStatus)}
-                                                        label={`Ödeme: ${order.paymentStatus}`}
-                                                        color={getPaymentStatusColor(order.paymentStatus)}
-                                                        sx={{flexGrow: 1}}
-                                                    />
-                                                )}
-                                            >
-                                                <MenuItem value="Ödendi">Ödendi</MenuItem>
-                                                <MenuItem value="Bekliyor">Bekliyor</MenuItem>
-                                                <MenuItem value="İptal Edildi">İptal Edildi</MenuItem>
-                                                <MenuItem value="Hediye">Hediye</MenuItem>
-                                                <MenuItem value="Daha Sonra Ödenecek">Daha Sonra Ödenecek</MenuItem>
-                                            </Select>
-                                        </FormControl>
-                                        <FormControl sx={{minWidth: 120}}>
-                                            <Select
-                                                sx={{
-                                                    '& .MuiOutlinedInput-notchedOutline': {
-                                                        border: 'none',
-                                                    },
-                                                    '&:hover .MuiOutlinedInput-notchedOutline': {
-                                                        border: 'none',
-                                                    },
-                                                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                                        border: 'none',
-                                                    }
-                                                }}
-                                                value={order.kitchenStatus}
-                                                onChange={(event) => handleKitchenStatusChange(event, order._id)}
-                                                displayEmpty
-                                                renderValue={(selected) => (
-                                                    <Chip
-                                                        icon={kitchenStatusIcons[order.kitchenStatus]}
-                                                        label={`Mutfak: ${order.kitchenStatus}`}
-                                                        color={getKitchenStatusColor(order.kitchenStatus)}
-                                                        sx={{flexGrow: 1}}
-                                                    />
-                                                )}
-                                            >
-                                                <MenuItem value="Beklemede">Beklemede</MenuItem>
-                                                <MenuItem value="Hazırlanıyor">Hazırlanıyor</MenuItem>
-                                                <MenuItem value="Hazırlandı">Hazırlandı</MenuItem>
-                                                <MenuItem value="İptal Edildi">İptal Edildi</MenuItem>
-                                            </Select>
-                                        </FormControl>
-                                    </Stack>
+                                    <Divider sx={{mt: 4}}/>
+                                    <Box>
+                                        <Stack spacing={2} flexWrap="wrap">
+                                            {/* Ödeme Durumu Seçimi */}
+                                            <FormControl fullWidth>
+                                                <InputLabel
+                                                    id="payment-status-label"
+                                                    sx={{
+                                                        textAlign: 'center',
+                                                        backgroundColor: 'background.paper',
+                                                        paddingX: 1
+                                                    }}
+                                                >
+                                                    Ödeme Durumu
+                                                </InputLabel>
+                                                <Select
+                                                    labelId="payment-status-label"
+                                                    sx={{
+                                                        '& .MuiOutlinedInput-notchedOutline': {
+                                                            border: 'none',
+                                                        },
+                                                        '&:hover .MuiOutlinedInput-notchedOutline': {
+                                                            border: 'none',
+                                                        },
+                                                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                                            border: 'none',
+                                                        },
+                                                        minWidth: 200,  // Genişliği artır
+                                                        textAlign: 'center',
+                                                        mt:1
+                                                    }}
+                                                    value={order.paymentStatus}
+                                                    onChange={(event) => handlePaymentStatusChange(event, order._id)}
+                                                    displayEmpty
+                                                    renderValue={(selected) => (
+                                                        <Chip
+                                                            icon={getPaymentStatusIcon(order.paymentStatus)}
+                                                            label={order.paymentStatus}
+                                                            color={getPaymentStatusColor(order.paymentStatus)}
+                                                            sx={{flexGrow: 1, width: 1}}
+                                                        />
+                                                    )}
+                                                >
+                                                    <MenuItem value="Ödendi">Ödendi</MenuItem>
+                                                    <MenuItem value="Bekliyor">Bekliyor</MenuItem>
+                                                    <MenuItem value="İptal Edildi">İptal Edildi</MenuItem>
+                                                    <MenuItem value="Hediye">Hediye</MenuItem>
+                                                    <MenuItem value="Daha Sonra Ödenecek">Daha Sonra Ödenecek</MenuItem>
+                                                </Select>
+                                            </FormControl>
+
+                                            {/* Mutfak Durumu Seçimi */}
+                                            <FormControl fullWidth>
+
+                                                <Divider sx={{mt: 0}}/>
+                                                <InputLabel
+                                                    id="kitchen-status-label"
+                                                    sx={{
+                                                        textAlign: 'center',
+                                                        backgroundColor: 'background.paper',
+                                                        paddingX: 1
+                                                    }}
+                                                >
+                                                    Mutfak Durumu
+                                                </InputLabel>
+                                                <Select
+                                                    labelId="kitchen-status-label"
+                                                    sx={{
+                                                        '& .MuiOutlinedInput-notchedOutline': {
+                                                            border: 'none',
+                                                        },
+                                                        '&:hover .MuiOutlinedInput-notchedOutline': {
+                                                            border: 'none',
+                                                        },
+                                                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                                            border: 'none',
+                                                        },
+                                                        minWidth: 200,  // Genişliği artır
+                                                        textAlign: 'center',
+                                                        mt:1
+                                                    }}
+                                                    value={order.kitchenStatus}
+                                                    onChange={(event) => handleKitchenStatusChange(event, order._id)}
+                                                    displayEmpty
+                                                    renderValue={(selected) => (
+                                                        <Chip
+                                                            icon={kitchenStatusIcons[order.kitchenStatus]}
+                                                            label={order.kitchenStatus}
+                                                            color={getKitchenStatusColor(order.kitchenStatus)}
+                                                            sx={{flexGrow: 1, width: 1}}
+                                                        />
+                                                    )}
+                                                >
+                                                    <MenuItem value="Beklemede">Beklemede</MenuItem>
+                                                    <MenuItem value="Hazırlanıyor">Hazırlanıyor</MenuItem>
+                                                    <MenuItem value="Hazırlandı">Hazırlandı</MenuItem>
+                                                    <MenuItem value="İptal Edildi">İptal Edildi</MenuItem>
+                                                </Select>
+                                            </FormControl>
+                                        </Stack>
+
+                                    </Box>
+
                                 </Box>
                                 <Divider/>
                                 <Box sx={{p: 3}}>
@@ -306,7 +344,7 @@ export default function OrdersPage() {
                                         <strong>Not:</strong> {order.orderNote || "Sipariş notu yok"}
                                     </Typography>
                                     <Typography variant="body2" color="textSecondary" sx={{mb: 2}}>
-                                        <strong>Müşteri:</strong> {order.user}
+                                        <strong>Siparişi Alan:</strong> {order.user}
                                     </Typography>
                                     <Divider sx={{mb: 2}}/>
                                     <Typography variant="body1" fontWeight="bold" gutterBottom>
@@ -318,7 +356,8 @@ export default function OrdersPage() {
 
                                             return (
                                                 <Grid item xs={12} key={product._id}>
-                                                    <Paper elevation={4} sx={{ p: 3, borderRadius: 4, backgroundColor: '#f9f9f9' }}>
+                                                    <Paper elevation={4}
+                                                           sx={{p: 3, borderRadius: 4, backgroundColor: '#f9f9f9'}}>
                                                         <Stack direction="row" spacing={3} alignItems="center">
                                                             <Typography
                                                                 variant="h5"
@@ -331,7 +370,8 @@ export default function OrdersPage() {
                                                                 {product.quantity}x
                                                             </Typography>
                                                             <Box>
-                                                                <Typography variant="h6" fontWeight="bold" color="textPrimary">
+                                                                <Typography variant="h6" fontWeight="bold"
+                                                                            color="textPrimary">
                                                                     {savedProduct?.productname || 'Ürün bulunamadı'}
                                                                 </Typography>
                                                                 <Typography variant="body2" color="textSecondary">
