@@ -10,7 +10,6 @@ import {
     Grid,
     Stack,
     Typography,
-    Avatar,
     Paper,
     MenuItem,
     Select,
@@ -26,6 +25,7 @@ import {
     Timer as TimerIcon,
 } from "@mui/icons-material";
 import {keyframes, styled} from "@mui/system";
+import Masonry from '@mui/lab/Masonry';
 import {SocketContext} from "../context/SocketContext";
 
 export default function OrdersPage() {
@@ -196,7 +196,7 @@ export default function OrdersPage() {
     });
 
     return (
-        <Container maxWidth="lg" sx={{mt: 4}}>
+        <Container maxWidth="xl" sx={{mt: 4}}>
             <Typography variant="h4" component="h1" gutterBottom>
                 Siparişler
             </Typography>
@@ -205,7 +205,15 @@ export default function OrdersPage() {
                     <CircularProgress/>
                 </Box>
             ) : orders.length > 0 ? (
-                <Grid container spacing={3}>
+                <Masonry
+                    spacing={2}
+                    columns={{
+                        xs: 1,
+                        sm: 2,
+                        md: 3,
+                        xl: 4
+                    }}
+                >
                     {orders.map((order) => (
                         <Grid item xs={12} md={6} key={order._id}>
                             <Card variant="outlined" sx={{borderRadius: 3, boxShadow: 3, overflow: "hidden"}}>
@@ -346,7 +354,7 @@ export default function OrdersPage() {
                             </Card>
                         </Grid>
                     ))}
-                </Grid>
+                </Masonry>
             ) : (
                 <Box sx={{textAlign: "center", py: 5}}>
                     <Typography variant="h6" color="textSecondary">
