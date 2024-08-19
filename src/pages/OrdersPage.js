@@ -23,11 +23,10 @@ import {
     Cancel as CancelIcon,
     HourglassEmpty as HourglassEmptyIcon,
     CardGiftcard as CardGiftcardIcon,
-    Payment as PaymentIcon,
-    HistoryToggleOff as HistoryToggleOff,
+    HistoryToggleOff,
     Timer as TimerIcon,
 } from "@mui/icons-material";
-import {keyframes, styled} from "@mui/system";
+import {keyframes} from "@mui/system";
 import Masonry from '@mui/lab/Masonry';
 import {SocketContext} from "../context/SocketContext";
 import {AccountContext} from "../context/AccountContext";
@@ -49,6 +48,7 @@ export default function OrdersPage() {
         if (isConnected) {
             sendSocketMessage({}, getProductsMessageType);
         }
+        // eslint-disable-next-line
     }, [isConnected]);
 
     useEffect(() => {
@@ -90,6 +90,7 @@ export default function OrdersPage() {
             }
         }
 
+        // eslint-disable-next-line
     }, [socketData]);
 
     useEffect(() => {
