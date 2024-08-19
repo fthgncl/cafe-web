@@ -14,7 +14,8 @@ import {
     MenuItem,
     Select,
     FormControl,
-    InputLabel
+    InputLabel,
+    LinearProgress
 } from "@mui/material";
 import {
     Kitchen as KitchenIcon,
@@ -29,14 +30,20 @@ import {
 import {keyframes, styled} from "@mui/system";
 import Masonry from '@mui/lab/Masonry';
 import {SocketContext} from "../context/SocketContext";
+import {AccountContext} from "../context/AccountContext";
+import {useSnackbar} from "notistack";
 
 export default function OrdersPage() {
     const {sendSocketMessage, socketData, isConnected} = useContext(SocketContext);
+    const {checkPermissions} = useContext(AccountContext);
+    const {enqueueSnackbar} = useSnackbar();
     const [products, setProducts] = useState([]);
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
-    const getOrdersmessageType = "getOrders";
+    const [loadingPaymentStatus, setLoadingPaymentStatus] = useState([]);
+    const getOrdersMessageType = "getOrders";
     const getProductsMessageType = 'getProducts';
+    const updateOrderPaymentStatusMessageType = 'updateOrderPaymentStatus';
 
     useEffect(() => {
         if (isConnected) {
@@ -45,11 +52,30 @@ export default function OrdersPage() {
     }, [isConnected]);
 
     useEffect(() => {
-        if (!socketData)
+        if (!socketData || !socketData.message)
             return;
 
-        if (socketData.type === getOrdersmessageType) {
-            if (socketData.message && socketData.message.status === "success" && socketData.message.orders) {
+
+        if (socketData.type === updateOrderPaymentStatusMessageType) {
+            console.log(socketData.message.newPaymentStatus);
+            enqueueSnackbar(socketData.message.message, {variant: socketData.message.status});
+            if (socketData.message.updatedOrder) {
+                setLoadingPaymentStatus(prevState => prevState.filter(item => item !== socketData.message.updatedOrder._id));
+                setOrders(prevState => prevState.map(order => {
+                    if ( order._id === socketData.message.updatedOrder._id )
+                        return { ...order, paymentStatus:socketData.message.updatedOrder.paymentStatus  }
+                    else return order;
+                }));
+            }
+            setLoading(false);
+            return;
+        }
+
+        if (socketData.message.status !== 'success')
+            return;
+
+        if (socketData.type === getOrdersMessageType) {
+            if (socketData.message.orders) {
                 const ordersArray = Object.values(socketData.message.orders);
                 setOrders(ordersArray.reverse());
             }
@@ -58,9 +84,9 @@ export default function OrdersPage() {
         }
 
         if (socketData.type === getProductsMessageType) {
-            if (socketData.message && socketData.message.status === 'success' && socketData.message.products) {
+            if (socketData.message.products) {
                 setProducts(socketData.message.products);
-                sendSocketMessage({}, getOrdersmessageType);
+                sendSocketMessage({}, getOrdersMessageType);
             }
         }
 
@@ -80,13 +106,13 @@ export default function OrdersPage() {
     }, []);
 
     const handlePaymentStatusChange = (event, orderId) => {
-        const updatedOrders = orders.map((order) => {
-            if (order._id === orderId) {
-                return {...order, paymentStatus: event.target.value};
-            }
-            return order;
-        });
-        setOrders(updatedOrders);
+        const selectedOrder = orders.find(order => order._id === orderId);
+        setLoadingPaymentStatus(prevState => [...prevState, selectedOrder._id]);
+        sendSocketMessage({
+            orderId: selectedOrder._id,
+            paymentStatus: event.target.value
+        }, updateOrderPaymentStatusMessageType);
+
     };
 
     const handleKitchenStatusChange = (event, orderId) => {
@@ -181,7 +207,7 @@ export default function OrdersPage() {
         if (diffMinutes >= 2) {
             return `${diffMinutes} dakika önce`;
         } else {
-            if ( diffMinutes > 0 )
+            if (diffMinutes > 0)
                 return `${diffMinutes} dakika ${remainingSecs} saniye önce`;
             else return `${remainingSecs} saniye önce`;
         }
@@ -229,52 +255,69 @@ export default function OrdersPage() {
                                     <Box>
                                         <Stack spacing={2} flexWrap="wrap">
                                             {/* Ödeme Durumu Seçimi */}
-                                            <FormControl fullWidth>
-                                                <InputLabel
-                                                    id="payment-status-label"
-                                                    sx={{
-                                                        textAlign: 'center',
-                                                        backgroundColor: 'background.paper',
-                                                        paddingX: 1
-                                                    }}
-                                                >
-                                                    Ödeme Durumu
-                                                </InputLabel>
-                                                <Select
-                                                    labelId="payment-status-label"
-                                                    sx={{
-                                                        '& .MuiOutlinedInput-notchedOutline': {
-                                                            border: 'none',
-                                                        },
-                                                        '&:hover .MuiOutlinedInput-notchedOutline': {
-                                                            border: 'none',
-                                                        },
-                                                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                                            border: 'none',
-                                                        },
-                                                        minWidth: 200,  // Genişliği artır
-                                                        textAlign: 'center',
-                                                        mt:1
-                                                    }}
-                                                    value={order.paymentStatus}
-                                                    onChange={(event) => handlePaymentStatusChange(event, order._id)}
-                                                    displayEmpty
-                                                    renderValue={(selected) => (
-                                                        <Chip
-                                                            icon={getPaymentStatusIcon(order.paymentStatus)}
-                                                            label={order.paymentStatus}
-                                                            color={getPaymentStatusColor(order.paymentStatus)}
-                                                            sx={{flexGrow: 1, width: 1}}
-                                                        />
-                                                    )}
-                                                >
-                                                    <MenuItem value="Ödendi">Ödendi</MenuItem>
-                                                    <MenuItem value="Daha Sonra Ödenecek">Daha Sonra Ödenecek</MenuItem>
-                                                    <MenuItem value="Hediye">Hediye</MenuItem>
-                                                    <MenuItem value="İptal Edildi">İptal Edildi</MenuItem>
-                                                </Select>
-                                            </FormControl>
-
+                                            {checkPermissions('e') && (
+                                                <FormControl fullWidth>
+                                                    <InputLabel
+                                                        id="payment-status-label"
+                                                        sx={{
+                                                            textAlign: 'center',
+                                                            backgroundColor: 'background.paper',
+                                                            paddingX: 1
+                                                        }}
+                                                    >
+                                                        Ödeme Durumu
+                                                    </InputLabel>
+                                                    <Select
+                                                        labelId="payment-status-label"
+                                                        sx={{
+                                                            '& .MuiOutlinedInput-notchedOutline': {
+                                                                border: 'none',
+                                                            },
+                                                            '&:hover .MuiOutlinedInput-notchedOutline': {
+                                                                border: 'none',
+                                                            },
+                                                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                                                border: 'none',
+                                                            },
+                                                            minWidth: 200,
+                                                            textAlign: 'center',
+                                                            mt: 1
+                                                        }}
+                                                        value={order.paymentStatus}
+                                                        onChange={(event) => handlePaymentStatusChange(event, order._id)}
+                                                        displayEmpty
+                                                        renderValue={(selected) =>
+                                                            loadingPaymentStatus.includes(order._id) ? (
+                                                                <LinearProgress sx={{mt:1.2}}/>
+                                                            ) : (
+                                                                <Chip
+                                                                    icon={getPaymentStatusIcon(order.paymentStatus)}
+                                                                    label={order.paymentStatus}
+                                                                    color={getPaymentStatusColor(order.paymentStatus)}
+                                                                    sx={{flexGrow: 1, width: 1}}
+                                                                />
+                                                            )
+                                                        }
+                                                    >
+                                                        <MenuItem value="Daha Sonra Ödenecek"
+                                                                  disabled={order.paymentStatus === "Daha Sonra Ödenecek"}>
+                                                            Daha Sonra Ödenecek
+                                                        </MenuItem>
+                                                        <MenuItem value="Hediye"
+                                                                  disabled={order.paymentStatus === "Hediye"}>
+                                                            Hediye
+                                                        </MenuItem>
+                                                        <MenuItem value="İptal Edildi"
+                                                                  disabled={order.paymentStatus === "İptal Edildi"}>
+                                                            İptal Edildi
+                                                        </MenuItem>
+                                                        <MenuItem value="Ödendi"
+                                                                  disabled={order.paymentStatus === "Ödendi"}>
+                                                            Ödendi
+                                                        </MenuItem>
+                                                    </Select>
+                                                </FormControl>
+                                            )}
                                             {/* Mutfak Durumu Seçimi */}
                                             <FormControl fullWidth>
 
@@ -303,7 +346,7 @@ export default function OrdersPage() {
                                                         },
                                                         minWidth: 200,  // Genişliği artır
                                                         textAlign: 'center',
-                                                        mt:1
+                                                        mt: 1
                                                     }}
                                                     value={order.kitchenStatus}
                                                     onChange={(event) => handleKitchenStatusChange(event, order._id)}
