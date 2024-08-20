@@ -62,8 +62,8 @@ export default function OrdersPage() {
             if (socketData.message.updatedOrder) {
                 setLoadingPaymentStatus(prevState => prevState.filter(item => item !== socketData.message.updatedOrder._id));
                 setOrders(prevState => prevState.map(order => {
-                    if ( order._id === socketData.message.updatedOrder._id )
-                        return { ...order, paymentStatus:socketData.message.updatedOrder.paymentStatus  }
+                    if (order._id === socketData.message.updatedOrder._id)
+                        return {...order, paymentStatus: socketData.message.updatedOrder.paymentStatus}
                     else return order;
                 }));
             }
@@ -249,14 +249,16 @@ export default function OrdersPage() {
                                             </Typography>
                                         </Stack>
                                     </Stack>
-                                    <Typography variant="body1" color="primary" fontWeight="medium" sx={{mb: 2}}>
-                                        {order.totalPrice} ₺
-                                    </Typography>
+                                    {order.totalPrice && (
+                                        <Typography variant="body1" color="primary" fontWeight="medium" sx={{mb: 2}}>
+                                            {order.totalPrice} ₺
+                                        </Typography>
+                                    )}
                                     <Divider sx={{mt: 4}}/>
                                     <Box>
                                         <Stack spacing={2} flexWrap="wrap">
                                             {/* Ödeme Durumu Seçimi */}
-                                            {checkPermissions('e') && (
+                                            {checkPermissions('e') && order.paymentStatus && (
                                                 <FormControl fullWidth>
                                                     <InputLabel
                                                         id="payment-status-label"
@@ -289,7 +291,7 @@ export default function OrdersPage() {
                                                         displayEmpty
                                                         renderValue={(selected) =>
                                                             loadingPaymentStatus.includes(order._id) ? (
-                                                                <LinearProgress sx={{mt:1.2}}/>
+                                                                <LinearProgress sx={{mt: 1.2}}/>
                                                             ) : (
                                                                 <Chip
                                                                     icon={getPaymentStatusIcon(order.paymentStatus)}
