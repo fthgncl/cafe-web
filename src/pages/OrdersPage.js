@@ -143,10 +143,20 @@ export default function OrdersPage() {
     useEffect(() => {
         const interval = setInterval(() => {
             setOrders((prevOrders) =>
-                prevOrders.map((order) => ({
-                    ...order,
-                    formattedDuration: formatDuration(order.createdDate),
-                }))
+                prevOrders
+                    .filter( ({ createdDate , kitchenStatus, paymentStatus }) => {
+
+                        if ( paymentStatus === 'Daha Sonra Ödenecek' || kitchenStatus === 'Beklemede' || kitchenStatus === 'Hazırlanıyor' )
+                            return true
+
+                        const now = new Date();
+                        const created = new Date(createdDate);
+                        return now - created < 1000 * 60 * 60;
+                    } )
+                    .map(order => ({
+                        ...order,
+                        formattedDuration: formatDuration(order.createdDate),
+                    }))
             );
         }, 1000);
 
