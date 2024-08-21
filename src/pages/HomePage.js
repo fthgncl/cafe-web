@@ -8,9 +8,9 @@ const boxStyle = {
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    width: '200px',
-    height: '200px',
-    margin: '16px',
+    width: '160px',
+    height: '160px',
+    margin: '12px',
     borderRadius: '8px',
     boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
     transition: 'all 0.3s ease',
@@ -21,11 +21,27 @@ const boxStyle = {
         backgroundColor: '#f5f5f5',
         boxShadow: '0 6px 12px rgba(0,0,0,0.2)',
     },
+    '@media (max-width:600px)': {
+        width: '120px',
+        height: '120px',
+        margin: '8px',
+    },
+    '@media (max-width:400px)': {
+        width: '100px',
+        height: '100px',
+        margin: '4px',
+    },
 };
 
 const iconStyle = {
-    fontSize: '48px',
+    fontSize: '40px',
     color: '#1976d2',
+    '@media (max-width:600px)': {
+        fontSize: '32px',
+    },
+    '@media (max-width:400px)': {
+        fontSize: '28px',
+    },
 };
 
 export default function HomePage() {
@@ -44,7 +60,7 @@ export default function HomePage() {
                 sx={boxStyle}
             >
                 <PersonAdd sx={iconStyle} />
-                <Typography variant="h6" sx={{ mt: 1 }}>
+                <Typography variant="body2" sx={{ mt: 1 }}>
                     Kullanıcı Oluştur
                 </Typography>
             </Box>
@@ -54,7 +70,7 @@ export default function HomePage() {
                 sx={boxStyle}
             >
                 <AddCircle sx={iconStyle} />
-                <Typography variant="h6" sx={{ mt: 1 }}>
+                <Typography variant="body2" sx={{ mt: 1 }}>
                     Ürün Oluştur
                 </Typography>
             </Box>
@@ -64,7 +80,7 @@ export default function HomePage() {
                 sx={boxStyle}
             >
                 <AddShoppingCart sx={iconStyle} />
-                <Typography variant="h6" sx={{ mt: 1 }}>
+                <Typography variant="body2" sx={{ mt: 1 }}>
                     Sipariş Ekle
                 </Typography>
             </Box>
@@ -74,7 +90,7 @@ export default function HomePage() {
                 sx={boxStyle}
             >
                 <List sx={iconStyle} />
-                <Typography variant="h6" sx={{ mt: 1 }}>
+                <Typography variant="body2" sx={{ mt: 1 }}>
                     Siparişler
                 </Typography>
             </Box>
@@ -84,7 +100,7 @@ export default function HomePage() {
                 sx={boxStyle}
             >
                 <Analytics sx={iconStyle} />
-                <Typography variant="h6" sx={{ mt: 1 }}>
+                <Typography variant="body2" sx={{ mt: 1 }}>
                     Satış İstatistikleri
                 </Typography>
             </Box>
