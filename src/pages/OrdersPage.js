@@ -15,7 +15,9 @@ import {
     Select,
     FormControl,
     InputLabel,
-    LinearProgress
+    LinearProgress,
+    IconButton,
+    Tooltip
 } from "@mui/material";
 import {
     Kitchen as KitchenIcon,
@@ -24,13 +26,18 @@ import {
     HourglassEmpty as HourglassEmptyIcon,
     CardGiftcard as CardGiftcardIcon,
     HistoryToggleOff,
-    Timer as TimerIcon,
+    Timer as TimerIcon
 } from "@mui/icons-material";
 import {keyframes} from "@mui/system";
+
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import NotificationsOffIcon from '@mui/icons-material/NotificationsOff';
+
 import Masonry from '@mui/lab/Masonry';
 import {SocketContext} from "../context/SocketContext";
 import {AccountContext} from "../context/AccountContext";
 import {useSnackbar} from "notistack";
+import newOrderNotification from '../sounds/newOrderNotification.mp3';
 
 export default function OrdersPage() {
     const {sendSocketMessage, socketData, isConnected} = useContext(SocketContext);
@@ -46,6 +53,17 @@ export default function OrdersPage() {
     const updateOrderPaymentStatusMessageType = 'updateOrderPaymentStatus';
     const updateOrderKitchenStatusMessageType = 'updateOrderKitchenStatus';
     const newOrderMessageType = 'newOrder';
+    const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+
+    const toggleNotifications = () => {
+        setNotificationsEnabled(!notificationsEnabled);
+        // Burada bildirim seslerini açma/kapatma işlemlerini yapabilirsiniz.
+    };
+
+    const playNotificationSound = () => {
+        const audio = new Audio(newOrderNotification);
+        audio.play().catch(error => console.error("Ses çalma hatası:", error));
+    };
 
     useEffect(() => {
         if (isConnected) {
@@ -62,7 +80,11 @@ export default function OrdersPage() {
         if (socketData.type === newOrderMessageType) {
             enqueueSnackbar(socketData.message.message, {variant: socketData.message.status});
             if (socketData.message.newOrder) {
-                setOrders(prevState => [socketData.message.newOrder,...prevState]);
+                if (socketData.message.status === "success") {
+                    playNotificationSound();
+                }
+
+                setOrders(prevState => [socketData.message.newOrder, ...prevState]);
             }
             return;
         }
@@ -235,7 +257,7 @@ export default function OrdersPage() {
 
         if (diffDays >= 1) {
             // Tarih formatında göster
-            const options = { day: 'numeric', month: 'long' };
+            const options = {day: 'numeric', month: 'long'};
             return created.toLocaleDateString(undefined, options);
         } else if (diffHours >= 1) {
             return `${remainingHours} saat ${remainingMinutes} dakika önce`;
@@ -249,9 +271,30 @@ export default function OrdersPage() {
 
     return (
         <Container maxWidth="xl" sx={{mt: 4}}>
-            <Typography variant="h4" component="h1" gutterBottom>
-                Siparişler
-            </Typography>
+            <Box
+                display="flex"
+                alignItems="start"
+                justifyContent="space-between"
+                padding={1}
+                sx={{ borderBottom: '1px solid #ddd', mb:2 }}
+            >
+                <Typography
+                    variant="h4"
+                    component="h1"
+                    gutterBottom
+                    sx={{ fontWeight: 'bold' }}
+                >
+                    Siparişler
+                </Typography>
+                <Tooltip
+                    title={notificationsEnabled ? "Bildirim Seslerini Kapat" : "Bildirim Seslerini Aç"}
+                    arrow
+                >
+                    <IconButton onClick={toggleNotifications} sx={{ color: notificationsEnabled ? 'primary.main' : 'text.secondary' }}>
+                        {notificationsEnabled ? <NotificationsIcon /> : <NotificationsOffIcon />}
+                    </IconButton>
+                </Tooltip>
+            </Box>
             {loading ? (
                 <Box sx={{display: "flex", justifyContent: "center", alignItems: "center", height: "80vh"}}>
                     <CircularProgress/>
@@ -430,23 +473,27 @@ export default function OrdersPage() {
                                                     >
                                                         {order.paymentStatus !== "İptal Edildi" ? (
                                                             [
-                                                                <MenuItem key="beklemede" value="Beklemede" disabled={order.kitchenStatus === "Beklemede"}>
+                                                                <MenuItem key="beklemede" value="Beklemede"
+                                                                          disabled={order.kitchenStatus === "Beklemede"}>
                                                                     Beklemede
                                                                 </MenuItem>,
-                                                                <MenuItem key="hazirlanıyor" value="Hazırlanıyor" disabled={order.kitchenStatus === "Hazırlanıyor"}>
+                                                                <MenuItem key="hazirlanıyor" value="Hazırlanıyor"
+                                                                          disabled={order.kitchenStatus === "Hazırlanıyor"}>
                                                                     Hazırlanıyor
                                                                 </MenuItem>,
-                                                                <MenuItem key="hazırlandı" value="Hazırlandı" disabled={order.kitchenStatus === "Hazırlandı"}>
+                                                                <MenuItem key="hazırlandı" value="Hazırlandı"
+                                                                          disabled={order.kitchenStatus === "Hazırlandı"}>
                                                                     Hazırlandı
                                                                 </MenuItem>
                                                             ]
                                                         ) : (
-                                                            <MenuItem value={order.kitchenStatus} disabled={true}>İptal edilen sipariş hazırlanamaz</MenuItem>
+                                                            <MenuItem value={order.kitchenStatus} disabled={true}>İptal
+                                                                edilen sipariş hazırlanamaz</MenuItem>
                                                         )}
 
                                                     </Select>
                                                 </FormControl>
-                                                )}
+                                            )}
                                         </Stack>
 
                                     </Box>
