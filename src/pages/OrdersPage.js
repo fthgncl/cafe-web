@@ -45,6 +45,7 @@ export default function OrdersPage() {
     const getProductsMessageType = 'getProducts';
     const updateOrderPaymentStatusMessageType = 'updateOrderPaymentStatus';
     const updateOrderKitchenStatusMessageType = 'updateOrderKitchenStatus';
+    const newOrderMessageType = 'newOrder';
 
     useEffect(() => {
         if (isConnected) {
@@ -58,8 +59,17 @@ export default function OrdersPage() {
             return;
 
 
+        if (socketData.type === newOrderMessageType) {
+            enqueueSnackbar(socketData.message.message, {variant: socketData.message.status});
+            if (socketData.message.newOrder) {
+                console.log(socketData.message.newOrder);
+            }
+            setLoading(false);
+            return;
+        }
+
+
         if (socketData.type === updateOrderKitchenStatusMessageType) {
-            console.log(socketData.message);
             enqueueSnackbar(socketData.message.message, {variant: socketData.message.status});
             if (socketData.message.orderInfo) {
                 setLoadingKitchenStatus(prevState => prevState.filter(item => item !== socketData.message.orderInfo.id));
@@ -210,6 +220,10 @@ export default function OrdersPage() {
         "Hazırlanıyor": <KitchenIcon sx={{animation: `${blink} 1s infinite`}}/>,
         "Hazırlandı": <DoneIcon/>,
         "İptal Edildi": <CancelIcon/>,
+    };
+
+    const getKitchenStatus = (status) => {
+        return ["Beklemede", "Hazırlanıyor", "Hazırlandı", "İptal Edildi"].includes(status) ? status : "";
     };
 
     const formatDuration = (createdAt) => {
@@ -411,27 +425,20 @@ export default function OrdersPage() {
                                                         }
                                                     >
                                                         {order.paymentStatus !== "İptal Edildi" ? (
-                                                            <>
-                                                                <MenuItem
-                                                                    value="Beklemede"
-                                                                    disabled={order.kitchenStatus === "Beklemede"}
-                                                                >
+                                                            [
+                                                                <MenuItem key="beklemede" value="Beklemede" disabled={order.kitchenStatus === "Beklemede"}>
                                                                     Beklemede
-                                                                </MenuItem>
-                                                                <MenuItem
-                                                                    value="Hazırlanıyor"
-                                                                    disabled={order.kitchenStatus === "Hazırlanıyor"}
-                                                                >
+                                                                </MenuItem>,
+                                                                <MenuItem key="hazirlanıyor" value="Hazırlanıyor" disabled={order.kitchenStatus === "Hazırlanıyor"}>
                                                                     Hazırlanıyor
-                                                                </MenuItem>
-                                                                <MenuItem
-                                                                    value="Hazırlandı"
-                                                                    disabled={order.kitchenStatus === "Hazırlandı"}
-                                                                >
+                                                                </MenuItem>,
+                                                                <MenuItem key="hazırlandı" value="Hazırlandı" disabled={order.kitchenStatus === "Hazırlandı"}>
                                                                     Hazırlandı
                                                                 </MenuItem>
-                                                            </>
-                                                        ):<MenuItem disabled={true}>İptal edilen sipariş hazırlanamaz</MenuItem>}
+                                                            ]
+                                                        ) : (
+                                                            <MenuItem value={order.kitchenStatus} disabled={true}>İptal edilen sipariş hazırlanamaz</MenuItem>
+                                                        )}
 
                                                     </Select>
                                                 </FormControl>
