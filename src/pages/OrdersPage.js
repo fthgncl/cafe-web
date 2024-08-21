@@ -294,7 +294,7 @@ export default function OrdersPage() {
                                     )}
 
 
-                                    <Divider sx={{ mt: 4 }} />
+                                    <Divider sx={{mt: 4}}/>
 
                                     <Box>
                                         <Stack spacing={2} flexWrap="wrap">
@@ -402,26 +402,40 @@ export default function OrdersPage() {
                                                                 <LinearProgress sx={{mt: 1.2}}/>
                                                             ) : (
                                                                 <Chip
-                                                                    icon={kitchenStatusIcons[order.kitchenStatus]}
-                                                                    label={order.kitchenStatus}
-                                                                    color={getKitchenStatusColor(order.kitchenStatus)}
+                                                                    icon={kitchenStatusIcons[order.paymentStatus !== "İptal Edildi" ? order.kitchenStatus : 'İptal Edildi']}
+                                                                    label={order.paymentStatus !== "İptal Edildi" ? order.kitchenStatus : 'İptal Edildi'}
+                                                                    color={getKitchenStatusColor(order.paymentStatus !== "İptal Edildi" ? order.kitchenStatus : 'İptal Edildi')}
                                                                     sx={{flexGrow: 1, width: 1}}
                                                                 />
                                                             )
                                                         }
                                                     >
-                                                        <MenuItem value="Beklemede"
-                                                                  disabled={order.kitchenStatus === "Beklemede"}>Beklemede</MenuItem>
-                                                        <MenuItem value="Hazırlanıyor"
-                                                                  disabled={order.kitchenStatus === "Hazırlanıyor"}>Hazırlanıyor</MenuItem>
-                                                        <MenuItem value="Hazırlandı"
-                                                                  disabled={order.kitchenStatus === "Hazırlandı"}>Hazırlandı</MenuItem>
-                                                        <MenuItem value="İptal Edildi"
-                                                                  disabled={order.kitchenStatus === "İptal Edildi"}>İptal
-                                                            Edildi</MenuItem>
+                                                        {order.paymentStatus !== "İptal Edildi" ? (
+                                                            <>
+                                                                <MenuItem
+                                                                    value="Beklemede"
+                                                                    disabled={order.kitchenStatus === "Beklemede"}
+                                                                >
+                                                                    Beklemede
+                                                                </MenuItem>
+                                                                <MenuItem
+                                                                    value="Hazırlanıyor"
+                                                                    disabled={order.kitchenStatus === "Hazırlanıyor"}
+                                                                >
+                                                                    Hazırlanıyor
+                                                                </MenuItem>
+                                                                <MenuItem
+                                                                    value="Hazırlandı"
+                                                                    disabled={order.kitchenStatus === "Hazırlandı"}
+                                                                >
+                                                                    Hazırlandı
+                                                                </MenuItem>
+                                                            </>
+                                                        ):<MenuItem disabled={true}>İptal edilen sipariş hazırlanamaz</MenuItem>}
+
                                                     </Select>
                                                 </FormControl>
-                                            )}
+                                                )}
                                         </Stack>
 
                                     </Box>
