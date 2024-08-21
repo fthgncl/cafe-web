@@ -62,9 +62,8 @@ export default function OrdersPage() {
         if (socketData.type === newOrderMessageType) {
             enqueueSnackbar(socketData.message.message, {variant: socketData.message.status});
             if (socketData.message.newOrder) {
-                console.log(socketData.message.newOrder);
+                setOrders(prevState => [socketData.message.newOrder,...prevState]);
             }
-            setLoading(false);
             return;
         }
 
