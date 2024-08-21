@@ -40,9 +40,11 @@ export default function OrdersPage() {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [loadingPaymentStatus, setLoadingPaymentStatus] = useState([]);
+    const [loadingKitchenStatus, setLoadingKitchenStatus] = useState([]);
     const getOrdersMessageType = "getOrders";
     const getProductsMessageType = 'getProducts';
     const updateOrderPaymentStatusMessageType = 'updateOrderPaymentStatus';
+    const updateOrderKitchenStatusMessageType = 'updateOrderKitchenStatus';
 
     useEffect(() => {
         if (isConnected) {
@@ -56,8 +58,22 @@ export default function OrdersPage() {
             return;
 
 
+        if (socketData.type === updateOrderKitchenStatusMessageType) {
+            console.log(socketData.message);
+            enqueueSnackbar(socketData.message.message, {variant: socketData.message.status});
+            if (socketData.message.orderInfo) {
+                setLoadingKitchenStatus(prevState => prevState.filter(item => item !== socketData.message.orderInfo.id));
+                setOrders(prevState => prevState.map(order => {
+                    if (order._id === socketData.message.orderInfo.id)
+                        return {...order, kitchenStatus: socketData.message.orderInfo.newKitchenStatus}
+                    else return order;
+                }));
+            }
+            setLoading(false);
+            return;
+        }
+
         if (socketData.type === updateOrderPaymentStatusMessageType) {
-            console.log(socketData.message.newPaymentStatus);
             enqueueSnackbar(socketData.message.message, {variant: socketData.message.status});
             if (socketData.message.updatedOrder) {
                 setLoadingPaymentStatus(prevState => prevState.filter(item => item !== socketData.message.updatedOrder._id));
@@ -117,13 +133,12 @@ export default function OrdersPage() {
     };
 
     const handleKitchenStatusChange = (event, orderId) => {
-        const updatedOrders = orders.map((order) => {
-            if (order._id === orderId) {
-                return {...order, kitchenStatus: event.target.value};
-            }
-            return order;
-        });
-        setOrders(updatedOrders);
+        const selectedOrder = orders.find(order => order._id === orderId);
+        setLoadingKitchenStatus(prevState => [...prevState, selectedOrder._id]);
+        sendSocketMessage({
+            orderId: selectedOrder._id,
+            kitchenStatus: event.target.value
+        }, updateOrderKitchenStatusMessageType);
     };
 
     const getPaymentStatusColor = (paymentStatus) => {
@@ -250,11 +265,37 @@ export default function OrdersPage() {
                                         </Stack>
                                     </Stack>
                                     {order.totalPrice && (
-                                        <Typography variant="body1" color="primary" fontWeight="medium" sx={{mb: 2}}>
+                                        <Typography
+                                            variant="body1"
+                                            color="primary"
+                                            fontWeight="medium"
+                                            sx={{
+                                                mb: 1,
+                                                display: 'inline-block',
+                                                marginRight: '8px'
+                                            }}
+                                        >
+                                            {order.discountedPrice} ₺
+                                        </Typography>
+                                    )}
+
+                                    {order.totalPrice !== order.discountedPrice && (
+                                        <Typography
+                                            variant="body2"
+                                            color="textSecondary"
+                                            sx={{
+                                                textDecoration: 'line-through',
+                                                mb: 1,
+                                                display: 'inline-block'
+                                            }}
+                                        >
                                             {order.totalPrice} ₺
                                         </Typography>
                                     )}
-                                    <Divider sx={{mt: 4}}/>
+
+
+                                    <Divider sx={{ mt: 4 }} />
+
                                     <Box>
                                         <Stack spacing={2} flexWrap="wrap">
                                             {/* Ödeme Durumu Seçimi */}
@@ -302,8 +343,10 @@ export default function OrdersPage() {
                                                             )
                                                         }
                                                     >
-                                                        <MenuItem value="Daha Sonra Ödenecek"
-                                                                  disabled={order.paymentStatus === "Daha Sonra Ödenecek"}>
+                                                        <MenuItem
+                                                            value="Daha Sonra Ödenecek"
+                                                            disabled={order.paymentStatus === "Daha Sonra Ödenecek"
+                                                            }>
                                                             Daha Sonra Ödenecek
                                                         </MenuItem>
                                                         <MenuItem value="Hediye"
@@ -322,53 +365,63 @@ export default function OrdersPage() {
                                                 </FormControl>
                                             )}
                                             {/* Mutfak Durumu Seçimi */}
-                                            <FormControl fullWidth>
-
-                                                <Divider sx={{mt: 0}}/>
-                                                <InputLabel
-                                                    id="kitchen-status-label"
-                                                    sx={{
-                                                        textAlign: 'center',
-                                                        backgroundColor: 'background.paper',
-                                                        paddingX: 1
-                                                    }}
-                                                >
-                                                    Mutfak Durumu
-                                                </InputLabel>
-                                                <Select
-                                                    labelId="kitchen-status-label"
-                                                    sx={{
-                                                        '& .MuiOutlinedInput-notchedOutline': {
-                                                            border: 'none',
-                                                        },
-                                                        '&:hover .MuiOutlinedInput-notchedOutline': {
-                                                            border: 'none',
-                                                        },
-                                                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                                            border: 'none',
-                                                        },
-                                                        minWidth: 200,  // Genişliği artır
-                                                        textAlign: 'center',
-                                                        mt: 1
-                                                    }}
-                                                    value={order.kitchenStatus}
-                                                    onChange={(event) => handleKitchenStatusChange(event, order._id)}
-                                                    displayEmpty
-                                                    renderValue={(selected) => (
-                                                        <Chip
-                                                            icon={kitchenStatusIcons[order.kitchenStatus]}
-                                                            label={order.kitchenStatus}
-                                                            color={getKitchenStatusColor(order.kitchenStatus)}
-                                                            sx={{flexGrow: 1, width: 1}}
-                                                        />
-                                                    )}
-                                                >
-                                                    <MenuItem value="Beklemede">Beklemede</MenuItem>
-                                                    <MenuItem value="Hazırlanıyor">Hazırlanıyor</MenuItem>
-                                                    <MenuItem value="Hazırlandı">Hazırlandı</MenuItem>
-                                                    <MenuItem value="İptal Edildi">İptal Edildi</MenuItem>
-                                                </Select>
-                                            </FormControl>
+                                            {checkPermissions('g') && order.kitchenStatus && (
+                                                <FormControl fullWidth>
+                                                    <Divider sx={{mt: 0}}/>
+                                                    <InputLabel
+                                                        id="kitchen-status-label"
+                                                        sx={{
+                                                            textAlign: 'center',
+                                                            backgroundColor: 'background.paper',
+                                                            paddingX: 1
+                                                        }}
+                                                    >
+                                                        Mutfak Durumu
+                                                    </InputLabel>
+                                                    <Select
+                                                        labelId="kitchen-status-label"
+                                                        sx={{
+                                                            '& .MuiOutlinedInput-notchedOutline': {
+                                                                border: 'none',
+                                                            },
+                                                            '&:hover .MuiOutlinedInput-notchedOutline': {
+                                                                border: 'none',
+                                                            },
+                                                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                                                border: 'none',
+                                                            },
+                                                            minWidth: 200,  // Genişliği artır
+                                                            textAlign: 'center',
+                                                            mt: 1
+                                                        }}
+                                                        value={order.kitchenStatus}
+                                                        onChange={(event) => handleKitchenStatusChange(event, order._id)}
+                                                        displayEmpty
+                                                        renderValue={(selected) =>
+                                                            loadingKitchenStatus.includes(order._id) ? (
+                                                                <LinearProgress sx={{mt: 1.2}}/>
+                                                            ) : (
+                                                                <Chip
+                                                                    icon={kitchenStatusIcons[order.kitchenStatus]}
+                                                                    label={order.kitchenStatus}
+                                                                    color={getKitchenStatusColor(order.kitchenStatus)}
+                                                                    sx={{flexGrow: 1, width: 1}}
+                                                                />
+                                                            )
+                                                        }
+                                                    >
+                                                        <MenuItem value="Beklemede"
+                                                                  disabled={order.kitchenStatus === "Beklemede"}>Beklemede</MenuItem>
+                                                        <MenuItem value="Hazırlanıyor"
+                                                                  disabled={order.kitchenStatus === "Hazırlanıyor"}>Hazırlanıyor</MenuItem>
+                                                        <MenuItem value="Hazırlandı"
+                                                                  disabled={order.kitchenStatus === "Hazırlandı"}>Hazırlandı</MenuItem>
+                                                        <MenuItem value="İptal Edildi"
+                                                                  disabled={order.kitchenStatus === "İptal Edildi"}>İptal
+                                                            Edildi</MenuItem>
+                                                    </Select>
+                                                </FormControl>
+                                            )}
                                         </Stack>
 
                                     </Box>
