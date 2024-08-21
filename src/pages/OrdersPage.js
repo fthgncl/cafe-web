@@ -221,26 +221,31 @@ export default function OrdersPage() {
         "İptal Edildi": <CancelIcon/>,
     };
 
-    const getKitchenStatus = (status) => {
-        return ["Beklemede", "Hazırlanıyor", "Hazırlandı", "İptal Edildi"].includes(status) ? status : "";
-    };
-
     const formatDuration = (createdAt) => {
         const now = new Date();
         const created = new Date(createdAt);
         const diffMs = now - created;
         const diffSecs = Math.floor(diffMs / 1000);
         const diffMinutes = Math.floor(diffSecs / 60);
+        const diffHours = Math.floor(diffMinutes / 60);
+        const diffDays = Math.floor(diffHours / 24);
         const remainingSecs = diffSecs % 60;
+        const remainingMinutes = diffMinutes % 60;
+        const remainingHours = diffHours % 24;
 
-        if (diffMinutes >= 2) {
-            return `${diffMinutes} dakika önce`;
+        if (diffDays >= 1) {
+            // Tarih formatında göster
+            const options = { day: 'numeric', month: 'long' };
+            return created.toLocaleDateString(undefined, options);
+        } else if (diffHours >= 1) {
+            return `${remainingHours} saat ${remainingMinutes} dakika önce`;
+        } else if (diffMinutes >= 1) {
+            return `${remainingMinutes} dakika önce`;
         } else {
-            if (diffMinutes > 0)
-                return `${diffMinutes} dakika ${remainingSecs} saniye önce`;
-            else return `${remainingSecs} saniye önce`;
+            return `${remainingSecs} saniye önce`;
         }
     };
+
 
     return (
         <Container maxWidth="xl" sx={{mt: 4}}>
