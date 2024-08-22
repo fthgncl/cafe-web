@@ -1,7 +1,7 @@
 import React from 'react';
 import { Container, Box, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
-import { PersonAdd, AddCircle, AddShoppingCart, List, Analytics } from '@mui/icons-material';
+import { PersonAdd, AddCircle, AddShoppingCart, List, Settings } from '@mui/icons-material';
 
 const boxStyle = {
     display: 'flex',
@@ -96,12 +96,12 @@ export default function HomePage() {
             </Box>
             <Box
                 component={Link}
-                to="/sales-stats"
+                to="/admin-dashboard"
                 sx={boxStyle}
             >
-                <Analytics sx={iconStyle} />
+                <Settings sx={iconStyle} />
                 <Typography variant="body2" sx={{ mt: 1 }}>
-                    Satış İstatistikleri
+                    Yönetim Merkezi
                 </Typography>
             </Box>
         </Container>
