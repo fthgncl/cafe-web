@@ -23,6 +23,7 @@ import Checkbox from '@mui/material/Checkbox';
 import { systemPermissions } from '../../config';
 import Alert from '@mui/material/Alert';
 import { useSnackbar } from 'notistack';
+import Paper from "@mui/material/Paper";
 
 export default function SignUp() {
     const { enqueueSnackbar } = useSnackbar();
@@ -108,165 +109,206 @@ export default function SignUp() {
     };
 
     return (
-        <Container maxWidth="xs">
+        <Container maxWidth="xs" sx={{ px: { xs: 0, sm: 2 } }}> {/* Container genişliği xs olarak ayarlandı */}
             <CssBaseline />
             <Box
                 sx={{
-                    marginTop: 2,
+                    marginTop: 4,
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
+                    width: '100%',  // Box'ın tam genişlikte olmasını sağlıyoruz.
                 }}
             >
-                <Avatar sx={{ m: 1, bgcolor: 'primary.main' }}>
-                    <PersonAddIcon />
-                </Avatar>
-                <Typography component="h1" variant="h5">
-                    Kullanıcı Oluştur
-                </Typography>
-                <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
-                    <Grid container spacing={2}>
-                        <Grid item xs={12} sm={6}>
-                            <TextField
-                                autoComplete="given-name"
-                                name="firstname"
-                                required
-                                fullWidth
-                                id="firstname"
-                                label="İsim"
-                                value={values.firstname}
-                                onBlur={handleBlur}
-                                onChange={handleChange}
-                                error={Boolean(errors.firstname) && touched.firstname}
-                                helperText={touched.firstname && errors.firstname}
-                                autoFocus
-                            />
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <TextField
-                                required
-                                fullWidth
-                                id="lastname"
-                                label="Soy İsim"
-                                name="lastname"
-                                autoComplete="family-name"
-                                onBlur={handleBlur}
-                                onChange={handleChange}
-                                value={values.lastname}
-                                error={Boolean(errors.lastname) && touched.lastname}
-                                helperText={touched.lastname && errors.lastname}
-                            />
-                        </Grid>
-                        <Grid item xs={12}>
-                            <TextField
-                                required
-                                fullWidth
-                                id="username"
-                                label="Kullanıcı Adı"
-                                name="username"
-                                autoComplete="username"
-                                value={values.username}
-                                onBlur={handleBlur}
-                                onChange={handleChange}
-                                error={Boolean(errors.username) && touched.username}
-                                helperText={touched.username && errors.username}
-                            />
-                        </Grid>
-                        <Grid item xs={12}>
-                            <TextField
-                                onBlur={handleBlur}
-                                helperText={touched.phone && errors.phone}
-                                error={Boolean(errors.phone) && touched.phone}
-                                value={values.phone}
-                                name="phone"
-                                onChange={handleChange}
-                                fullWidth
-                                id="phone"
-                                label="Telefon Numarası"
-                                autoComplete="tel-local"
-                                InputProps={{
-                                    startAdornment: <InputAdornment position="start">+90</InputAdornment>
-                                }}
-                            />
-                        </Grid>
-                        <Grid item xs={12}>
-                            <TextField
-                                margin="normal"
-                                required
-                                fullWidth
-                                name="password"
-                                label="Şifre"
-                                type={showPassword ? 'text' : 'password'}
-                                id="password"
-                                autoComplete="current-password"
-                                value={values.password}
-                                onChange={handleChange}
-                                onBlur={handleBlur}
-                                error={Boolean(errors.password) && touched.password}
-                                helperText={touched.password && errors.password}
-                                InputProps={{
-                                    endAdornment: <InputAdornment position="end">
-                                        <IconButton
-                                            tabIndex={-1}
-                                            aria-label="toggle password visibility"
-                                            onClick={() => setShowPassword(true)}
-                                            onMouseDown={() => setShowPassword(false)}
-                                        >
-                                            {showPassword ? <VisibilityOff /> : <Visibility />}
-                                        </IconButton>
-                                    </InputAdornment>
-                                }}
-                            />
-                        </Grid>
-                        <Grid item xs={12}>
-                            <TextField
-                                onBlur={handleBlur}
-                                helperText={touched.confirmPassword && errors.confirmPassword}
-                                error={Boolean(errors.confirmPassword) && touched.confirmPassword}
-                                value={values.confirmPassword}
-                                name="confirmPassword"
-                                onChange={handleChange}
-                                required
-                                fullWidth
-                                label="Parola Tekrarı"
-                                type={showPassword ? 'text' : 'password'}
-                                id="confirmPassword"
-                                autoComplete="new-password"
-                                InputProps={{
-                                    endAdornment: <InputAdornment position="end">
-                                        <IconButton
-                                            tabIndex={-1}
-                                            aria-label="toggle password visibility"
-                                            onClick={() => setShowPassword(true)}
-                                            onMouseDown={() => setShowPassword(false)}
-                                        >
-                                            {showPassword ? <VisibilityOff /> : <Visibility />}
-                                        </IconButton>
-                                    </InputAdornment>
-                                }}
-                            />
-                        </Grid>
-                        <Grid item xs={12}>
-                            <UserPermissionsCheckboxGroup
-                                onChange={handleCheckboxChange}
-                                selectedPermissions={values.permissions}
-                            />
-                        </Grid>
-                    </Grid>
-                    {!!errors.permissions && (<Alert sx={{ mt: 2 }} severity="error">{errors.permissions}</Alert>)}
-                    {!!errorMessage && (<Alert sx={{ mt: 2 }} severity="error">{errorMessage}</Alert>)}
-                    <Button
-                        disabled={isSubmitting || isLoading}
-                        type="submit"
-                        fullWidth
-                        variant="contained"
-                        sx={{ mt: 3, mb: 2 }}
+                <Paper
+                    elevation={3}
+                    sx={{
+                        padding: 2,
+                        borderRadius: 2,
+                        width: '100%',  // Paper'ın genişliğini yüzde 100 yaparak ekranı doldurmasını sağlıyoruz.
+                        boxSizing: 'border-box', // Kenar boşluklarının genişlik hesaplamasına dahil edilmesini sağlıyoruz.
+                        maxWidth: '100%', // Mobilde tam genişlik, küçük ekranlarda %100'e kadar genişleyebilir.
+                        margin: 'auto' // Ekranda ortalanmasını sağlamak için margin ayarlandı.
+                    }}
+                >
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            width: '100%',  // Box'ın tam genişlikte olmasını sağlıyoruz.
+                        }}
                     >
-                        {isSubmitting || isLoading ? <CircularProgress color="inherit" /> : <>Kaydet</>}
-                    </Button>
-                </Box>
+                        <Avatar sx={{ m: 1, bgcolor: 'primary.main' }}>
+                            <PersonAddIcon />
+                        </Avatar>
+                        <Typography component="h1" variant="h5" sx={{ mb: 2 }}>
+                            Yeni Kullanıcı Ekle
+                        </Typography>
+                        <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 2, width: '100%' }}>
+                            <Grid container spacing={3}>
+                                <Grid item xs={12} sm={6}>
+                                    <TextField
+                                        autoComplete="given-name"
+                                        name="firstname"
+                                        required
+                                        fullWidth
+                                        id="firstname"
+                                        label="İsim"
+                                        value={values.firstname}
+                                        onBlur={handleBlur}
+                                        onChange={handleChange}
+                                        error={Boolean(errors.firstname) && touched.firstname}
+                                        helperText={touched.firstname && errors.firstname}
+                                        autoFocus
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={6}>
+                                    <TextField
+                                        required
+                                        fullWidth
+                                        id="lastname"
+                                        label="Soy İsim"
+                                        name="lastname"
+                                        autoComplete="family-name"
+                                        onBlur={handleBlur}
+                                        onChange={handleChange}
+                                        value={values.lastname}
+                                        error={Boolean(errors.lastname) && touched.lastname}
+                                        helperText={touched.lastname && errors.lastname}
+                                    />
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <TextField
+                                        required
+                                        fullWidth
+                                        id="username"
+                                        label="Kullanıcı Adı"
+                                        name="username"
+                                        autoComplete="username"
+                                        value={values.username}
+                                        onBlur={handleBlur}
+                                        onChange={handleChange}
+                                        error={Boolean(errors.username) && touched.username}
+                                        helperText={touched.username && errors.username}
+                                    />
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <TextField
+                                        onBlur={handleBlur}
+                                        helperText={touched.phone && errors.phone}
+                                        error={Boolean(errors.phone) && touched.phone}
+                                        value={values.phone}
+                                        name="phone"
+                                        onChange={handleChange}
+                                        fullWidth
+                                        id="phone"
+                                        label="Telefon Numarası"
+                                        autoComplete="tel-local"
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">+90</InputAdornment>
+                                            ),
+                                        }}
+                                    />
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <TextField
+                                        margin="normal"
+                                        required
+                                        fullWidth
+                                        name="password"
+                                        label="Şifre"
+                                        type={showPassword ? 'text' : 'password'}
+                                        id="password"
+                                        autoComplete="current-password"
+                                        value={values.password}
+                                        onChange={handleChange}
+                                        onBlur={handleBlur}
+                                        error={Boolean(errors.password) && touched.password}
+                                        helperText={touched.password && errors.password}
+                                        InputProps={{
+                                            endAdornment: (
+                                                <InputAdornment position="end">
+                                                    <IconButton
+                                                        tabIndex={-1}
+                                                        aria-label="toggle password visibility"
+                                                        onClick={() => setShowPassword(!showPassword)}
+                                                        onMouseDown={(e) => e.preventDefault()}
+                                                    >
+                                                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                                                    </IconButton>
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                    />
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <TextField
+                                        onBlur={handleBlur}
+                                        helperText={touched.confirmPassword && errors.confirmPassword}
+                                        error={Boolean(errors.confirmPassword) && touched.confirmPassword}
+                                        value={values.confirmPassword}
+                                        name="confirmPassword"
+                                        onChange={handleChange}
+                                        required
+                                        fullWidth
+                                        label="Parola Tekrarı"
+                                        type={showPassword ? 'text' : 'password'}
+                                        id="confirmPassword"
+                                        autoComplete="new-password"
+                                        InputProps={{
+                                            endAdornment: (
+                                                <InputAdornment position="end">
+                                                    <IconButton
+                                                        tabIndex={-1}
+                                                        aria-label="toggle password visibility"
+                                                        onClick={() => setShowPassword(!showPassword)}
+                                                        onMouseDown={(e) => e.preventDefault()}
+                                                    >
+                                                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                                                    </IconButton>
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                    />
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <UserPermissionsCheckboxGroup
+                                        onChange={handleCheckboxChange}
+                                        selectedPermissions={values.permissions}
+                                    />
+                                </Grid>
+                            </Grid>
+                            {!!errors.permissions && (
+                                <Alert sx={{ mt: 2 }} severity="error">
+                                    {errors.permissions}
+                                </Alert>
+                            )}
+                            {!!errorMessage && (
+                                <Alert sx={{ mt: 2 }} severity="error">
+                                    {errorMessage}
+                                </Alert>
+                            )}
+                            <Button
+                                disabled={isSubmitting || isLoading}
+                                type="submit"
+                                fullWidth
+                                variant="contained"
+                                sx={{ mt: 3, mb: 2 }}
+                            >
+                                {isSubmitting || isLoading ? (
+                                    <CircularProgress color="inherit" />
+                                ) : (
+                                    <>Kaydet</>
+                                )}
+                            </Button>
+                        </Box>
+                    </Box>
+                </Paper>
             </Box>
         </Container>
+
     );
 }
 

@@ -230,15 +230,34 @@ export default function UserManagement() {
                 onClose={handleCloseCreateUserDialog}
                 maxWidth="md"
                 fullWidth
-                fullScreen={isMobile} // Tam ekran yapma özelliği mobil için
+                fullScreen={isMobile}
             >
-                <DialogTitle sx={{ height:'45px', bgcolor:'primary.main'}} display='flex' flexDirection='row-reverse'>
+                <DialogTitle
+                    sx={{ height: '50px', bgcolor: 'primary.main' }}
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="space-between"
+                >
+                    <Box display="flex" alignItems="center">
+                        <PersonAddIcon sx={{ color: 'white', mr: 1 }} />
+                        <Typography variant="h6" sx={{ color: 'white' }}>
+                            Yeni Kullanıcı Ekle
+                        </Typography>
+                    </Box>
                     <IconButton
                         edge="end"
                         color="inherit"
                         onClick={handleCloseCreateUserDialog}
                         aria-label="close"
-                        sx={{ right: 8, top:0 }}
+                        sx={{
+                            color: 'white',
+                            width: 25,
+                            height: 25,
+                            borderRadius: '50%',
+                            '&:hover': {
+                                bgcolor: 'primary.dark', // Hover efekti için arka plan rengini ayarlayın
+                            },
+                        }}
                     >
                         <CloseIcon />
                     </IconButton>
