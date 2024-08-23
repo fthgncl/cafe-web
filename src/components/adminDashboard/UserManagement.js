@@ -97,9 +97,8 @@ export default function UserManagement() {
             enqueueSnackbar(socketData.message.message, {variant: socketData.message.status});
 
             if ( socketData.message.status === "success" )
-                setUsers(prevState => prevState.filter(user => user._id !== currentUser.id ));
+                setUsers(prevState => prevState.filter(user => user._id !== socketData.message.deletedUserId ));
 
-            setCurrentUser(null);
         }
         // eslint-disable-next-line
     }, [socketData]);
@@ -130,14 +129,12 @@ export default function UserManagement() {
     const handleConfirmDelete = () => {
         sendSocketMessage({userId: currentUser.id}, deleteUserMessageType)
         setOpenDeleteConfirmDialog(false);
+        setCurrentUser(null);
     };
 
     const handleCancelDelete = () => {
         setOpenDeleteConfirmDialog(false);
     };
-
-    const open = Boolean(anchorEl);
-    const id = open ? 'simple-menu' : undefined;
 
     const handleAddUserClick = () => {
         setOpenCreateUserDialog(true);
