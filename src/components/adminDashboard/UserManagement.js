@@ -151,7 +151,6 @@ export default function UserManagement() {
             boxSizing: 'border-box',
             display: 'flex',  // Flexbox düzeni için
             justifyContent: 'center',  // Yatayda ortalama
-            alignItems: 'center',  // Dikeyde ortalama
             minHeight: '100vh',  // Yüksekliği ekranın tamamı yapar
         }}>
             <Masonry columns={{xs: 1, sm: 2, md: 3}} spacing={isMobile ? 2 : 3}>
