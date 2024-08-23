@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
-import { Container, Tabs, Tab, Box, Typography, Button, Paper, useMediaQuery } from '@mui/material';
+import { Container, Tabs, Tab, Box, Typography, Paper, useMediaQuery } from '@mui/material';
 import PeopleIcon from '@mui/icons-material/People';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import { useTheme } from '@mui/material/styles';
+
+import UserManagement from '../components/adminDashboard/UserManagement';
+// Diğer bileşenleriniz burada import edilecek
 
 function AdminDashboard() {
     const [selectedTab, setSelectedTab] = useState(0);
@@ -14,10 +17,24 @@ function AdminDashboard() {
         setSelectedTab(newValue);
     };
 
+    const renderContent = () => {
+        switch (selectedTab) {
+            case 0:
+                return <UserManagement />;
+            // Diğer durumlar için ek bileşenler
+            case 1:
+                return <Box textAlign="center">Ürün Yönetimi İçeriği</Box>; // Bu kısımları bileşenlerle değiştirin
+            case 2:
+                return <Box textAlign="center">Satış Raporları İçeriği</Box>; // Bu kısımları bileşenlerle değiştirin
+            default:
+                return null;
+        }
+    };
+
     return (
         <Container maxWidth="lg" sx={{ mt: 4 }}>
             <Typography
-                variant={isMobile ? "h5" : "h4"}  // Başlığı mobilde biraz daha küçük yapıyoruz
+                variant={isMobile ? "h5" : "h4"}
                 gutterBottom
                 sx={{ fontWeight: 'bold', textAlign: 'center' }}
             >
@@ -54,89 +71,13 @@ function AdminDashboard() {
                     flexDirection: isMobile ? 'column' : 'row',
                     alignItems: isMobile ? 'center' : 'flex-start', // Mobilde merkezde hizala
                     justifyContent: 'center',
-                    p: 3,
                     borderRadius: 2,
                     boxShadow: 2,
                     backgroundColor: '#fff',
                     mt: isMobile ? 2 : 0,
                 }}
             >
-                {selectedTab === 0 && (
-                    <Box textAlign="center" sx={{ width: '100%', maxWidth: 400 }}>
-                        <Typography
-                            variant={isMobile ? "h6" : "h5"}
-                            gutterBottom
-                            sx={{ fontWeight: 'medium' }}
-                        >
-                            Kullanıcı Yönetimi
-                        </Typography>
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            sx={{
-                                mt: 2,
-                                px: 4,
-                                py: 1.5,
-                                boxShadow: 3,
-                                fontSize: isMobile ? '0.875rem' : '1rem',
-                                fontWeight: 'bold',
-                            }}
-                        >
-                            Yönet
-                        </Button>
-                    </Box>
-                )}
-                {selectedTab === 1 && (
-                    <Box textAlign="center" sx={{ width: '100%', maxWidth: 400 }}>
-                        <Typography
-                            variant={isMobile ? "h6" : "h5"}
-                            gutterBottom
-                            sx={{ fontWeight: 'medium' }}
-                        >
-                            Ürün Yönetimi
-                        </Typography>
-                        <Button
-                            variant="contained"
-                            color="secondary"
-                            sx={{
-                                mt: 2,
-                                px: 4,
-                                py: 1.5,
-                                boxShadow: 3,
-                                fontSize: isMobile ? '0.875rem' : '1rem',
-                                fontWeight: 'bold',
-                            }}
-                        >
-                            Yönet
-                        </Button>
-                    </Box>
-                )}
-                {selectedTab === 2 && (
-                    <Box textAlign="center" sx={{ width: '100%', maxWidth: 400 }}>
-                        <Typography
-                            variant={isMobile ? "h6" : "h5"}
-                            gutterBottom
-                            sx={{ fontWeight: 'medium' }}
-                        >
-                            Satış Raporları
-                        </Typography>
-                        <Button
-                            variant="contained"
-                            sx={{
-                                mt: 2,
-                                px: 4,
-                                py: 1.5,
-                                boxShadow: 3,
-                                backgroundColor: '#ff9800',
-                                color: '#fff',
-                                fontSize: isMobile ? '0.875rem' : '1rem',
-                                fontWeight: 'bold',
-                            }}
-                        >
-                            Görüntüle
-                        </Button>
-                    </Box>
-                )}
+                {renderContent()}
             </Box>
         </Container>
     );
