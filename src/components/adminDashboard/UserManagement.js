@@ -1,7 +1,7 @@
-import React, {useContext, useEffect, useState} from "react";
-import {SocketContext} from "../../context/SocketContext";
+import React, { useContext, useEffect, useState } from "react";
+import { SocketContext } from "../../context/SocketContext";
 import CreateUser from "./CreateUser";
-import {systemPermissions} from '../../config';
+import { systemPermissions } from '../../config';
 import {
     Box,
     Card,
@@ -9,28 +9,28 @@ import {
     CardHeader,
     Typography,
     Avatar,
-    Grid,
     Divider,
     List,
     ListItem,
     ListItemText,
     ListItemIcon,
     IconButton,
-    Menu,
-    MenuItem,
     useTheme,
     useMediaQuery,
     Dialog,
     DialogTitle,
-    DialogContent
+    DialogContent,
+    MenuItem,
+    Menu
 } from '@mui/material';
-import {deepPurple} from '@mui/material/colors';
+import { deepPurple } from '@mui/material/colors';
 import CloseIcon from '@mui/icons-material/Close';
 import InfoIcon from '@mui/icons-material/Info';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import PersonAddIcon from '@mui/icons-material/PersonAdd'; // Yeni kullanıcı ekleme simgesi
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import Masonry from "@mui/lab/Masonry";
 
 // İzin kodlarını açıklamalara dönüştüren fonksiyon
 const getPermissionsDescriptions = (permissions, isAdmin) => {
@@ -48,12 +48,12 @@ const getPermissionsDescriptions = (permissions, isAdmin) => {
 
 // Tarih formatını düzenleyen fonksiyon
 const formatDate = (dateString) => {
-    const options = {day: 'numeric', month: 'long', year: 'numeric'};
+    const options = { day: 'numeric', month: 'long', year: 'numeric' };
     return new Date(dateString).toLocaleDateString('tr-TR', options);
 };
 
 export default function UserManagement() {
-    const {sendSocketMessage, socketData} = useContext(SocketContext);
+    const { sendSocketMessage, socketData } = useContext(SocketContext);
     const [users, setUsers] = useState([]);
     const [anchorEl, setAnchorEl] = useState(null);
     const [currentUserId, setCurrentUserId] = useState(null);
@@ -110,9 +110,17 @@ export default function UserManagement() {
     };
 
     return (
-        <Box sx={{width: '100%', padding: '20px', boxSizing: 'border-box'}}>
-            <Grid container spacing={isMobile ? 2 : 3} alignItems="flex-start">
-                <Grid item xs={12} sm={6} md={4}>
+        <Box sx={{
+            width: '100%',
+            padding: '20px',
+            boxSizing: 'border-box',
+            display: 'flex',  // Flexbox düzeni için
+            justifyContent: 'center',  // Yatayda ortalama
+            alignItems: 'center',  // Dikeyde ortalama
+            minHeight: '100vh',  // Yüksekliği ekranın tamamı yapar
+        }}>
+            <Masonry columns={{ xs: 1, sm: 2, md: 3 }} spacing={isMobile ? 2 : 3}>
+                <div>
                     <Card
                         variant="outlined"
                         sx={{
@@ -128,37 +136,44 @@ export default function UserManagement() {
                         }}
                         onClick={handleAddUserClick}
                     >
-                        <CardContent sx={{textAlign: 'center'}}>
-                            <PersonAddIcon sx={{fontSize: 60, color: theme.palette.primary.main}}/>
-                            <Typography variant="h6" sx={{mt: 2}}>
+                        <CardContent sx={{ textAlign: 'center' }}>
+                            <PersonAddIcon sx={{ fontSize: 60, color: theme.palette.primary.main }} />
+                            <Typography variant="h6" sx={{ mt: 2 }}>
                                 Yeni Kullanıcı Ekle
                             </Typography>
                         </CardContent>
                     </Card>
-                </Grid>
+                </div>
+
                 {users.map((user) => {
                     const isAdmin = user.permissions.includes('a');
 
                     return (
-                        <Grid item xs={12} sm={6} md={4} key={user._id}>
-                            <Card variant="outlined" sx={{borderRadius: 2, boxShadow: 3, height: '100%'}}>
+                        <div key={user._id}>
+                            <Card variant="outlined" sx={{ borderRadius: 2, boxShadow: 2, height: '100%' }}>
                                 <CardHeader
                                     avatar={
-                                        <Avatar sx={{bgcolor: deepPurple[500], width: 40, height: 40}}>
+                                        <Avatar sx={{ bgcolor: deepPurple[500], width: 40, height: 40 }}>
                                             {user.firstname.charAt(0)}{user.lastname.charAt(0)}
                                         </Avatar>
                                     }
-                                    title={<Typography variant="h6"
-                                                       noWrap>{`${user.firstname} ${user.lastname}`}</Typography>}
-                                    subheader={<Typography variant="body2"
-                                                           color="textSecondary">{`Kullanıcı Adı: ${user.username}`}</Typography>}
+                                    title={
+                                        <Typography variant="h6" noWrap>
+                                            {`${user.firstname} ${user.lastname}`}
+                                        </Typography>
+                                    }
+                                    subheader={
+                                        <Typography variant="body2" color="textSecondary">
+                                            {`Kullanıcı Adı: ${user.username}`}
+                                        </Typography>
+                                    }
                                     action={
                                         <IconButton
                                             aria-label="daha fazla seçenek"
                                             onClick={(event) => handleClick(event, user._id)}
-                                            sx={{padding: '10px'}}
+                                            sx={{ padding: '10px' }}
                                         >
-                                            <MoreVertIcon/>
+                                            <MoreVertIcon />
                                         </IconButton>
                                     }
                                 />
@@ -166,7 +181,7 @@ export default function UserManagement() {
                                     <Typography variant="body2" color="textSecondary" gutterBottom>
                                         <strong>Telefon:</strong> {user.phone}
                                     </Typography>
-                                    <Divider sx={{my: 1}}/>
+                                    <Divider sx={{ my: 1 }} />
                                     <Typography variant="body2" color="textSecondary" gutterBottom>
                                         <strong>Yetkiler:</strong>
                                     </Typography>
@@ -174,55 +189,56 @@ export default function UserManagement() {
                                         {getPermissionsDescriptions(user.permissions, isAdmin).map((desc, index) => (
                                             <ListItem key={index} disableGutters>
                                                 <ListItemIcon>
-                                                    <InfoIcon fontSize="small" color="primary"/>
+                                                    <InfoIcon fontSize="small" color="primary" />
                                                 </ListItemIcon>
-                                                <ListItemText primary={desc}/>
+                                                <ListItemText primary={desc} />
                                             </ListItem>
                                         ))}
                                     </List>
-                                    <Divider sx={{my: 1}}/>
+                                    <Divider sx={{ my: 1 }} />
                                     <Typography variant="body2" color="textSecondary">
                                         <strong>Oluşturulma Tarihi:</strong> {formatDate(user.createdDate)}
                                     </Typography>
                                 </CardContent>
+
+                                {/* Üç noktalı menü */}
+                                <Menu
+                                    anchorEl={anchorEl}
+                                    open={Boolean(anchorEl) && currentUserId === user._id}
+                                    onClose={handleClose}
+                                    PaperProps={{
+                                        sx: {
+                                            boxShadow: 3,
+                                            borderRadius: 1,
+                                            minWidth: 150,
+                                            mt: 1,
+                                            backgroundColor: theme.palette.background.paper,
+                                            border: `1px solid ${theme.palette.divider}`,
+                                        }
+                                    }}
+                                    anchorOrigin={{
+                                        vertical: 'bottom',
+                                        horizontal: 'right',
+                                    }}
+                                    transformOrigin={{
+                                        vertical: 'top',
+                                        horizontal: 'right',
+                                    }}
+                                >
+                                    <MenuItem onClick={handleEditClick}>
+                                        <EditIcon sx={{ mr: 1 }} />
+                                        Düzenle
+                                    </MenuItem>
+                                    <MenuItem onClick={handleDeleteClick}>
+                                        <DeleteIcon sx={{ mr: 1 }} />
+                                        Sil
+                                    </MenuItem>
+                                </Menu>
                             </Card>
-                            <Menu
-                                id={id}
-                                anchorEl={anchorEl}
-                                open={Boolean(anchorEl)}
-                                onClose={handleClose}
-                                PaperProps={{
-                                    sx: {
-                                        boxShadow: 3,
-                                        borderRadius: 1,
-                                        minWidth: 150,
-                                        mt: 1,
-                                        backgroundColor: theme.palette.background.paper,
-                                        border: `1px solid ${theme.palette.divider}`,
-                                    }
-                                }}
-                                anchorOrigin={{
-                                    vertical: 'bottom',
-                                    horizontal: 'right',
-                                }}
-                                transformOrigin={{
-                                    vertical: 'top',
-                                    horizontal: 'right',
-                                }}
-                            >
-                                <MenuItem onClick={handleEditClick}>
-                                    <EditIcon sx={{mr: 1}}/>
-                                    Düzenle
-                                </MenuItem>
-                                <MenuItem onClick={handleDeleteClick}>
-                                    <DeleteIcon sx={{mr: 1}}/>
-                                    Sil
-                                </MenuItem>
-                            </Menu>
-                        </Grid>
+                        </div>
                     );
                 })}
-            </Grid>
+            </Masonry>
 
             {/* Yeni Kullanıcı Ekleme Dialogu */}
             <Dialog
@@ -266,7 +282,6 @@ export default function UserManagement() {
                     <CreateUser />
                 </DialogContent>
             </Dialog>
-
         </Box>
     );
 }
