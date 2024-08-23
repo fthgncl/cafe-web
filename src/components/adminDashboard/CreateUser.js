@@ -15,12 +15,12 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import Visibility from "@mui/icons-material/Visibility";
 import { useContext, useEffect, useState } from "react";
 import { useFormik } from 'formik';
-import { userSchema } from "../schemas/userSchema";
-import { SocketContext } from "../context/SocketContext";
+import { userSchema } from "../../schemas/userSchema";
+import { SocketContext } from "../../context/SocketContext";
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
-import { systemPermissions } from '../config';
+import { systemPermissions } from '../../config';
 import Alert from '@mui/material/Alert';
 import { useSnackbar } from 'notistack';
 
@@ -108,17 +108,17 @@ export default function SignUp() {
     };
 
     return (
-        <Container component="main" maxWidth="xs">
+        <Container maxWidth="xs">
             <CssBaseline />
             <Box
                 sx={{
-                    marginTop: 8,
+                    marginTop: 2,
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                 }}
             >
-                <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
+                <Avatar sx={{ m: 1, bgcolor: 'primary.main' }}>
                     <PersonAddIcon />
                 </Avatar>
                 <Typography component="h1" variant="h5">

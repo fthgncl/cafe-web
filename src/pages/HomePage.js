@@ -1,7 +1,7 @@
 import React from 'react';
 import { Container, Box, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
-import { PersonAdd, AddCircle, AddShoppingCart, List, Settings } from '@mui/icons-material';
+import { AddCircle, AddShoppingCart, List, Settings } from '@mui/icons-material';
 
 const boxStyle = {
     display: 'flex',
@@ -54,16 +54,6 @@ export default function HomePage() {
                 mt: 10
             }}
         >
-            <Box
-                component={Link}
-                to="/create-user"
-                sx={boxStyle}
-            >
-                <PersonAdd sx={iconStyle} />
-                <Typography variant="body2" sx={{ mt: 1 }}>
-                    Kullanıcı Oluştur
-                </Typography>
-            </Box>
             <Box
                 component={Link}
                 to="/create-product"

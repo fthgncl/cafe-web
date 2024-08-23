@@ -1,6 +1,7 @@
 import React, {useContext, useEffect, useState} from "react";
 import {SocketContext} from "../../context/SocketContext";
-import {systemPermissions} from '../../config'; // İzin kodlarını ve açıklamalarını içeren değişkeni import ediyoruz.
+import CreateUser from "./CreateUser";
+import {systemPermissions} from '../../config';
 import {
     Box,
     Card,
@@ -18,22 +19,25 @@ import {
     Menu,
     MenuItem,
     useTheme,
-    useMediaQuery
+    useMediaQuery,
+    Dialog,
+    DialogTitle,
+    DialogContent
 } from '@mui/material';
 import {deepPurple} from '@mui/material/colors';
+import CloseIcon from '@mui/icons-material/Close';
 import InfoIcon from '@mui/icons-material/Info';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import PersonAddIcon from '@mui/icons-material/PersonAdd'; // Yeni kullanıcı ekleme simgesi
 
 // İzin kodlarını açıklamalara dönüştüren fonksiyon
 const getPermissionsDescriptions = (permissions, isAdmin) => {
-    // Eğer kullanıcı sistem yöneticisiyse (a kodu) tüm izinleri göster
     if (isAdmin) {
         return Object.values(systemPermissions).map(perm => perm.description);
     }
 
-    // İzin kodlarını açıklamalara dönüştürelim
     if (!permissions) return ["Yetki Yok"];
 
     return permissions.split('').map(code => {
@@ -53,9 +57,9 @@ export default function UserManagement() {
     const [users, setUsers] = useState([]);
     const [anchorEl, setAnchorEl] = useState(null);
     const [currentUserId, setCurrentUserId] = useState(null);
+    const [openCreateUserDialog, setOpenCreateUserDialog] = useState(false);
     const getUsersMessageType = 'getUsers';
 
-    // Temayı ve mobil uyumlu tasarımı kontrol et
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -71,6 +75,7 @@ export default function UserManagement() {
                 setUsers(socketData.message.users);
             }
         }
+        // eslint-disable-next-line
     }, [socketData]);
 
     const handleClick = (event, userId) => {
@@ -96,16 +101,47 @@ export default function UserManagement() {
     const open = Boolean(anchorEl);
     const id = open ? 'simple-menu' : undefined;
 
+    const handleAddUserClick = () => {
+        setOpenCreateUserDialog(true);
+    };
+
+    const handleCloseCreateUserDialog = () => {
+        setOpenCreateUserDialog(false);
+    };
+
     return (
         <Box sx={{width: '100%', padding: '20px', boxSizing: 'border-box'}}>
-            <Grid container spacing={isMobile ? 2 : 3}>
+            <Grid container spacing={isMobile ? 2 : 3} alignItems="flex-start">
+                <Grid item xs={12} sm={6} md={4}>
+                    <Card
+                        variant="outlined"
+                        sx={{
+                            borderRadius: 2,
+                            boxShadow: 3,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            height: '200px',
+                            cursor: 'pointer',
+                            backgroundColor: theme.palette.background.paper,
+                            border: `2px dashed ${theme.palette.primary.main}`,
+                        }}
+                        onClick={handleAddUserClick}
+                    >
+                        <CardContent sx={{textAlign: 'center'}}>
+                            <PersonAddIcon sx={{fontSize: 60, color: theme.palette.primary.main}}/>
+                            <Typography variant="h6" sx={{mt: 2}}>
+                                Yeni Kullanıcı Ekle
+                            </Typography>
+                        </CardContent>
+                    </Card>
+                </Grid>
                 {users.map((user) => {
-                    // Kullanıcının sistem yöneticisi olup olmadığını kontrol et
                     const isAdmin = user.permissions.includes('a');
 
                     return (
                         <Grid item xs={12} sm={6} md={4} key={user._id}>
-                            <Card variant="outlined" sx={{borderRadius: 2, boxShadow: 3}}>
+                            <Card variant="outlined" sx={{borderRadius: 2, boxShadow: 3, height: '100%'}}>
                                 <CardHeader
                                     avatar={
                                         <Avatar sx={{bgcolor: deepPurple[500], width: 40, height: 40}}>
@@ -157,16 +193,12 @@ export default function UserManagement() {
                                 onClose={handleClose}
                                 PaperProps={{
                                     sx: {
-                                        boxShadow: 3, // Hafif gölge
+                                        boxShadow: 3,
                                         borderRadius: 1,
                                         minWidth: 150,
                                         mt: 1,
-                                        backgroundColor: theme.palette.background.paper
-                                    }
-                                }}
-                                BackdropProps={{
-                                    sx: {
-                                        backgroundColor: 'rgba(0, 0, 0, 0.3)' // Hafif karartma
+                                        backgroundColor: theme.palette.background.paper,
+                                        border: `1px solid ${theme.palette.divider}`,
                                     }
                                 }}
                                 anchorOrigin={{
@@ -191,6 +223,31 @@ export default function UserManagement() {
                     );
                 })}
             </Grid>
+
+            {/* Yeni Kullanıcı Ekleme Dialogu */}
+            <Dialog
+                open={openCreateUserDialog}
+                onClose={handleCloseCreateUserDialog}
+                maxWidth="md"
+                fullWidth
+                fullScreen={isMobile} // Tam ekran yapma özelliği mobil için
+            >
+                <DialogTitle sx={{ height:'45px', bgcolor:'primary.main'}} display='flex' flexDirection='row-reverse'>
+                    <IconButton
+                        edge="end"
+                        color="inherit"
+                        onClick={handleCloseCreateUserDialog}
+                        aria-label="close"
+                        sx={{ right: 8, top:0 }}
+                    >
+                        <CloseIcon />
+                    </IconButton>
+                </DialogTitle>
+                <DialogContent className="custom-scrollbar" sx={{ overflowY: 'auto' }}>
+                    <CreateUser />
+                </DialogContent>
+            </Dialog>
+
         </Box>
     );
 }
