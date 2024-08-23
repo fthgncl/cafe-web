@@ -64,6 +64,7 @@ export default function UserManagement() {
     const [openDeleteConfirmDialog, setOpenDeleteConfirmDialog] = useState(false);
     const getUsersMessageType = 'getUsers';
     const deleteUserMessageType = 'deleteUser';
+    const createUserMessageType = 'createUser';
 
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -78,6 +79,13 @@ export default function UserManagement() {
         if (!socketData || !socketData.message)
             return;
 
+        if (socketData.type === createUserMessageType) {
+            if (socketData.message.status === "success" && socketData.message.data) {
+                setUsers(prevState => [...prevState, socketData.message.data] );
+            }
+            return;
+        }
+
         if (socketData.type === getUsersMessageType) {
             if (socketData.message.status === "success") {
                 setUsers(socketData.message.users);
@@ -87,7 +95,7 @@ export default function UserManagement() {
 
         if (socketData.type === deleteUserMessageType) {
             enqueueSnackbar(socketData.message.message, {variant: socketData.message.status});
-            
+
             if ( socketData.message.status === "success" )
                 setUsers(prevState => prevState.filter(user => user._id !== currentUser.id ));
 
