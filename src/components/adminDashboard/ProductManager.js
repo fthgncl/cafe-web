@@ -1,6 +1,6 @@
 // ProductManager.js
-import React, { useContext, useEffect, useState } from "react";
-import { SocketContext } from "../../context/SocketContext";
+import React, {useContext, useEffect, useState} from "react";
+import {SocketContext} from "../../context/SocketContext";
 import {
     Avatar,
     Box,
@@ -21,11 +21,12 @@ import {
     MenuItem,
     Typography,
     useMediaQuery,
-    useTheme
+    useTheme,
+    Chip
 } from "@mui/material";
 import Masonry from "@mui/lab/Masonry";
 import CoffeeIcon from '@mui/icons-material/EmojiFoodBeverageRounded';
-import { deepPurple } from "@mui/material/colors";
+import {deepPurple} from "@mui/material/colors";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import InfoIcon from "@mui/icons-material/Info";
 import EditIcon from "@mui/icons-material/Edit";
@@ -33,11 +34,10 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
 import CreateProduct from "./CreateProduct";
 import {useSnackbar} from "notistack";
-import CreateUser from "./CreateUser";
 
 export default function ProductManager() {
     const {enqueueSnackbar} = useSnackbar();
-    const { sendSocketMessage, socketData, isConnected } = useContext(SocketContext);
+    const {sendSocketMessage, socketData, isConnected} = useContext(SocketContext);
     const [products, setProducts] = useState([]);
     const [anchorEl, setAnchorEl] = useState(null);
     const [currentProduct, setCurrentProduct] = useState(null);
@@ -57,15 +57,12 @@ export default function ProductManager() {
     }, [isConnected]);
 
     useEffect(() => {
-
         if (!socketData || !socketData.message)
             return;
 
         if (socketData.type === 'updateProduct') {
             if (socketData.message.status === "success" && socketData.message.updatedProduct) {
-
                 setProducts(prevState => prevState.map(product => {
-
                     if (product._id === socketData.message.updatedProduct._id)
                         return socketData.message.updatedProduct;
 
@@ -87,7 +84,7 @@ export default function ProductManager() {
             enqueueSnackbar(socketData.message.message, {variant: socketData.message.status});
 
             if (socketData.message.status === "success")
-                setProducts(prevState => prevState.filter(porduct => porduct._id !== socketData.message.deletedProductId));
+                setProducts(prevState => prevState.filter(product => product._id !== socketData.message.deletedProductId));
         }
         // eslint-disable-next-line
     }, [socketData]);
@@ -112,7 +109,7 @@ export default function ProductManager() {
     };
 
     const handleConfirmDelete = () => {
-        sendSocketMessage({ productId: currentProduct._id }, deleteProductMessageType);
+        sendSocketMessage({productId: currentProduct._id}, deleteProductMessageType);
         setOpenDeleteConfirmDialog(false);
         setCurrentProduct(null);
     };
@@ -133,11 +130,6 @@ export default function ProductManager() {
         setOpenEditProductDialog(false);
     };
 
-    const formatDate = (dateString) => {
-        const options = { day: 'numeric', month: 'long', year: 'numeric' };
-        return new Date(dateString).toLocaleDateString('tr-TR', options);
-    };
-
     return (
         <Box sx={{
             width: '100%',
@@ -147,7 +139,7 @@ export default function ProductManager() {
             justifyContent: 'center',
             minHeight: '100vh',
         }}>
-            <Masonry columns={{ xs: 1, sm: 2, md: 3 }} spacing={isMobile ? 2 : 3}>
+            <Masonry columns={{xs: 1, sm: 2, md: 3}} spacing={isMobile ? 2 : 3}>
                 <div>
                     <Card
                         variant="outlined"
@@ -164,9 +156,9 @@ export default function ProductManager() {
                         }}
                         onClick={handleAddProductClick}
                     >
-                        <CardContent sx={{ textAlign: 'center' }}>
-                            <CoffeeIcon sx={{ fontSize: 60, color: theme.palette.primary.main }} />
-                            <Typography variant="h6" sx={{ mt: 2 }}>
+                        <CardContent sx={{textAlign: 'center'}}>
+                            <CoffeeIcon sx={{fontSize: 60, color: theme.palette.primary.main}}/>
+                            <Typography variant="h6" sx={{mt: 2}}>
                                 Ürün Ekle
                             </Typography>
                         </CardContent>
@@ -175,7 +167,7 @@ export default function ProductManager() {
 
                 {products.map((product) => (
                     <div key={product._id}>
-                        <Card variant="outlined" sx={{ borderRadius: 2, boxShadow: 2, height: '100%' }}>
+                        <Card variant="outlined" sx={{borderRadius: 2, boxShadow: 2, height: '100%'}}>
                             <CardHeader
                                 title={
                                     <Typography variant="h6" noWrap>
@@ -191,9 +183,9 @@ export default function ProductManager() {
                                     <IconButton
                                         aria-label="daha fazla seçenek"
                                         onClick={(event) => handleClick(event, product)}
-                                        sx={{ padding: '10px' }}
+                                        sx={{padding: '10px'}}
                                     >
-                                        <MoreVertIcon />
+                                        <MoreVertIcon/>
                                     </IconButton>
                                 }
                             />
@@ -201,17 +193,56 @@ export default function ProductManager() {
                                 <Typography variant="body2" color="textPrimary" gutterBottom>
                                     <strong>Boyutlar ve Fiyatlar:</strong>
                                 </Typography>
-                                <List dense>
+                                <Box
+                                    sx={{
+                                        width: 1,
+                                        display: 'flex',
+                                        flexWrap: 'wrap',
+                                        gap: 1, // Chip'ler arasındaki boşluk
+                                        justifyContent: 'center', // Çip'leri ortala
+                                        mb: 2, // Alt boşluk
+                                    }}
+                                >
                                     {product.sizes.map((size) => (
-                                        <ListItem key={size._id} disableGutters>
-                                            <ListItemIcon>
-                                                <InfoIcon fontSize="small" color="primary" />
-                                            </ListItemIcon>
-                                            <ListItemText primary={`${size.size}: ${size.price} TL`} />
-                                        </ListItem>
+                                        <Box
+                                            key={size._id}
+                                            color="primary"
+                                            sx={{
+                                                bgcolor: 'primary.light',
+                                                color: 'white',
+                                                borderRadius: '5px',
+                                                display: 'flex',
+                                                flexDirection: 'center',
+                                                justifyContent: 'space-around',
+                                            }}>
+                                            <Typography variant="body2"
+                                                        sx={{
+                                                            bgcolor: 'primary.dark',
+                                                            textAlign: 'center',
+                                                            color: 'white',
+                                                            padding: 0.5,
+                                                            ml: '5px'
+                                                        }}>
+                                                {size.size}
+                                            </Typography>
+                                            <Typography variant="body2"
+                                                        sx={{
+                                                            marginLeft:'10px',
+                                                            marginRight:'10px',
+                                                            borderRadius: '5px',
+                                                            fontWeight: 500,
+                                                            display: 'flex',
+                                                            justifyContent: 'center',
+                                                            alignItems: 'center'
+                                                        }}>
+                                                {size.price} ₺
+                                            </Typography>
+                                        </Box>
+
+
                                     ))}
-                                </List>
-                                <Divider sx={{ my: 1 }} />
+                                </Box>
+
                                 <Typography variant="body2" color="textPrimary" gutterBottom>
                                     <strong>İçerikler:</strong>
                                 </Typography>
@@ -220,22 +251,20 @@ export default function ProductManager() {
                                         product.contents.map((content) => (
                                             <ListItem key={content._id} disableGutters>
                                                 <ListItemIcon>
-                                                    <InfoIcon fontSize="small" color="primary" />
+                                                    <InfoIcon fontSize="small" color="primary"/>
                                                 </ListItemIcon>
-                                                <ListItemText primary={`${content.name} (+${content.extraFee} TL)`} />
+                                                <ListItemText
+                                                    primary={`${content.name} ${content.extraFee > 0 ? `(+${content.extraFee} ₺)` : ''}`}/>
                                             </ListItem>
                                         ))
                                     ) : (
                                         <ListItem disableGutters>
-                                            <ListItemText primary="İçerik bulunmuyor" />
+                                            <ListItemText primary="İçerik bulunmuyor"/>
                                         </ListItem>
                                     )}
                                 </List>
-                                <Divider sx={{ my: 1 }} />
-                                <Typography variant="body2" color="textPrimary">
-                                    <strong>Oluşturulma Tarihi:</strong> {formatDate(product.createdDate)}
-                                </Typography>
                             </CardContent>
+
 
                             <Menu
                                 anchorEl={anchorEl}
@@ -261,11 +290,11 @@ export default function ProductManager() {
                                 }}
                             >
                                 <MenuItem onClick={handleEditClick}>
-                                    <EditIcon sx={{ mr: 1 }} />
+                                    <EditIcon sx={{mr: 1}}/>
                                     Düzenle
                                 </MenuItem>
                                 <MenuItem onClick={handleDeleteClick}>
-                                    <DeleteIcon sx={{ mr: 1 }} />
+                                    <DeleteIcon sx={{mr: 1}}/>
                                     Sil
                                 </MenuItem>
                             </Menu>
@@ -283,14 +312,14 @@ export default function ProductManager() {
                 fullScreen={isMobile}
             >
                 <DialogTitle
-                    sx={{ height: '50px', bgcolor: 'primary.main' }}
+                    sx={{height: '50px', bgcolor: 'primary.main'}}
                     display="flex"
                     alignItems="center"
                     justifyContent="space-between"
                 >
                     <Box display="flex" alignItems="center">
-                        <CoffeeIcon sx={{ color: 'white', mr: 1 }} />
-                        <Typography variant="h6" sx={{ color: 'white' }}>
+                        <CoffeeIcon sx={{color: 'white', mr: 1}}/>
+                        <Typography variant="h6" sx={{color: 'white'}}>
                             Yeni Ürün Ekle
                         </Typography>
                     </Box>
@@ -306,11 +335,11 @@ export default function ProductManager() {
                             alignSelf: 'center',
                         }}
                     >
-                        <CloseIcon />
+                        <CloseIcon/>
                     </IconButton>
                 </DialogTitle>
                 <DialogContent>
-                    <CreateProduct onClose={handleCloseCreateProductDialog} />
+                    <CreateProduct onClose={handleCloseCreateProductDialog}/>
                 </DialogContent>
             </Dialog>
 
@@ -323,14 +352,14 @@ export default function ProductManager() {
                 fullScreen={isMobile}
             >
                 <DialogTitle
-                    sx={{ height: '50px', bgcolor: 'primary.main' }}
+                    sx={{height: '50px', bgcolor: 'primary.main'}}
                     display="flex"
                     alignItems="center"
                     justifyContent="space-between"
                 >
                     <Box display="flex" alignItems="center">
-                        <EditIcon sx={{ color: 'white', mr: 1 }} />
-                        <Typography variant="h6" sx={{ color: 'white' }}>
+                        <EditIcon sx={{color: 'white', mr: 1}}/>
+                        <Typography variant="h6" sx={{color: 'white'}}>
                             Ürünü Düzenle
                         </Typography>
                     </Box>
@@ -346,11 +375,12 @@ export default function ProductManager() {
                             alignSelf: 'center',
                         }}
                     >
-                        <CloseIcon />
+                        <CloseIcon/>
                     </IconButton>
                 </DialogTitle>
                 <DialogContent className="custom-scrollbar" sx={{overflowY: 'auto'}}>
-                    {currentProduct && <CreateProduct productId={currentProduct._id} onClose={handleCloseEditProductDialog}/>}
+                    {currentProduct &&
+                        <CreateProduct productId={currentProduct._id} onClose={handleCloseEditProductDialog}/>}
                 </DialogContent>
             </Dialog>
 
@@ -366,11 +396,20 @@ export default function ProductManager() {
                     <Typography>
                         Seçili ürünü silmek istediğinize emin misiniz?
                     </Typography>
-                    <Box mt={2} display="flex" justifyContent="flex-end">
-                        <Button onClick={handleCancelDelete} color="primary" sx={{ mr: 1 }}>
+                    <Box sx={{display: 'flex', justifyContent: 'flex-end', p: 2}}>
+                        <Button
+                            onClick={handleCancelDelete}
+                            color="primary"
+                            variant="outlined"
+                            sx={{mr: 1}}
+                        >
                             İptal
                         </Button>
-                        <Button onClick={handleConfirmDelete} color="primary">
+                        <Button
+                            onClick={handleConfirmDelete}
+                            color="error"
+                            variant="contained"
+                        >
                             Sil
                         </Button>
                     </Box>

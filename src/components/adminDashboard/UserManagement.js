@@ -255,7 +255,7 @@ export default function UserManagement() {
                                     </List>
                                     <Divider sx={{my: 1}}/>
                                     <Typography variant="body2" color="textSecondary">
-                                        <strong>Oluşturulma Tarihi:</strong> {formatDate(user.createdDate)}
+                                        <strong>Kayıt Tarihi:</strong> {formatDate(user.createdDate)}
                                     </Typography>
                                 </CardContent>
 
