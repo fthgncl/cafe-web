@@ -144,15 +144,15 @@ export default function OrdersPage() {
         const interval = setInterval(() => {
             setOrders((prevOrders) =>
                 prevOrders
-                    .filter( ({ createdDate , kitchenStatus, paymentStatus }) => {
+                    .filter(({createdDate, kitchenStatus, paymentStatus}) => {
 
-                        if ( paymentStatus === 'Daha Sonra Ödenecek' || kitchenStatus === 'Beklemede' || kitchenStatus === 'Hazırlanıyor' )
+                        if (paymentStatus === 'Daha Sonra Ödenecek' || kitchenStatus === 'Beklemede' || kitchenStatus === 'Hazırlanıyor')
                             return true
 
                         const now = new Date();
                         const created = new Date(createdDate);
                         return now - created < 1000 * 60 * 60;
-                    } )
+                    })
                     .map(order => ({
                         ...order,
                         formattedDuration: formatDuration(order.createdDate),
@@ -278,6 +278,14 @@ export default function OrdersPage() {
         }
     };
 
+    const fadeInOut = keyframes`
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.5;
+      }
+    `;
 
     return (
         <Container maxWidth="xl" sx={{mt: 4}}>
@@ -286,13 +294,13 @@ export default function OrdersPage() {
                 alignItems="start"
                 justifyContent="space-between"
                 padding={1}
-                sx={{ borderBottom: '1px solid #ddd', mb:2 }}
+                sx={{borderBottom: '1px solid #ddd', mb: 2}}
             >
                 <Typography
                     variant="h4"
                     component="h1"
                     gutterBottom
-                    sx={{ fontWeight: 'bold' }}
+                    sx={{fontWeight: 'bold'}}
                 >
                     Siparişler
                 </Typography>
@@ -300,8 +308,9 @@ export default function OrdersPage() {
                     title={notificationsEnabled ? "Bildirim Seslerini Kapat" : "Bildirim Seslerini Aç"}
                     arrow
                 >
-                    <IconButton onClick={toggleNotifications} sx={{ color: notificationsEnabled ? 'primary.main' : 'text.secondary' }}>
-                        {notificationsEnabled ? <NotificationsIcon /> : <NotificationsOffIcon />}
+                    <IconButton onClick={toggleNotifications}
+                                sx={{color: notificationsEnabled ? 'primary.main' : 'text.secondary'}}>
+                        {notificationsEnabled ? <NotificationsIcon/> : <NotificationsOffIcon/>}
                     </IconButton>
                 </Tooltip>
             </Box>
@@ -511,9 +520,24 @@ export default function OrdersPage() {
                                 </Box>
                                 <Divider/>
                                 <Box sx={{p: 3}}>
-                                    <Typography variant="body2" color="textSecondary" sx={{mb: 1}}>
-                                        <strong>Not:</strong> {order.orderNote || "Sipariş notu yok"}
-                                    </Typography>
+                                    {order.orderNote && (
+                                        <Typography
+                                            variant="body2"
+                                            color="textSecondary"
+                                            sx={{
+                                                mb: 1,
+                                                animation: `${fadeInOut} 2.5s infinite`, // Yanıp sönme animasyonu
+                                                padding: '6px',
+                                                borderRadius: '4px',
+                                                display: 'inline-block',
+                                                textAlign: 'justify',
+                                                bgcolor: 'rgba(248,203,100,0.96)'
+                                            }}
+                                        >
+                                            <strong>Not:</strong> {order.orderNote}
+                                        </Typography>
+
+                                    )}
                                     <Typography variant="body2" color="textSecondary" sx={{mb: 1}}>
                                         <strong>Siparişi Alan:</strong> {order.createdBy}
                                     </Typography>
