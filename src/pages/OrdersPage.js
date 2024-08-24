@@ -146,7 +146,7 @@ export default function OrdersPage() {
                 prevOrders
                     .filter(({createdDate, kitchenStatus, paymentStatus}) => {
 
-                        if (paymentStatus === 'Daha Sonra Ödenecek' || kitchenStatus === 'Beklemede' || kitchenStatus === 'Hazırlanıyor')
+                        if ( ( paymentStatus === 'Daha Sonra Ödenecek' || kitchenStatus === 'Beklemede' || kitchenStatus === 'Hazırlanıyor' ) && paymentStatus !== 'İptal Edildi'  )
                             return true
 
                         const now = new Date();
