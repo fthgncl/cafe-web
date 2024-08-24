@@ -58,20 +58,6 @@ export default function HomePage() {
             }}
         >
 
-            {checkPermissions("b") && (
-            <Box
-                component={Link}
-                to="/create-product"
-                sx={boxStyle}
-            >
-                <AddCircle sx={iconStyle}/>
-                <Typography variant="body2" sx={{mt: 1}}>
-                    Ürün Oluştur
-                </Typography>
-            </Box>
-            )}
-
-
             {checkPermissions("d") && (
             <Box
                 component={Link}
