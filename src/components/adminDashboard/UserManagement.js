@@ -1,7 +1,7 @@
-import React, { useContext, useEffect, useState } from "react";
-import { SocketContext } from "../../context/SocketContext";
+import React, {useContext, useEffect, useState} from "react";
+import {SocketContext} from "../../context/SocketContext";
 import CreateUser from "./CreateUser";
-import { systemPermissions } from '../../config';
+import {systemPermissions} from '../../config';
 import {
     Box,
     Card,
@@ -24,7 +24,7 @@ import {
     Menu,
     Button
 } from '@mui/material';
-import { deepPurple } from '@mui/material/colors';
+import {deepPurple} from '@mui/material/colors';
 import CloseIcon from '@mui/icons-material/Close';
 import InfoIcon from '@mui/icons-material/Info';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -32,7 +32,8 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import Masonry from "@mui/lab/Masonry";
-import { useSnackbar } from "notistack";
+import {useSnackbar} from "notistack";
+import {AccountContext} from "../../context/AccountContext";
 
 // İzin kodlarını açıklamalara dönüştüren fonksiyon
 const getPermissionsDescriptions = (permissions, isAdmin) => {
@@ -50,13 +51,14 @@ const getPermissionsDescriptions = (permissions, isAdmin) => {
 
 // Tarih formatını düzenleyen fonksiyon
 const formatDate = (dateString) => {
-    const options = { day: 'numeric', month: 'long', year: 'numeric' };
+    const options = {day: 'numeric', month: 'long', year: 'numeric'};
     return new Date(dateString).toLocaleDateString('tr-TR', options);
 };
 
 export default function UserManagement() {
-    const { enqueueSnackbar } = useSnackbar();
-    const { sendSocketMessage, socketData } = useContext(SocketContext);
+    const {enqueueSnackbar} = useSnackbar();
+    const {sendSocketMessage, socketData} = useContext(SocketContext);
+    const {accountProps} = useContext(AccountContext);
     const [users, setUsers] = useState([]);
     const [anchorEl, setAnchorEl] = useState(null);
     const [currentUser, setCurrentUser] = useState(null);
@@ -84,7 +86,7 @@ export default function UserManagement() {
 
                 setUsers(prevState => prevState.map(user => {
 
-                    if ( user._id === socketData.message.updatedUser._id )
+                    if (user._id === socketData.message.updatedUser._id)
                         return socketData.message.updatedUser;
 
                     return user;
@@ -109,7 +111,7 @@ export default function UserManagement() {
         }
 
         if (socketData.type === deleteUserMessageType) {
-            enqueueSnackbar(socketData.message.message, { variant: socketData.message.status });
+            enqueueSnackbar(socketData.message.message, {variant: socketData.message.status});
 
             if (socketData.message.status === "success")
                 setUsers(prevState => prevState.filter(user => user._id !== socketData.message.deletedUserId));
@@ -141,7 +143,7 @@ export default function UserManagement() {
     };
 
     const handleConfirmDelete = () => {
-        sendSocketMessage({ userId: currentUser.id }, deleteUserMessageType)
+        sendSocketMessage({userId: currentUser.id}, deleteUserMessageType)
         setOpenDeleteConfirmDialog(false);
         setCurrentUser(null);
     };
@@ -171,7 +173,7 @@ export default function UserManagement() {
             justifyContent: 'center',  // Yatayda ortalama
             minHeight: '100vh',  // Yüksekliği ekranın tamamı yapar
         }}>
-            <Masonry columns={{ xs: 1, sm: 2, md: 3 }} spacing={isMobile ? 2 : 3}>
+            <Masonry columns={{xs: 1, sm: 2, md: 3}} spacing={isMobile ? 2 : 3}>
                 <div>
                     <Card
                         variant="outlined"
@@ -188,9 +190,9 @@ export default function UserManagement() {
                         }}
                         onClick={handleAddUserClick}
                     >
-                        <CardContent sx={{ textAlign: 'center' }}>
-                            <PersonAddIcon sx={{ fontSize: 60, color: theme.palette.primary.main }} />
-                            <Typography variant="h6" sx={{ mt: 2 }}>
+                        <CardContent sx={{textAlign: 'center'}}>
+                            <PersonAddIcon sx={{fontSize: 60, color: theme.palette.primary.main}}/>
+                            <Typography variant="h6" sx={{mt: 2}}>
                                 Yeni Kullanıcı Ekle
                             </Typography>
                         </CardContent>
@@ -202,10 +204,10 @@ export default function UserManagement() {
 
                     return (
                         <div key={user._id}>
-                            <Card variant="outlined" sx={{ borderRadius: 2, boxShadow: 2, height: '100%' }}>
+                            <Card variant="outlined" sx={{borderRadius: 2, boxShadow: 2, height: '100%'}}>
                                 <CardHeader
                                     avatar={
-                                        <Avatar sx={{ bgcolor: deepPurple[500], width: 40, height: 40 }}>
+                                        <Avatar sx={{bgcolor: deepPurple[500], width: 40, height: 40}}>
                                             {user.firstname.charAt(0)}{user.lastname.charAt(0)}
                                         </Avatar>
                                     }
@@ -220,20 +222,24 @@ export default function UserManagement() {
                                         </Typography>
                                     }
                                     action={
-                                        <IconButton
-                                            aria-label="daha fazla seçenek"
-                                            onClick={(event) => handleClick(event, user)}
-                                            sx={{ padding: '10px' }}
-                                        >
-                                            <MoreVertIcon />
-                                        </IconButton>
+                                        <>
+                                            {accountProps && accountProps.username !== user.username && (
+                                                <IconButton
+                                                    aria-label="daha fazla seçenek"
+                                                    onClick={(event) => handleClick(event, user)}
+                                                    sx={{padding: '10px'}}
+                                                >
+                                                    <MoreVertIcon/>
+                                                </IconButton>
+                                            )}
+                                        </>
                                     }
                                 />
                                 <CardContent>
                                     <Typography variant="body2" color="textSecondary" gutterBottom>
                                         <strong>Telefon:</strong> {user.phone}
                                     </Typography>
-                                    <Divider sx={{ my: 1 }} />
+                                    <Divider sx={{my: 1}}/>
                                     <Typography variant="body2" color="textSecondary" gutterBottom>
                                         <strong>Yetkiler:</strong>
                                     </Typography>
@@ -241,13 +247,13 @@ export default function UserManagement() {
                                         {getPermissionsDescriptions(user.permissions, isAdmin).map((desc, index) => (
                                             <ListItem key={index} disableGutters>
                                                 <ListItemIcon>
-                                                    <InfoIcon fontSize="small" color="primary" />
+                                                    <InfoIcon fontSize="small" color="primary"/>
                                                 </ListItemIcon>
-                                                <ListItemText primary={desc} />
+                                                <ListItemText primary={desc}/>
                                             </ListItem>
                                         ))}
                                     </List>
-                                    <Divider sx={{ my: 1 }} />
+                                    <Divider sx={{my: 1}}/>
                                     <Typography variant="body2" color="textSecondary">
                                         <strong>Oluşturulma Tarihi:</strong> {formatDate(user.createdDate)}
                                     </Typography>
@@ -278,11 +284,11 @@ export default function UserManagement() {
                                     }}
                                 >
                                     <MenuItem onClick={handleEditClick}>
-                                        <EditIcon sx={{ mr: 1 }} />
+                                        <EditIcon sx={{mr: 1}}/>
                                         Düzenle
                                     </MenuItem>
                                     <MenuItem onClick={handleDeleteClick}>
-                                        <DeleteIcon sx={{ mr: 1 }} />
+                                        <DeleteIcon sx={{mr: 1}}/>
                                         Sil
                                     </MenuItem>
                                 </Menu>
@@ -301,14 +307,14 @@ export default function UserManagement() {
                 fullScreen={isMobile}
             >
                 <DialogTitle
-                    sx={{ height: '50px', bgcolor: 'primary.main' }}
+                    sx={{height: '50px', bgcolor: 'primary.main'}}
                     display="flex"
                     alignItems="center"
                     justifyContent="space-between"
                 >
                     <Box display="flex" alignItems="center">
-                        <PersonAddIcon sx={{ color: 'white', mr: 1 }} />
-                        <Typography variant="h6" sx={{ color: 'white' }}>
+                        <PersonAddIcon sx={{color: 'white', mr: 1}}/>
+                        <Typography variant="h6" sx={{color: 'white'}}>
                             Yeni Kullanıcı Ekle
                         </Typography>
                     </Box>
@@ -327,11 +333,11 @@ export default function UserManagement() {
                             },
                         }}
                     >
-                        <CloseIcon />
+                        <CloseIcon/>
                     </IconButton>
                 </DialogTitle>
-                <DialogContent className="custom-scrollbar" sx={{ overflowY: 'auto' }}>
-                    <CreateUser onClose={handleCloseCreateUserDialog} />
+                <DialogContent className="custom-scrollbar" sx={{overflowY: 'auto'}}>
+                    <CreateUser onClose={handleCloseCreateUserDialog}/>
                 </DialogContent>
             </Dialog>
 
@@ -344,14 +350,14 @@ export default function UserManagement() {
                 fullScreen={isMobile}
             >
                 <DialogTitle
-                    sx={{ height: '50px', bgcolor: 'primary.main' }}
+                    sx={{height: '50px', bgcolor: 'primary.main'}}
                     display="flex"
                     alignItems="center"
                     justifyContent="space-between"
                 >
                     <Box display="flex" alignItems="center">
-                        <EditIcon sx={{ color: 'white', mr: 1 }} />
-                        <Typography variant="h6" sx={{ color: 'white' }}>
+                        <EditIcon sx={{color: 'white', mr: 1}}/>
+                        <Typography variant="h6" sx={{color: 'white'}}>
                             Kullanıcıyı Düzenle
                         </Typography>
                     </Box>
@@ -370,11 +376,11 @@ export default function UserManagement() {
                             },
                         }}
                     >
-                        <CloseIcon />
+                        <CloseIcon/>
                     </IconButton>
                 </DialogTitle>
-                <DialogContent className="custom-scrollbar" sx={{ overflowY: 'auto' }}>
-                    {currentUser && <CreateUser userId={currentUser.id} onClose={handleCloseEditUserDialog} />}
+                <DialogContent className="custom-scrollbar" sx={{overflowY: 'auto'}}>
+                    {currentUser && <CreateUser userId={currentUser.id} onClose={handleCloseEditUserDialog}/>}
                 </DialogContent>
             </Dialog>
 
@@ -393,12 +399,12 @@ export default function UserManagement() {
                         Bu kullanıcıyı silmek istediğinizden emin misiniz?
                     </Typography>
                 </DialogContent>
-                <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 2 }}>
+                <Box sx={{display: 'flex', justifyContent: 'flex-end', p: 2}}>
                     <Button
                         onClick={handleCancelDelete}
                         color="primary"
                         variant="outlined"
-                        sx={{ mr: 1 }}
+                        sx={{mr: 1}}
                     >
                         İptal
                     </Button>
