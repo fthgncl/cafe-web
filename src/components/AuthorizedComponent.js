@@ -2,7 +2,7 @@ import { useContext } from 'react';
 import Unauthorized from "../pages/Unauthorized";
 import { AccountContext } from '../context/AccountContext';
 
-const PrivateRoute = ({ element, requiredPermissions, fullMatch }) => {
+const AuthorizedComponent = ({ element, requiredPermissions, fullMatch }) => {
     const { checkPermissions } = useContext(AccountContext);
     const hasPermission = checkPermissions(requiredPermissions, fullMatch);
 
@@ -13,4 +13,4 @@ const PrivateRoute = ({ element, requiredPermissions, fullMatch }) => {
     }
 };
 
-export default PrivateRoute;
+export default AuthorizedComponent;

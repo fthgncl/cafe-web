@@ -11,7 +11,7 @@ import NotConnected from "./pages/NotConnected";
 import {AccountContext} from "./context/AccountContext";
 import {SocketContext} from "./context/SocketContext";
 import AppBar from "./components/AppBar";
-import PrivateRoute from "./components/PrivateRoute";
+import AuthorizedComponent from "./components/AuthorizedComponent";
 
 function App() {
     const {isConnected, socketData} = useContext(SocketContext);
@@ -59,31 +59,31 @@ function App() {
                 <Routes>
                     <Route path="/" element={<HomePage/>}/>
 
-                    <Route path="/create-user" element={<PrivateRoute
+                    <Route path="/create-user" element={<AuthorizedComponent
                         element={<CreateUser/>}
                         requiredPermissions=""
                         fullMatch={false}
                     />}/>
 
-                    <Route path="/create-product" element={<PrivateRoute
+                    <Route path="/create-product" element={<AuthorizedComponent
                         element={<CreateProduct/>}
                         requiredPermissions="b"
                         fullMatch={false}
                     />}/>
 
-                    <Route path="/order-entry" element={<PrivateRoute
+                    <Route path="/order-entry" element={<AuthorizedComponent
                         element={<OrderEntry/>}
                         requiredPermissions="d"
                         fullMatch={false}
                     />}/>
 
-                    <Route path="/orders" element={<PrivateRoute
+                    <Route path="/orders" element={<AuthorizedComponent
                         element={<OrdersPage/>}
                         requiredPermissions="defg"
                         fullMatch={false}
                     />}/>
 
-                    <Route path="/admin-dashboard" element={<PrivateRoute
+                    <Route path="/admin-dashboard" element={<AuthorizedComponent
                         element={<AdminDashBoardPage/>}
                         requiredPermissions="bc"
                         fullMatch={false}

@@ -94,6 +94,8 @@ export default function HomePage() {
                     Yönetim Merkezi
                 </Typography>
             </Box>
+
+            const hasPermission = checkPermissions(requiredPermissions, fullMatch);
         </Container>
     );
 }
