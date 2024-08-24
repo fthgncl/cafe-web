@@ -38,14 +38,12 @@ export default function ProductForm({productId = null, onClose}) {
     useEffect(() => {
         if (!!productId)
             sendSocketMessage({productId}, getProductMessageType)
-        // eslint-disable-next-line 
+        // eslint-disable-next-line
     }, []);
 
     useEffect(() => {
         if (!socketData || !socketData.message)
             return;
-
-        console.log(socketData);
 
         if (socketData.type === getProductMessageType) {
             if (socketData.message.status === "success" && socketData.message.product) {
