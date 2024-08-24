@@ -45,11 +45,11 @@ export default function LoadingProductsSkeleton() {
                         sx={{
                             borderRadius: 2,
                             boxShadow: 3,
-                            display: "flex",
+                            display: 'flex',
                             alignItems: "center",
-                            justifyContent: "center",
-                            height: "200px",
-                            cursor: "pointer",
+                            justifyContent: 'center',
+                            height: '200px',
+                            cursor: 'pointer',
                             backgroundColor: theme.palette.background.paper,
                             border: `2px dashed ${theme.palette.primary.main}`,
                         }}

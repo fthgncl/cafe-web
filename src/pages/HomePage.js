@@ -1,7 +1,7 @@
 import React, {useContext} from 'react';
 import {Container, Box, Typography} from '@mui/material';
 import {Link} from 'react-router-dom';
-import {AddCircle, AddShoppingCart, List, Settings} from '@mui/icons-material';
+import {AddShoppingCart, List, Settings} from '@mui/icons-material';
 import {AccountContext} from "../context/AccountContext";
 
 const boxStyle = {

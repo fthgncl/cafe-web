@@ -34,6 +34,7 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import Masonry from "@mui/lab/Masonry";
 import {useSnackbar} from "notistack";
 import {AccountContext} from "../../context/AccountContext";
+import LoadingCardSkeleton from "./LoadingUsersSkeleton";
 
 // İzin kodlarını açıklamalara dönüştüren fonksiyon
 const getPermissionsDescriptions = (permissions, isAdmin) => {
@@ -59,6 +60,7 @@ export default function UserManagement() {
     const {enqueueSnackbar} = useSnackbar();
     const {sendSocketMessage, socketData} = useContext(SocketContext);
     const {accountProps} = useContext(AccountContext);
+    const [isLoading, setIsLoading] = useState(true);
     const [users, setUsers] = useState([]);
     const [anchorEl, setAnchorEl] = useState(null);
     const [currentUser, setCurrentUser] = useState(null);
@@ -73,6 +75,7 @@ export default function UserManagement() {
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     useEffect(() => {
+        setIsLoading(true);
         sendSocketMessage({}, getUsersMessageType);
         // eslint-disable-next-line
     }, []);
@@ -106,6 +109,7 @@ export default function UserManagement() {
         if (socketData.type === getUsersMessageType) {
             if (socketData.message.status === "success") {
                 setUsers(socketData.message.users);
+                setIsLoading(false);
             }
             return;
         }
@@ -118,6 +122,9 @@ export default function UserManagement() {
         }
         // eslint-disable-next-line
     }, [socketData]);
+
+    if ( isLoading )
+        return <LoadingCardSkeleton/>
 
     const handleClick = (event, user) => {
         setAnchorEl(event.currentTarget);
