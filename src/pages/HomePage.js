@@ -1,7 +1,8 @@
-import React from 'react';
-import { Container, Box, Typography } from '@mui/material';
-import { Link } from 'react-router-dom';
-import { AddCircle, AddShoppingCart, List, Settings } from '@mui/icons-material';
+import React, {useContext} from 'react';
+import {Container, Box, Typography} from '@mui/material';
+import {Link} from 'react-router-dom';
+import {AddCircle, AddShoppingCart, List, Settings} from '@mui/icons-material';
+import {AccountContext} from "../context/AccountContext";
 
 const boxStyle = {
     display: 'flex',
@@ -45,6 +46,8 @@ const iconStyle = {
 };
 
 export default function HomePage() {
+    const {checkPermissions} = useContext(AccountContext);
+
     return (
         <Container
             sx={{
@@ -54,48 +57,61 @@ export default function HomePage() {
                 mt: 10
             }}
         >
+
+            {checkPermissions("b") && (
             <Box
                 component={Link}
                 to="/create-product"
                 sx={boxStyle}
             >
-                <AddCircle sx={iconStyle} />
-                <Typography variant="body2" sx={{ mt: 1 }}>
+                <AddCircle sx={iconStyle}/>
+                <Typography variant="body2" sx={{mt: 1}}>
                     Ürün Oluştur
                 </Typography>
             </Box>
+            )}
+
+
+            {checkPermissions("d") && (
             <Box
                 component={Link}
                 to="/order-entry"
                 sx={boxStyle}
             >
-                <AddShoppingCart sx={iconStyle} />
-                <Typography variant="body2" sx={{ mt: 1 }}>
+                <AddShoppingCart sx={iconStyle}/>
+                <Typography variant="body2" sx={{mt: 1}}>
                     Sipariş Ekle
                 </Typography>
             </Box>
-            <Box
+            )}
+
+            {checkPermissions("defg") && (
+                <Box
                 component={Link}
                 to="/orders"
                 sx={boxStyle}
             >
-                <List sx={iconStyle} />
-                <Typography variant="body2" sx={{ mt: 1 }}>
+                <List sx={iconStyle}/>
+                <Typography variant="body2" sx={{mt: 1}}>
                     Siparişler
                 </Typography>
             </Box>
-            <Box
-                component={Link}
-                to="/admin-dashboard"
-                sx={boxStyle}
-            >
-                <Settings sx={iconStyle} />
-                <Typography variant="body2" sx={{ mt: 1 }}>
-                    Yönetim Merkezi
-                </Typography>
-            </Box>
+            )}
 
-            const hasPermission = checkPermissions(requiredPermissions, fullMatch);
+            {checkPermissions("bc") && (
+                <Box
+                    component={Link}
+                    to="/admin-dashboard"
+                    sx={boxStyle}
+                >
+                    <Settings sx={iconStyle}/>
+                    <Typography variant="body2" sx={{mt: 1}}>
+                        Yönetim Merkezi
+                    </Typography>
+                </Box>
+            )}
+
+
         </Container>
     );
 }
