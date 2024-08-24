@@ -22,14 +22,36 @@ import CoffeeIcon from '@mui/icons-material/EmojiFoodBeverageRounded';
 import Avatar from "@mui/material/Avatar";
 import Paper from "@mui/material/Paper";
 
-export default function ProductForm() {
+export default function ProductForm({productId = null}) {
+
     const { enqueueSnackbar } = useSnackbar();
     const [isLoading, setIsLoading] = useState(false);
+    const [productData, setProductData] = useState(null);
     const { sendSocketMessage, socketData } = useContext(SocketContext);
-    const messageType = 'createProduct';
+    const isEditMode = !!productId;
+    const messageType = isEditMode ? 'updateProduct' : 'createProduct';
+    const getProductMessageType = 'getProduct';
 
     useEffect(() => {
-        if (socketData && socketData.type === messageType) {
+        if (isEditMode)
+            sendSocketMessage({productId}, getProductMessageType);
+        // eslint-disable-next-line
+    }, [isEditMode, productId]);
+
+    useEffect(() => {
+        if (!socketData || !socketData.message)
+            return;
+
+        if (socketData.type === getProductMessageType) {
+            if (socketData.message.status === "success" && socketData.message.product) {
+                setProductData(socketData.message.product);
+                setIsLoading(false);
+            }
+            return
+        }
+
+
+        if (socketData.type === messageType) {
 
             let apiErrors = {};
             if (socketData.message.status === 'error') {
@@ -53,6 +75,16 @@ export default function ProductForm() {
         // eslint-disable-next-line
     }, [socketData]);
 
+
+    const onSubmit = async (values) => {
+        setIsLoading(true);
+        const payload = { ...values };
+        if (isEditMode) {
+            payload.productId = productId;
+        }
+        sendSocketMessage(payload, messageType);
+    }
+
     const formik = useFormik({
         initialValues: {
             productname: '',
@@ -61,11 +93,23 @@ export default function ProductForm() {
             contents: []
         },
         validationSchema: productSchema,
-        onSubmit: (values) => {
-            setIsLoading(true);
-            sendSocketMessage(values, messageType);
-        },
+        onSubmit
     });
+
+    useEffect(() => {
+        if (productData) {
+            // Formu sıfırla ve kullanıcı verileri ile doldur
+            formik.resetForm({
+                values: {
+                    productname: productData.productname || '',
+                    productcategory: productData.productcategory || '',
+                    sizes: productData.sizes || [{ size: 'Standart', price: '' }],
+                    contents: productData.contents || [],
+                }
+            });
+        }
+        // eslint-disable-next-line
+    }, [productData]);
 
     const handleAddSize = () => {
         if (formik.values.sizes.length < 1) {
@@ -142,7 +186,7 @@ export default function ProductForm() {
                     <CoffeeIcon/>
                 </Avatar>
                 <Typography component="h1" variant="h5" sx={{mb: 2}}>
-                    Ürün Ekle
+                    Yeni Ürün Ekle
                 </Typography>
                 <Box sx={{
                     backgroundColor: '#ffffff',
@@ -296,7 +340,7 @@ export default function ProductForm() {
                                         sx={{ mt: 3, mb: 2 }}
                                         disabled={isLoading}
                                     >
-                                        {isLoading ? <CircularProgress color="inherit" size={24} /> : 'Kaydet'}
+                                        {isLoading ? <CircularProgress color="inherit" size={24} /> : isEditMode ? 'Güncelle' : 'Kaydet'}
                                     </Button>
                                 </Grid>
 

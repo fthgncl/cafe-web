@@ -52,6 +52,7 @@ export default function SignUp({userId = null}) {
                 setIsLoading(false);
             }
         }
+        // eslint-disable-next-line
     }, [socketData]);
 
     const onSubmit = async (values) => {
@@ -105,7 +106,8 @@ export default function SignUp({userId = null}) {
                 }
             });
         }
-    }, [userData, resetForm]);
+        // eslint-disable-next-line
+    }, [userData]);
 
     useEffect(() => {
         if (socketData && socketData.type === messageType) {

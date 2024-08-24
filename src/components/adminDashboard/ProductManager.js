@@ -32,8 +32,11 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
 import CreateProduct from "./CreateProduct";
+import {useSnackbar} from "notistack";
+import CreateUser from "./CreateUser";
 
 export default function ProductManager() {
+    const {enqueueSnackbar} = useSnackbar();
     const { sendSocketMessage, socketData, isConnected } = useContext(SocketContext);
     const [products, setProducts] = useState([]);
     const [anchorEl, setAnchorEl] = useState(null);
@@ -54,11 +57,39 @@ export default function ProductManager() {
     }, [isConnected]);
 
     useEffect(() => {
-        if (socketData && socketData.type === getProductsMessageType) {
+
+        if (!socketData || !socketData.message)
+            return;
+
+        if (socketData.type === 'updateProduct') {
+            if (socketData.message.status === "success" && socketData.message.updatedProduct) {
+
+                setProducts(prevState => prevState.map(product => {
+
+                    if (product._id === socketData.message.updatedProduct._id)
+                        return socketData.message.updatedProduct;
+
+                    return product;
+                }));
+                setOpenEditProductDialog(false);
+            }
+            return
+        }
+
+        if (socketData.type === getProductsMessageType) {
             if (socketData.message && socketData.message.status === 'success' && socketData.message.products) {
                 setProducts(socketData.message.products);
             }
+            return;
         }
+
+        if (socketData.type === deleteProductMessageType) {
+            enqueueSnackbar(socketData.message.message, {variant: socketData.message.status});
+
+            if (socketData.message.status === "success")
+                setProducts(prevState => prevState.filter(porduct => porduct._id !== socketData.message.deletedProductId));
+        }
+        // eslint-disable-next-line
     }, [socketData]);
 
     const handleClick = (event, product) => {
@@ -146,18 +177,13 @@ export default function ProductManager() {
                     <div key={product._id}>
                         <Card variant="outlined" sx={{ borderRadius: 2, boxShadow: 2, height: '100%' }}>
                             <CardHeader
-                                avatar={
-                                    <Avatar sx={{ bgcolor: deepPurple[500], width: 40, height: 40 }}>
-                                        {product.productname.charAt(0)}
-                                    </Avatar>
-                                }
                                 title={
                                     <Typography variant="h6" noWrap>
                                         {product.productname}
                                     </Typography>
                                 }
                                 subheader={
-                                    <Typography variant="body2" color="textSecondary">
+                                    <Typography variant="body2" color="textPrimary">
                                         {`Kategori: ${product.productcategory}`}
                                     </Typography>
                                 }
@@ -172,7 +198,7 @@ export default function ProductManager() {
                                 }
                             />
                             <CardContent>
-                                <Typography variant="body2" color="textSecondary" gutterBottom>
+                                <Typography variant="body2" color="textPrimary" gutterBottom>
                                     <strong>Boyutlar ve Fiyatlar:</strong>
                                 </Typography>
                                 <List dense>
@@ -186,7 +212,7 @@ export default function ProductManager() {
                                     ))}
                                 </List>
                                 <Divider sx={{ my: 1 }} />
-                                <Typography variant="body2" color="textSecondary" gutterBottom>
+                                <Typography variant="body2" color="textPrimary" gutterBottom>
                                     <strong>İçerikler:</strong>
                                 </Typography>
                                 <List dense>
@@ -206,7 +232,7 @@ export default function ProductManager() {
                                     )}
                                 </List>
                                 <Divider sx={{ my: 1 }} />
-                                <Typography variant="body2" color="textSecondary">
+                                <Typography variant="body2" color="textPrimary">
                                     <strong>Oluşturulma Tarihi:</strong> {formatDate(product.createdDate)}
                                 </Typography>
                             </CardContent>
@@ -323,8 +349,8 @@ export default function ProductManager() {
                         <CloseIcon />
                     </IconButton>
                 </DialogTitle>
-                <DialogContent>
-                    {/* EditProduct bileşenini burada ekleyin */}
+                <DialogContent className="custom-scrollbar" sx={{overflowY: 'auto'}}>
+                    {currentProduct && <CreateProduct productId={currentProduct._id} onClose={handleCloseEditProductDialog}/>}
                 </DialogContent>
             </Dialog>
 
@@ -344,7 +370,7 @@ export default function ProductManager() {
                         <Button onClick={handleCancelDelete} color="primary" sx={{ mr: 1 }}>
                             İptal
                         </Button>
-                        <Button onClick={handleConfirmDelete} color="secondary">
+                        <Button onClick={handleConfirmDelete} color="primary">
                             Sil
                         </Button>
                     </Box>
