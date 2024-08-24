@@ -2,7 +2,6 @@
 import React, {useContext, useEffect, useState} from "react";
 import {SocketContext} from "../../context/SocketContext";
 import {
-    Avatar,
     Box,
     Button,
     Card,
@@ -11,7 +10,6 @@ import {
     Dialog,
     DialogContent,
     DialogTitle,
-    Divider,
     IconButton,
     List,
     ListItem,
@@ -21,12 +19,10 @@ import {
     MenuItem,
     Typography,
     useMediaQuery,
-    useTheme,
-    Chip
+    useTheme
 } from "@mui/material";
 import Masonry from "@mui/lab/Masonry";
 import CoffeeIcon from '@mui/icons-material/EmojiFoodBeverageRounded';
-import {deepPurple} from "@mui/material/colors";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import InfoIcon from "@mui/icons-material/Info";
 import EditIcon from "@mui/icons-material/Edit";
@@ -34,10 +30,12 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
 import CreateProduct from "./CreateProduct";
 import {useSnackbar} from "notistack";
+import LoadingProductsSkeleton from './LoadingProductsSkeleton'
 
 export default function ProductManager() {
     const {enqueueSnackbar} = useSnackbar();
     const {sendSocketMessage, socketData, isConnected} = useContext(SocketContext);
+    const [isLoading, setIsLoading] = useState(true);
     const [products, setProducts] = useState([]);
     const [anchorEl, setAnchorEl] = useState(null);
     const [currentProduct, setCurrentProduct] = useState(null);
@@ -51,6 +49,7 @@ export default function ProductManager() {
 
     useEffect(() => {
         if (isConnected) {
+            setIsLoading(true);
             sendSocketMessage({}, getProductsMessageType);
         }
         // eslint-disable-next-line
@@ -76,6 +75,7 @@ export default function ProductManager() {
         if (socketData.type === getProductsMessageType) {
             if (socketData.message && socketData.message.status === 'success' && socketData.message.products) {
                 setProducts(socketData.message.products);
+                setIsLoading(false);
             }
             return;
         }
@@ -88,6 +88,10 @@ export default function ProductManager() {
         }
         // eslint-disable-next-line
     }, [socketData]);
+
+    if (isLoading) {
+        return (<LoadingProductsSkeleton/>)
+    }
 
     const handleClick = (event, product) => {
         setAnchorEl(event.currentTarget);
