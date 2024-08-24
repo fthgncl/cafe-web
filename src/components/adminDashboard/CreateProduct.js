@@ -13,21 +13,23 @@ import {
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/AddCircleOutlineTwoTone';
 import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
-import { useFormik } from 'formik';
-import { productSchema } from '../../schemas/productSchema';
-import { useContext, useEffect, useState } from 'react';
-import { SocketContext } from '../../context/SocketContext';
-import { useSnackbar } from 'notistack';
+import {useFormik} from 'formik';
+import {productSchema} from '../../schemas/productSchema';
+import {useContext, useEffect, useState} from 'react';
+import {SocketContext} from '../../context/SocketContext';
+import {useSnackbar} from 'notistack';
 import CoffeeIcon from '@mui/icons-material/EmojiFoodBeverageRounded';
 import Avatar from "@mui/material/Avatar";
 import Paper from "@mui/material/Paper";
+import {AccountContext} from "../../context/AccountContext";
 
-export default function ProductForm({productId = null , onClose}) {
+export default function ProductForm({productId = null, onClose}) {
 
-    const { enqueueSnackbar } = useSnackbar();
+    const {enqueueSnackbar} = useSnackbar();
     const [isLoading, setIsLoading] = useState(false);
     const [productData, setProductData] = useState(null);
-    const { sendSocketMessage, socketData } = useContext(SocketContext);
+    const {accountProps} = useContext(AccountContext);
+    const {sendSocketMessage, socketData} = useContext(SocketContext);
     const isEditMode = !!productId;
     const messageType = isEditMode ? 'updateProduct' : 'createProduct';
     const newProductMessageType = 'newProduct';
@@ -36,14 +38,13 @@ export default function ProductForm({productId = null , onClose}) {
         if (!socketData || !socketData.message)
             return;
 
-
-        console.log(socketData);
-
         if (socketData.type === newProductMessageType) {
             if (socketData.message.status === "success" && socketData.message.product) {
-                setProductData(socketData.message.product);
-                setIsLoading(false);
-                onClose();
+                if (socketData.message.addedByToken === accountProps.oldToken) {
+                    setProductData(socketData.message.product);
+                    setIsLoading(false);
+                    onClose();
+                }
             }
             return
         }
@@ -61,7 +62,7 @@ export default function ProductForm({productId = null , onClose}) {
             }
 
             if (Object.keys(apiErrors).length === 0 && socketData.message.message && socketData.message.status) {
-                enqueueSnackbar(socketData.message.message, { variant: socketData.message.status });
+                enqueueSnackbar(socketData.message.message, {variant: socketData.message.status});
             }
 
             if (socketData.message.status === 'success') {
@@ -76,7 +77,7 @@ export default function ProductForm({productId = null , onClose}) {
 
     const onSubmit = async (values) => {
         setIsLoading(true);
-        const payload = { ...values };
+        const payload = {...values};
         if (isEditMode) {
             payload.productId = productId;
         }
@@ -87,7 +88,7 @@ export default function ProductForm({productId = null , onClose}) {
         initialValues: {
             productname: '',
             productcategory: '',
-            sizes: [{ size: 'Standart', price: '' }],
+            sizes: [{size: 'Standart', price: ''}],
             contents: []
         },
         validationSchema: productSchema,
@@ -101,7 +102,7 @@ export default function ProductForm({productId = null , onClose}) {
                 values: {
                     productname: productData.productname || '',
                     productcategory: productData.productcategory || '',
-                    sizes: productData.sizes || [{ size: 'Standart', price: '' }],
+                    sizes: productData.sizes || [{size: 'Standart', price: ''}],
                     contents: productData.contents || [],
                 }
             });
@@ -114,7 +115,7 @@ export default function ProductForm({productId = null , onClose}) {
             // En az bir boyut olması gerekiyor
             return;
         }
-        formik.setFieldValue('sizes', [...formik.values.sizes, { size: '', price: '' }]);
+        formik.setFieldValue('sizes', [...formik.values.sizes, {size: '', price: ''}]);
     };
 
     const handleRemoveSize = (index) => {
@@ -125,15 +126,15 @@ export default function ProductForm({productId = null , onClose}) {
     };
 
     const handleSizeChange = (index, event) => {
-        const { name, value } = event.target;
+        const {name, value} = event.target;
         const newSizes = formik.values.sizes.map((size, i) =>
-            i === index ? { ...size, [name]: value } : size
+            i === index ? {...size, [name]: value} : size
         );
         formik.setFieldValue('sizes', newSizes);
     };
 
     const handleAddContent = () => {
-        formik.setFieldValue('contents', [...formik.values.contents, { name: '', extraFee: '' }]);
+        formik.setFieldValue('contents', [...formik.values.contents, {name: '', extraFee: ''}]);
     };
 
     const handleRemoveContent = (index) => {
@@ -142,16 +143,16 @@ export default function ProductForm({productId = null , onClose}) {
     };
 
     const handleContentChange = (index, event) => {
-        const { name, value } = event.target;
+        const {name, value} = event.target;
         const newContents = formik.values.contents.map((content, i) =>
-            i === index ? { ...content, [name]: value } : content
+            i === index ? {...content, [name]: value} : content
         );
         formik.setFieldValue('contents', newContents);
     };
 
     return (
         <Container component="main" maxWidth="xs">
-            <CssBaseline />
+            <CssBaseline/>
             <Box
                 sx={{
                     marginTop: 4,
@@ -181,171 +182,184 @@ export default function ProductForm({productId = null , onClose}) {
                         }}
                     >
                         <Avatar sx={{m: 1, bgcolor: 'primary.main'}}>
-                    <CoffeeIcon/>
-                </Avatar>
-                <Typography component="h1" variant="h5" sx={{mb: 2}}>
-                    Yeni Ürün Ekle
-                </Typography>
-                <Box sx={{
-                    backgroundColor: '#ffffff',
-                    overflow: 'hidden',
-                    mt: 3
-                }}>
+                            <CoffeeIcon/>
+                        </Avatar>
+                        <Typography component="h1" variant="h5" sx={{mb: 2}}>
+                            Yeni Ürün Ekle
+                        </Typography>
+                        <Box sx={{
+                            backgroundColor: '#ffffff',
+                            overflow: 'hidden',
+                            mt: 3
+                        }}>
 
-                    <Box sx={{ width: 1, display: 'flex', padding: 2 }}>
-                        <form onSubmit={formik.handleSubmit}>
-                            <Grid container spacing={2}>
+                            <Box sx={{width: 1, display: 'flex', padding: 2}}>
+                                <form onSubmit={formik.handleSubmit}>
+                                    <Grid container spacing={2}>
 
-                                <Grid item xs={12}>
-                                    <TextField
-                                        required
-                                        fullWidth
-                                        id="productname"
-                                        label="Ürün Adı"
-                                        name="productname"
-                                        value={formik.values.productname}
-                                        onChange={formik.handleChange}
-                                        onBlur={formik.handleBlur}
-                                        error={Boolean(formik.errors.productname) && formik.touched.productname}
-                                        helperText={formik.touched.productname && formik.errors.productname}
-                                    />
-                                </Grid>
+                                        <Grid item xs={12}>
+                                            <TextField
+                                                required
+                                                fullWidth
+                                                id="productname"
+                                                label="Ürün Adı"
+                                                name="productname"
+                                                value={formik.values.productname}
+                                                onChange={formik.handleChange}
+                                                onBlur={formik.handleBlur}
+                                                error={Boolean(formik.errors.productname) && formik.touched.productname}
+                                                helperText={formik.touched.productname && formik.errors.productname}
+                                            />
+                                        </Grid>
 
-                                <Grid item xs={12}>
-                                    <TextField
-                                        required
-                                        fullWidth
-                                        id="productcategory"
-                                        label="Kategori"
-                                        name="productcategory"
-                                        value={formik.values.productcategory}
-                                        onChange={formik.handleChange}
-                                        onBlur={formik.handleBlur}
-                                        error={Boolean(formik.errors.productcategory) && formik.touched.productcategory}
-                                        helperText={formik.touched.productcategory && formik.errors.productcategory}
-                                    />
-                                </Grid>
+                                        <Grid item xs={12}>
+                                            <TextField
+                                                required
+                                                fullWidth
+                                                id="productcategory"
+                                                label="Kategori"
+                                                name="productcategory"
+                                                value={formik.values.productcategory}
+                                                onChange={formik.handleChange}
+                                                onBlur={formik.handleBlur}
+                                                error={Boolean(formik.errors.productcategory) && formik.touched.productcategory}
+                                                helperText={formik.touched.productcategory && formik.errors.productcategory}
+                                            />
+                                        </Grid>
 
-                                <Grid item xs={12}>
-                                    <Box sx={{ marginTop: 2, textAlign: 'center' }}>
-                                        <Typography variant="h6" gutterBottom>
-                                            Ürün Boyutları
-                                        </Typography>
-                                        {formik.values.sizes.map((size, index) => (
-                                            <Box key={index} sx={{ marginBottom: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                                <Box sx={{ display: 'flex', gap: 2, flexGrow: 1 }}>
-                                                    <TextField
-                                                        required
-                                                        fullWidth
-                                                        label="Boyut Adı"
-                                                        name="size"
-                                                        value={size.size}
-                                                        onChange={(event) => handleSizeChange(index, event)}
-                                                    />
-                                                    <TextField
-                                                        required
-                                                        fullWidth
-                                                        label="Fiyat (₺)"
-                                                        name="price"
-                                                        type="number"
-                                                        value={size.price}
-                                                        InputProps={{
-                                                            startAdornment: <InputAdornment position="start">₺</InputAdornment>,
-                                                        }}
-                                                        onChange={(event) => handleSizeChange(index, event)}
-                                                    />
-                                                </Box>
-                                                <IconButton
-                                                    color="error"
-                                                    onClick={() => handleRemoveSize(index)}
-                                                    sx={{ marginLeft: 2 }}
+                                        <Grid item xs={12}>
+                                            <Box sx={{marginTop: 2, textAlign: 'center'}}>
+                                                <Typography variant="h6" gutterBottom>
+                                                    Ürün Boyutları
+                                                </Typography>
+                                                {formik.values.sizes.map((size, index) => (
+                                                    <Box key={index} sx={{
+                                                        marginBottom: 2,
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'space-between'
+                                                    }}>
+                                                        <Box sx={{display: 'flex', gap: 2, flexGrow: 1}}>
+                                                            <TextField
+                                                                required
+                                                                fullWidth
+                                                                label="Boyut Adı"
+                                                                name="size"
+                                                                value={size.size}
+                                                                onChange={(event) => handleSizeChange(index, event)}
+                                                            />
+                                                            <TextField
+                                                                required
+                                                                fullWidth
+                                                                label="Fiyat (₺)"
+                                                                name="price"
+                                                                type="number"
+                                                                value={size.price}
+                                                                InputProps={{
+                                                                    startAdornment: <InputAdornment
+                                                                        position="start">₺</InputAdornment>,
+                                                                }}
+                                                                onChange={(event) => handleSizeChange(index, event)}
+                                                            />
+                                                        </Box>
+                                                        <IconButton
+                                                            color="error"
+                                                            onClick={() => handleRemoveSize(index)}
+                                                            sx={{marginLeft: 2}}
+                                                        >
+                                                            <CancelOutlinedIcon/>
+                                                        </IconButton>
+                                                    </Box>
+                                                ))}
+                                                <Button
+                                                    sx={{
+                                                        height: '30px',
+                                                        textTransform: 'none'
+                                                    }}
+                                                    variant="outlined"
+                                                    startIcon={<AddIcon/>}
+                                                    onClick={handleAddSize}
                                                 >
-                                                    <CancelOutlinedIcon />
-                                                </IconButton>
+                                                    Boyut Ekle
+                                                </Button>
                                             </Box>
-                                        ))}
-                                        <Button
-                                            sx={{
-                                                height: '30px',
-                                                textTransform: 'none'
-                                            }}
-                                            variant="outlined"
-                                            startIcon={<AddIcon />}
-                                            onClick={handleAddSize}
-                                        >
-                                            Boyut Ekle
-                                        </Button>
-                                    </Box>
-                                </Grid>
+                                        </Grid>
 
-                                <Grid item xs={12}>
-                                    <Box sx={{ marginTop: 2, textAlign: 'center' }}>
-                                        <Typography variant="h6" gutterBottom>
-                                            Ürün İçeriği
-                                        </Typography>
-                                        {formik.values.contents.map((content, index) => (
-                                            <Box key={index} sx={{ marginBottom: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                                <Box sx={{ display: 'flex', gap: 2, flexGrow: 1 }}>
-                                                    <TextField
-                                                        required
-                                                        fullWidth
-                                                        label="İçerik Adı"
-                                                        name="name"
-                                                        value={content.name}
-                                                        onChange={(event) => handleContentChange(index, event)}
-                                                    />
-                                                    <TextField
-                                                        required
-                                                        fullWidth
-                                                        label="Ek Ücret (₺)"
-                                                        name="extraFee"
-                                                        type="number"
-                                                        value={content.extraFee}
-                                                        InputProps={{
-                                                            startAdornment: <InputAdornment position="start">₺</InputAdornment>,
-                                                        }}
-                                                        onChange={(event) => handleContentChange(index, event)}
-                                                    />
-                                                </Box>
-                                                <IconButton
-                                                    color="error"
-                                                    onClick={() => handleRemoveContent(index)}
-                                                    sx={{ marginLeft: 2 }}
+                                        <Grid item xs={12}>
+                                            <Box sx={{marginTop: 2, textAlign: 'center'}}>
+                                                <Typography variant="h6" gutterBottom>
+                                                    Ürün İçeriği
+                                                </Typography>
+                                                {formik.values.contents.map((content, index) => (
+                                                    <Box key={index} sx={{
+                                                        marginBottom: 2,
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'space-between'
+                                                    }}>
+                                                        <Box sx={{display: 'flex', gap: 2, flexGrow: 1}}>
+                                                            <TextField
+                                                                required
+                                                                fullWidth
+                                                                label="İçerik Adı"
+                                                                name="name"
+                                                                value={content.name}
+                                                                onChange={(event) => handleContentChange(index, event)}
+                                                            />
+                                                            <TextField
+                                                                required
+                                                                fullWidth
+                                                                label="Ek Ücret (₺)"
+                                                                name="extraFee"
+                                                                type="number"
+                                                                value={content.extraFee}
+                                                                InputProps={{
+                                                                    startAdornment: <InputAdornment
+                                                                        position="start">₺</InputAdornment>,
+                                                                }}
+                                                                onChange={(event) => handleContentChange(index, event)}
+                                                            />
+                                                        </Box>
+                                                        <IconButton
+                                                            color="error"
+                                                            onClick={() => handleRemoveContent(index)}
+                                                            sx={{marginLeft: 2}}
+                                                        >
+                                                            <CancelOutlinedIcon/>
+                                                        </IconButton>
+                                                    </Box>
+                                                ))}
+                                                <Button
+                                                    sx={{
+                                                        height: '30px',
+                                                        textTransform: 'none'
+                                                    }}
+                                                    variant="outlined"
+                                                    startIcon={<AddIcon/>}
+                                                    onClick={handleAddContent}
                                                 >
-                                                    <CancelOutlinedIcon />
-                                                </IconButton>
+                                                    İçerik Ekle
+                                                </Button>
                                             </Box>
-                                        ))}
-                                        <Button
-                                            sx={{
-                                                height: '30px',
-                                                textTransform: 'none'
-                                            }}
-                                            variant="outlined"
-                                            startIcon={<AddIcon />}
-                                            onClick={handleAddContent}
-                                        >
-                                            İçerik Ekle
-                                        </Button>
-                                    </Box>
-                                </Grid>
+                                        </Grid>
 
-                                <Grid item xs={12}>
-                                    <Button
-                                        type="submit"
-                                        fullWidth
-                                        variant="contained"
-                                        sx={{ mt: 3, mb: 2 }}
-                                        disabled={isLoading}
-                                    >
-                                        {isLoading ? <CircularProgress color="inherit" size={24} /> : isEditMode ? 'Güncelle' : 'Kaydet'}
-                                    </Button>
-                                </Grid>
+                                        <Grid item xs={12}>
+                                            <Button
+                                                type="submit"
+                                                fullWidth
+                                                variant="contained"
+                                                sx={{mt: 3, mb: 2}}
+                                                disabled={isLoading}
+                                            >
+                                                {isLoading ? <CircularProgress color="inherit"
+                                                                               size={24}/> : isEditMode ? 'Güncelle' : 'Kaydet'}
+                                            </Button>
+                                        </Grid>
 
-                            </Grid>
-                        </form>
-                    </Box>
-                </Box>
+                                    </Grid>
+                                </form>
+                            </Box>
+                        </Box>
                     </Box>
                 </Paper>
             </Box>
