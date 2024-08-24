@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useContext, useState} from 'react';
 import { Container, Tabs, Tab, Box, Typography, Paper, useMediaQuery } from '@mui/material';
 import PeopleIcon from '@mui/icons-material/People';
 import InventoryIcon from '@mui/icons-material/Inventory';
@@ -6,12 +6,17 @@ import AssessmentIcon from '@mui/icons-material/Assessment';
 import { useTheme } from '@mui/material/styles';
 
 import UserManagement from '../components/adminDashboard/UserManagement';
+import {AccountContext} from "../context/AccountContext";
 // Diğer bileşenleriniz burada import edilecek
 
 function AdminDashboard() {
-    const [selectedTab, setSelectedTab] = useState(0);
+    const {checkPermissions} = useContext(AccountContext);
+    const [selectedTab, setSelectedTab] = useState(null);
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const isSysAdmin = checkPermissions("a");
+    const isProductManager = checkPermissions("b");
+    const isReportViewer = checkPermissions("c");
 
     const handleChange = (event, newValue) => {
         setSelectedTab(newValue);
@@ -21,7 +26,6 @@ function AdminDashboard() {
         switch (selectedTab) {
             case 0:
                 return <UserManagement />;
-            // Diğer durumlar için ek bileşenler
             case 1:
                 return <Box textAlign="center">Ürün Yönetimi İçeriği</Box>; // Bu kısımları bileşenlerle değiştirin
             case 2:
@@ -60,9 +64,10 @@ function AdminDashboard() {
                         },
                     }}
                 >
-                    <Tab icon={<PeopleIcon />} label="Kullanıcı Yönetimi" />
-                    <Tab icon={<InventoryIcon />} label="Ürün Yönetimi" />
-                    <Tab icon={<AssessmentIcon />} label="Satış Raporları" />
+                    <Tab disabled={!isSysAdmin} icon={<PeopleIcon />} label="Kullanıcı Yönetimi" />
+                    <Tab disabled={!isProductManager} icon={<InventoryIcon />} label="Ürün Yönetimi" />
+                    <Tab disabled={!isReportViewer} icon={<AssessmentIcon />} label="Satış Raporları" />
+
                 </Tabs>
             </Paper>
             <Box
