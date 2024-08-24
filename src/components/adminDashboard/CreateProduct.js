@@ -32,25 +32,33 @@ export default function ProductForm({productId = null, onClose}) {
     const {sendSocketMessage, socketData} = useContext(SocketContext);
     const isEditMode = !!productId;
     const messageType = isEditMode ? 'updateProduct' : 'createProduct';
+    const getProductMessageType = 'getProduct';
     const newProductMessageType = 'newProduct';
+
+    useEffect(() => {
+        if (!!productId)
+            sendSocketMessage({productId}, getProductMessageType)
+        // eslint-disable-next-line 
+    }, []);
 
     useEffect(() => {
         if (!socketData || !socketData.message)
             return;
 
-        if (socketData.type === newProductMessageType) {
+        console.log(socketData);
+
+        if (socketData.type === getProductMessageType) {
             if (socketData.message.status === "success" && socketData.message.product) {
-                if (socketData.message.addedByToken === accountProps.oldToken) {
-                    setProductData(socketData.message.product);
-                    setIsLoading(false);
-                    onClose();
-                }
+                setProductData(socketData.message.product);
+                setIsLoading(false);
             }
-            return
+            return;
         }
 
+        if (socketData.type === newProductMessageType) {
 
-        if (socketData.type === messageType) {
+            if (accountProps.oldToken !== socketData.message.addedByToken)
+                return;
 
             let apiErrors = {};
             if (socketData.message.status === 'error') {
@@ -65,7 +73,9 @@ export default function ProductForm({productId = null, onClose}) {
                 enqueueSnackbar(socketData.message.message, {variant: socketData.message.status});
             }
 
+
             if (socketData.message.status === 'success') {
+                onClose();
                 formik.resetForm();
             }
 
@@ -185,7 +195,7 @@ export default function ProductForm({productId = null, onClose}) {
                             <CoffeeIcon/>
                         </Avatar>
                         <Typography component="h1" variant="h5" sx={{mb: 2}}>
-                            Yeni Ürün Ekle
+                            {isEditMode ? "Ürünü Düzenle" : "Yeni Ürün Ekle"}
                         </Typography>
                         <Box sx={{
                             backgroundColor: '#ffffff',

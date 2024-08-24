@@ -24,32 +24,32 @@ import {systemPermissions} from '../../config';
 import Alert from '@mui/material/Alert';
 import {useSnackbar} from 'notistack';
 import Paper from "@mui/material/Paper";
+import {AccountContext} from "../../context/AccountContext";
 
-export default function SignUp({userId = null}) {
+export default function SignUp({userId = null,onClose}) {
     const {enqueueSnackbar} = useSnackbar();
     const [userData, setUserData] = useState(null);
     const [errorMessage, setErrorMessage] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const {accountProps} = useContext(AccountContext);
     const {sendSocketMessage, socketData} = useContext(SocketContext);
     const isEditMode = !!userId;
     const messageType = isEditMode ? 'updateUser' : 'createUser';
-    const getUserMessageType = 'getUser';
-
-    useEffect(() => {
-        if (isEditMode)
-            sendSocketMessage({userId}, getUserMessageType);
-        // eslint-disable-next-line
-    }, [isEditMode, userId]);
+    const newUserMessageType = 'newUser';
 
     useEffect(() => {
         if (!socketData || !socketData.message)
             return;
 
-        if (socketData.type === getUserMessageType) {
+        if (socketData.type === newUserMessageType) {
             if (socketData.message.status === "success" && socketData.message.user) {
-                setUserData(socketData.message.user);
-                setIsLoading(false);
+                console.log(socketData.message.addedByToken, accountProps.oldToken)
+                if (socketData.message.addedByToken === accountProps.oldToken) {
+                    setUserData(socketData.message.user);
+                    setIsLoading(false);
+                    onClose();
+                }
             }
         }
         // eslint-disable-next-line
