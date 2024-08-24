@@ -4,7 +4,7 @@ import AdminDashBoardPage from "./pages/AdminDashBoardPage";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import CreateUser from "./components/adminDashboard/CreateUser";
-import CreateProduct from "./pages/CreateProduct";
+import CreateProduct from "./components/adminDashboard/CreateProduct";
 import OrderEntry from "./pages/OrderEntry";
 import OrdersPage from "./pages/OrdersPage";
 import NotConnected from "./pages/NotConnected";

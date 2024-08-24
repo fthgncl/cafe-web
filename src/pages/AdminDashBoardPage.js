@@ -6,12 +6,12 @@ import AssessmentIcon from '@mui/icons-material/Assessment';
 import { useTheme } from '@mui/material/styles';
 
 import UserManagement from '../components/adminDashboard/UserManagement';
+import ProductManager from '../components/adminDashboard/ProductManager';
 import {AccountContext} from "../context/AccountContext";
-// Diğer bileşenleriniz burada import edilecek
 
 function AdminDashboard() {
     const {checkPermissions} = useContext(AccountContext);
-    const [selectedTab, setSelectedTab] = useState(false);
+    const [selectedTab, setSelectedTab] = useState(1);
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const isSysAdmin = checkPermissions("a");
@@ -27,7 +27,7 @@ function AdminDashboard() {
             case 0:
                 return <UserManagement />;
             case 1:
-                return <Box textAlign="center">Ürün Yönetimi İçeriği</Box>; // Bu kısımları bileşenlerle değiştirin
+                return <ProductManager />;
             case 2:
                 return <Box textAlign="center">Satış Raporları İçeriği</Box>; // Bu kısımları bileşenlerle değiştirin
             default:

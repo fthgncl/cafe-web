@@ -14,12 +14,13 @@ import {
 import AddIcon from '@mui/icons-material/AddCircleOutlineTwoTone';
 import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
 import { useFormik } from 'formik';
-import { productSchema } from '../schemas/productSchema';
+import { productSchema } from '../../schemas/productSchema';
 import { useContext, useEffect, useState } from 'react';
-import { SocketContext } from '../context/SocketContext';
+import { SocketContext } from '../../context/SocketContext';
 import { useSnackbar } from 'notistack';
+import CoffeeIcon from '@mui/icons-material/EmojiFoodBeverageRounded';
 import Avatar from "@mui/material/Avatar";
-import EmojiFoodBeverageTwoToneIcon from '@mui/icons-material/EmojiFoodBeverageTwoTone';
+import Paper from "@mui/material/Paper";
 
 export default function ProductForm() {
     const { enqueueSnackbar } = useSnackbar();
@@ -111,16 +112,36 @@ export default function ProductForm() {
             <CssBaseline />
             <Box
                 sx={{
-                    marginTop: 8,
+                    marginTop: 4,
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
+                    width: '100%',
                 }}
             >
-                <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-                    <EmojiFoodBeverageTwoToneIcon />
+                <Paper
+                    elevation={3}
+                    sx={{
+                        padding: 2,
+                        borderRadius: 2,
+                        width: '100%',
+                        boxSizing: 'border-box',
+                        maxWidth: '100%',
+                        margin: 'auto'
+                    }}
+                >
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            width: '100%',
+                        }}
+                    >
+                        <Avatar sx={{m: 1, bgcolor: 'primary.main'}}>
+                    <CoffeeIcon/>
                 </Avatar>
-                <Typography component="h1" variant="h5">
+                <Typography component="h1" variant="h5" sx={{mb: 2}}>
                     Ürün Ekle
                 </Typography>
                 <Box sx={{
@@ -283,6 +304,8 @@ export default function ProductForm() {
                         </form>
                     </Box>
                 </Box>
+                    </Box>
+                </Paper>
             </Box>
         </Container>
     );
