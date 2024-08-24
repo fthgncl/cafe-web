@@ -22,7 +22,7 @@ import CoffeeIcon from '@mui/icons-material/EmojiFoodBeverageRounded';
 import Avatar from "@mui/material/Avatar";
 import Paper from "@mui/material/Paper";
 
-export default function ProductForm({productId = null}) {
+export default function ProductForm({productId = null , onClose}) {
 
     const { enqueueSnackbar } = useSnackbar();
     const [isLoading, setIsLoading] = useState(false);
@@ -30,22 +30,20 @@ export default function ProductForm({productId = null}) {
     const { sendSocketMessage, socketData } = useContext(SocketContext);
     const isEditMode = !!productId;
     const messageType = isEditMode ? 'updateProduct' : 'createProduct';
-    const getProductMessageType = 'getProduct';
-
-    useEffect(() => {
-        if (isEditMode)
-            sendSocketMessage({productId}, getProductMessageType);
-        // eslint-disable-next-line
-    }, [isEditMode, productId]);
+    const newProductMessageType = 'newProduct';
 
     useEffect(() => {
         if (!socketData || !socketData.message)
             return;
 
-        if (socketData.type === getProductMessageType) {
+
+        console.log(socketData);
+
+        if (socketData.type === newProductMessageType) {
             if (socketData.message.status === "success" && socketData.message.product) {
                 setProductData(socketData.message.product);
                 setIsLoading(false);
+                onClose();
             }
             return
         }

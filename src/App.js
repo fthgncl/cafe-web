@@ -3,8 +3,6 @@ import {Routes, Route} from 'react-router-dom';
 import AdminDashBoardPage from "./pages/AdminDashBoardPage";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
-import CreateUser from "./components/adminDashboard/CreateUser";
-import CreateProduct from "./components/adminDashboard/CreateProduct";
 import OrderEntry from "./pages/OrderEntry";
 import OrdersPage from "./pages/OrdersPage";
 import NotConnected from "./pages/NotConnected";
@@ -58,18 +56,6 @@ function App() {
                 <AppBar/>
                 <Routes>
                     <Route path="/" element={<HomePage/>}/>
-
-                    <Route path="/create-user" element={<AuthorizedComponent
-                        element={<CreateUser/>}
-                        requiredPermissions=""
-                        fullMatch={false}
-                    />}/>
-
-                    <Route path="/create-product" element={<AuthorizedComponent
-                        element={<CreateProduct/>}
-                        requiredPermissions="b"
-                        fullMatch={false}
-                    />}/>
 
                     <Route path="/order-entry" element={<AuthorizedComponent
                         element={<OrderEntry/>}

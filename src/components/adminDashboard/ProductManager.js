@@ -44,6 +44,7 @@ export default function ProductManager() {
     const [openDeleteConfirmDialog, setOpenDeleteConfirmDialog] = useState(false);
     const getProductsMessageType = 'getProducts';
     const deleteProductMessageType = 'deleteProduct';
+    const newProductMessageType = 'newProduct';
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -58,6 +59,14 @@ export default function ProductManager() {
     useEffect(() => {
         if (!socketData || !socketData.message)
             return;
+
+        if (socketData.type === newProductMessageType) {
+            if (socketData.message && socketData.message.status === 'success' && socketData.message.product) {
+                setProducts(prevState => [...prevState,socketData.message.product] )
+                setIsLoading(false);
+            }
+            return;
+        }
 
         if (socketData.type === 'updateProduct') {
             if (socketData.message.status === "success" && socketData.message.updatedProduct) {
