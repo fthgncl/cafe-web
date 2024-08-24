@@ -3,7 +3,7 @@ import * as yup from 'yup'
 const passwordRules = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{5,}$/;
 const phoneRules = /^[0-9]{10}$/;
 
-export const userSchema = yup.object().shape({
+export const userSchema = (isEditMode) => yup.object().shape({
 
     firstname: yup
         .string()
@@ -29,18 +29,21 @@ export const userSchema = yup.object().shape({
             message: 'Geçerli bir telefon numarası giriniz.',
         }),
 
-    password: yup
-        .string()
-        .required('Lütfen bir şifre belirleyiniz.')
-        .min(6, 'Şifre en az 6 haneli olmalıdır.')
-        .matches(passwordRules, {
-            message: 'Şifre en az bir büyük , bir küçük harf ve bir sayı içermelidir.',
-        }),
+    // Şifre alanlarını sadece yeni kullanıcı oluşturma işlemi için zorunlu yapıyoruz
+    ...(isEditMode ? {} : {
+        password: yup
+            .string()
+            .required('Lütfen bir şifre belirleyiniz.')
+            .min(6, 'Şifre en az 6 haneli olmalıdır.')
+            .matches(passwordRules, {
+                message: 'Şifre en az bir büyük, bir küçük harf ve bir sayı içermelidir.',
+            }),
 
-    confirmPassword: yup
-        .string()
-        .oneOf([yup.ref('password')], 'Şifreler eşleşmiyor')
-        .required('Tekrar şifre girmek zorunludur'),
+        confirmPassword: yup
+            .string()
+            .oneOf([yup.ref('password')], 'Şifreler eşleşmiyor')
+            .required('Tekrar şifre girmek zorunludur'),
+    }),
 
     permissions: yup
         .string()

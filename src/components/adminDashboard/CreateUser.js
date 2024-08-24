@@ -13,32 +13,70 @@ import InputAdornment from "@mui/material/InputAdornment";
 import IconButton from "@mui/material/IconButton";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import Visibility from "@mui/icons-material/Visibility";
-import { useContext, useEffect, useState } from "react";
-import { useFormik } from 'formik';
-import { userSchema } from "../../schemas/userSchema";
-import { SocketContext } from "../../context/SocketContext";
+import {useContext, useEffect, useState} from "react";
+import {useFormik} from 'formik';
+import {userSchema} from "../../schemas/userSchema";
+import {SocketContext} from "../../context/SocketContext";
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
-import { systemPermissions } from '../../config';
+import {systemPermissions} from '../../config';
 import Alert from '@mui/material/Alert';
-import { useSnackbar } from 'notistack';
+import {useSnackbar} from 'notistack';
 import Paper from "@mui/material/Paper";
 
-export default function SignUp() {
-    const { enqueueSnackbar } = useSnackbar();
+export default function SignUp({userId = null}) {
+    const {enqueueSnackbar} = useSnackbar();
+    const [userData, setUserData] = useState(null);
     const [errorMessage, setErrorMessage] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const { sendSocketMessage, socketData } = useContext(SocketContext);
-    const messageType = 'createUser';
+    const {sendSocketMessage, socketData} = useContext(SocketContext);
+    const isEditMode = !!userId;
+    const messageType = isEditMode ? 'updateUser' : 'createUser';
+    const getUserMessageType = 'getUser';
 
-    const onSubmit = async (values, actions) => {
+    useEffect(() => {
+        if (isEditMode)
+            sendSocketMessage({userId}, getUserMessageType);
+        // eslint-disable-next-line
+    }, [isEditMode, userId]);
+
+    useEffect(() => {
+        if (!socketData || !socketData.message)
+            return;
+
+        if (socketData.type === getUserMessageType) {
+            if (socketData.message.status === "success" && socketData.message.user) {
+                setUserData(socketData.message.user);
+                setIsLoading(false);
+            }
+        }
+    }, [socketData]);
+
+    const onSubmit = async (values) => {
         setIsLoading(true);
-        sendSocketMessage(values, messageType);
+        const payload = { ...values };
+        if (isEditMode) {
+            payload.userId = userId;
+            delete payload.password;
+            delete payload.confirmPassword;
+        }
+        sendSocketMessage(payload, messageType);
     }
 
-    const { values, touched, handleBlur, errors, setErrors, isSubmitting, handleChange, handleSubmit, setFieldValue, resetForm } = useFormik({
+    const {
+        values,
+        touched,
+        handleBlur,
+        errors,
+        setErrors,
+        isSubmitting,
+        handleChange,
+        handleSubmit,
+        setFieldValue,
+        resetForm
+    } = useFormik({
         initialValues: {
             firstname: '',
             lastname: '',
@@ -46,16 +84,33 @@ export default function SignUp() {
             password: '',
             confirmPassword: '',
             phone: '',
-            permissions: ''
+            permissions: '',
         },
-        validationSchema: userSchema,
+        validationSchema: userSchema(isEditMode),
         onSubmit
     });
 
     useEffect(() => {
+        if (userData) {
+            // Formu sıfırla ve kullanıcı verileri ile doldur
+            resetForm({
+                values: {
+                    firstname: userData.firstname || '',
+                    lastname: userData.lastname || '',
+                    username: userData.username || '',
+                    password: '',
+                    confirmPassword: '',
+                    phone: userData.phone || '',
+                    permissions: userData.permissions || ''
+                }
+            });
+        }
+    }, [userData, resetForm]);
+
+    useEffect(() => {
         if (socketData && socketData.type === messageType) {
             if (socketData.message.message && socketData.message.status) {
-                enqueueSnackbar(socketData.message.message, { variant: socketData.message.status });
+                enqueueSnackbar(socketData.message.message, {variant: socketData.message.status});
             }
 
             if (socketData.message.status && socketData.message.status === 'success') {
@@ -81,7 +136,7 @@ export default function SignUp() {
     }, [socketData]);
 
     const handleCheckboxChange = (event) => {
-        const { value, checked } = event.target;
+        const {value, checked} = event.target;
         const permission = value;
 
         let currentPermissions = values.permissions.split('');
@@ -109,15 +164,15 @@ export default function SignUp() {
     };
 
     return (
-        <Container maxWidth="xs" sx={{ px: { xs: 0, sm: 2 } }}> {/* Container genişliği xs olarak ayarlandı */}
-            <CssBaseline />
+        <Container maxWidth="xs" sx={{px: {xs: 0, sm: 2}}}>
+            <CssBaseline/>
             <Box
                 sx={{
                     marginTop: 4,
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    width: '100%',  // Box'ın tam genişlikte olmasını sağlıyoruz.
+                    width: '100%',
                 }}
             >
                 <Paper
@@ -125,10 +180,10 @@ export default function SignUp() {
                     sx={{
                         padding: 2,
                         borderRadius: 2,
-                        width: '100%',  // Paper'ın genişliğini yüzde 100 yaparak ekranı doldurmasını sağlıyoruz.
-                        boxSizing: 'border-box', // Kenar boşluklarının genişlik hesaplamasına dahil edilmesini sağlıyoruz.
-                        maxWidth: '100%', // Mobilde tam genişlik, küçük ekranlarda %100'e kadar genişleyebilir.
-                        margin: 'auto' // Ekranda ortalanmasını sağlamak için margin ayarlandı.
+                        width: '100%',
+                        boxSizing: 'border-box',
+                        maxWidth: '100%',
+                        margin: 'auto'
                     }}
                 >
                     <Box
@@ -136,16 +191,16 @@ export default function SignUp() {
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center',
-                            width: '100%',  // Box'ın tam genişlikte olmasını sağlıyoruz.
+                            width: '100%',
                         }}
                     >
-                        <Avatar sx={{ m: 1, bgcolor: 'primary.main' }}>
-                            <PersonAddIcon />
+                        <Avatar sx={{m: 1, bgcolor: 'primary.main'}}>
+                            <PersonAddIcon/>
                         </Avatar>
-                        <Typography component="h1" variant="h5" sx={{ mb: 2 }}>
-                            Yeni Kullanıcı Ekle
+                        <Typography component="h1" variant="h5" sx={{mb: 2}}>
+                            {isEditMode ? 'Kullanıcıyı Düzenle' : 'Yeni Kullanıcı Ekle'}
                         </Typography>
-                        <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 2, width: '100%' }}>
+                        <Box component="form" noValidate onSubmit={handleSubmit} sx={{mt: 2, width: '100%'}}>
                             <Grid container spacing={3}>
                                 <Grid item xs={12} sm={6}>
                                     <TextField
@@ -212,67 +267,71 @@ export default function SignUp() {
                                         }}
                                     />
                                 </Grid>
-                                <Grid item xs={12}>
-                                    <TextField
-                                        margin="normal"
-                                        required
-                                        fullWidth
-                                        name="password"
-                                        label="Şifre"
-                                        type={showPassword ? 'text' : 'password'}
-                                        id="password"
-                                        autoComplete="current-password"
-                                        value={values.password}
-                                        onChange={handleChange}
-                                        onBlur={handleBlur}
-                                        error={Boolean(errors.password) && touched.password}
-                                        helperText={touched.password && errors.password}
-                                        InputProps={{
-                                            endAdornment: (
-                                                <InputAdornment position="end">
-                                                    <IconButton
-                                                        tabIndex={-1}
-                                                        aria-label="toggle password visibility"
-                                                        onClick={() => setShowPassword(!showPassword)}
-                                                        onMouseDown={(e) => e.preventDefault()}
-                                                    >
-                                                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                                                    </IconButton>
-                                                </InputAdornment>
-                                            ),
-                                        }}
-                                    />
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <TextField
-                                        onBlur={handleBlur}
-                                        helperText={touched.confirmPassword && errors.confirmPassword}
-                                        error={Boolean(errors.confirmPassword) && touched.confirmPassword}
-                                        value={values.confirmPassword}
-                                        name="confirmPassword"
-                                        onChange={handleChange}
-                                        required
-                                        fullWidth
-                                        label="Parola Tekrarı"
-                                        type={showPassword ? 'text' : 'password'}
-                                        id="confirmPassword"
-                                        autoComplete="new-password"
-                                        InputProps={{
-                                            endAdornment: (
-                                                <InputAdornment position="end">
-                                                    <IconButton
-                                                        tabIndex={-1}
-                                                        aria-label="toggle password visibility"
-                                                        onClick={() => setShowPassword(!showPassword)}
-                                                        onMouseDown={(e) => e.preventDefault()}
-                                                    >
-                                                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                                                    </IconButton>
-                                                </InputAdornment>
-                                            ),
-                                        }}
-                                    />
-                                </Grid>
+                                {!isEditMode && (
+                                    <>
+                                        <Grid item xs={12}>
+                                            <TextField
+                                                margin="normal"
+                                                required
+                                                fullWidth
+                                                name="password"
+                                                label="Şifre"
+                                                type={showPassword ? 'text' : 'password'}
+                                                id="password"
+                                                autoComplete="current-password"
+                                                value={values.password}
+                                                onChange={handleChange}
+                                                onBlur={handleBlur}
+                                                error={Boolean(errors.password) && touched.password}
+                                                helperText={touched.password && errors.password}
+                                                InputProps={{
+                                                    endAdornment: (
+                                                        <InputAdornment position="end">
+                                                            <IconButton
+                                                                tabIndex={-1}
+                                                                aria-label="toggle password visibility"
+                                                                onClick={() => setShowPassword(!showPassword)}
+                                                                onMouseDown={(e) => e.preventDefault()}
+                                                            >
+                                                                {showPassword ? <VisibilityOff/> : <Visibility/>}
+                                                            </IconButton>
+                                                        </InputAdornment>
+                                                    ),
+                                                }}
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <TextField
+                                                onBlur={handleBlur}
+                                                helperText={touched.confirmPassword && errors.confirmPassword}
+                                                error={Boolean(errors.confirmPassword) && touched.confirmPassword}
+                                                value={values.confirmPassword}
+                                                name="confirmPassword"
+                                                onChange={handleChange}
+                                                required
+                                                fullWidth
+                                                label="Parola Tekrarı"
+                                                type={showPassword ? 'text' : 'password'}
+                                                id="confirmPassword"
+                                                autoComplete="new-password"
+                                                InputProps={{
+                                                    endAdornment: (
+                                                        <InputAdornment position="end">
+                                                            <IconButton
+                                                                tabIndex={-1}
+                                                                aria-label="toggle password visibility"
+                                                                onClick={() => setShowPassword(!showPassword)}
+                                                                onMouseDown={(e) => e.preventDefault()}
+                                                            >
+                                                                {showPassword ? <VisibilityOff/> : <Visibility/>}
+                                                            </IconButton>
+                                                        </InputAdornment>
+                                                    ),
+                                                }}
+                                            />
+                                        </Grid>
+                                    </>
+                                )}
                                 <Grid item xs={12}>
                                     <UserPermissionsCheckboxGroup
                                         onChange={handleCheckboxChange}
@@ -281,12 +340,12 @@ export default function SignUp() {
                                 </Grid>
                             </Grid>
                             {!!errors.permissions && (
-                                <Alert sx={{ mt: 2 }} severity="error">
+                                <Alert sx={{mt: 2}} severity="error">
                                     {errors.permissions}
                                 </Alert>
                             )}
                             {!!errorMessage && (
-                                <Alert sx={{ mt: 2 }} severity="error">
+                                <Alert sx={{mt: 2}} severity="error">
                                     {errorMessage}
                                 </Alert>
                             )}
@@ -295,12 +354,12 @@ export default function SignUp() {
                                 type="submit"
                                 fullWidth
                                 variant="contained"
-                                sx={{ mt: 3, mb: 2 }}
+                                sx={{mt: 3, mb: 2}}
                             >
                                 {isSubmitting || isLoading ? (
-                                    <CircularProgress color="inherit" />
+                                    <CircularProgress color="inherit"/>
                                 ) : (
-                                    <>Kaydet</>
+                                    <>{isEditMode ? 'Güncelle' : 'Kaydet'}</>
                                 )}
                             </Button>
                         </Box>
@@ -308,11 +367,10 @@ export default function SignUp() {
                 </Paper>
             </Box>
         </Container>
-
     );
 }
 
-function UserPermissionsCheckboxGroup({ onChange, selectedPermissions }) {
+function UserPermissionsCheckboxGroup({onChange, selectedPermissions}) {
     return (
         <FormGroup>
             <Typography variant="h6" gutterBottom>
@@ -323,7 +381,7 @@ function UserPermissionsCheckboxGroup({ onChange, selectedPermissions }) {
                     key={key}
                     control={<Checkbox value={permission.code} onChange={onChange} />}
                     label={permission.description}
-                    checked={selectedPermissions.includes(permission.code)}
+                    checked={selectedPermissions.includes(permission.code) || selectedPermissions.includes(systemPermissions.sys_admin.code)}
                 />
             ))}
         </FormGroup>

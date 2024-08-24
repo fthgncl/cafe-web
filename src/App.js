@@ -1,5 +1,5 @@
-import { useState, useEffect, useContext } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import {useState, useEffect, useContext} from 'react';
+import {Routes, Route} from 'react-router-dom';
 import AdminDashBoardPage from "./pages/AdminDashBoardPage";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
@@ -8,14 +8,31 @@ import CreateProduct from "./pages/CreateProduct";
 import OrderEntry from "./pages/OrderEntry";
 import OrdersPage from "./pages/OrdersPage";
 import NotConnected from "./pages/NotConnected";
-import { AccountContext } from "./context/AccountContext";
-import { SocketContext } from "./context/SocketContext";
+import {AccountContext} from "./context/AccountContext";
+import {SocketContext} from "./context/SocketContext";
 import AppBar from "./components/AppBar";
 import PrivateRoute from "./components/PrivateRoute";
+
 function App() {
-    const { isConnected } = useContext(SocketContext);
-    const { isActive } = useContext(AccountContext);
+    const {isConnected, socketData} = useContext(SocketContext);
+    const {isActive, logout, accountProps} = useContext(AccountContext);
     const [isSocketChecked, setIsSocketChecked] = useState(false);
+
+    useEffect(() => {
+        if (!socketData || !socketData.message)
+            return;
+
+        if (socketData.type === 'updateUser') {
+            if (socketData.message.status === "success" && socketData.message.updatedUser) {
+                if (socketData.message.updatedUser.username === accountProps.username) {
+                    logout();
+                }
+            }
+
+        }
+
+        // eslint-disable-next-line
+    }, [socketData]);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -30,47 +47,47 @@ function App() {
             return <div/>;
         }
 
-        return <NotConnected />;
+        return <NotConnected/>;
     }
 
     if (!isActive) {
-        return <LoginPage />;
+        return <LoginPage/>;
     } else {
         return (
             <>
-                <AppBar />
+                <AppBar/>
                 <Routes>
-                    <Route path="/" element={<HomePage/>} />
+                    <Route path="/" element={<HomePage/>}/>
 
                     <Route path="/create-user" element={<PrivateRoute
-                        element={<CreateUser />}
+                        element={<CreateUser/>}
                         requiredPermissions=""
                         fullMatch={false}
-                    />} />
+                    />}/>
 
                     <Route path="/create-product" element={<PrivateRoute
-                        element={<CreateProduct />}
+                        element={<CreateProduct/>}
                         requiredPermissions="b"
                         fullMatch={false}
-                    />} />
+                    />}/>
 
                     <Route path="/order-entry" element={<PrivateRoute
-                        element={<OrderEntry />}
+                        element={<OrderEntry/>}
                         requiredPermissions="d"
                         fullMatch={false}
-                    />} />
+                    />}/>
 
                     <Route path="/orders" element={<PrivateRoute
-                        element={<OrdersPage />}
+                        element={<OrdersPage/>}
                         requiredPermissions="defg"
                         fullMatch={false}
-                    />} />
+                    />}/>
 
                     <Route path="/admin-dashboard" element={<PrivateRoute
                         element={<AdminDashBoardPage/>}
                         requiredPermissions="bc"
                         fullMatch={false}
-                    />} />
+                    />}/>
                 </Routes>
             </>
         );
