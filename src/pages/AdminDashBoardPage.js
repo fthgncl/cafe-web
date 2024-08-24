@@ -11,7 +11,7 @@ import {AccountContext} from "../context/AccountContext";
 
 function AdminDashboard() {
     const {checkPermissions} = useContext(AccountContext);
-    const [selectedTab, setSelectedTab] = useState(null);
+    const [selectedTab, setSelectedTab] = useState(false);
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const isSysAdmin = checkPermissions("a");
