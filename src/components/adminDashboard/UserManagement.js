@@ -69,7 +69,7 @@ export default function UserManagement() {
     const [openDeleteConfirmDialog, setOpenDeleteConfirmDialog] = useState(false);
     const getUsersMessageType = 'getUsers';
     const deleteUserMessageType = 'deleteUser';
-    const createUserMessageType = 'createUser';
+    const newUserMessageType = 'newUser';
 
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -84,30 +84,39 @@ export default function UserManagement() {
         if (!socketData || !socketData.message)
             return;
 
+        if (socketData.type === newUserMessageType) {
+            if (socketData.message.status === 'success' && socketData.message.user) {
+                setUsers(prevState => [...prevState,socketData.message.user] )
+                setIsLoading(false);
+            }
+            return;
+        }
+
+
+
         if (socketData.type === 'updateUser') {
             if (socketData.message.status === "success" && socketData.message.updatedUser) {
-
                 setUsers(prevState => prevState.map(user => {
-
                     if (user._id === socketData.message.updatedUser._id)
                         return socketData.message.updatedUser;
 
                     return user;
                 }));
-                setOpenEditUserDialog(false);
+
+                if (socketData.message.addedByToken && accountProps.oldToken === socketData.message.addedByToken) {
+                    return;
+                }
+
+                if (currentUser?.id === socketData.message.updatedUser._id) {
+                    handleCloseEditUserDialog();
+                    enqueueSnackbar("Düzenlediğiniz kullanıcı başka bir kullanıcı tarafından düzenlendi.", {variant: "warning"});
+                }
             }
             return
         }
 
-        if (socketData.type === createUserMessageType) {
-            if (socketData.message.status === "success" && socketData.message.data) {
-                setUsers(prevState => [...prevState, socketData.message.data]);
-            }
-            return;
-        }
-
         if (socketData.type === getUsersMessageType) {
-            if (socketData.message.status === "success") {
+            if (socketData.message && socketData.message.status === 'success' && socketData.message.users) {
                 setUsers(socketData.message.users);
                 setIsLoading(false);
             }
@@ -115,11 +124,17 @@ export default function UserManagement() {
         }
 
         if (socketData.type === deleteUserMessageType) {
-            enqueueSnackbar(socketData.message.message, {variant: socketData.message.status});
 
             if (socketData.message.status === "success")
                 setUsers(prevState => prevState.filter(user => user._id !== socketData.message.deletedUserId));
+
+            if (currentUser && socketData.message.deletedUserId === currentUser.id) {
+                handleCloseEditUserDialog();
+                enqueueSnackbar("Düzenlediğiniz kullanıcı başka bir kullanıcı tarafından silindi.", {variant: "warning"});
+            } else enqueueSnackbar(socketData.message.message, {variant: socketData.message.status});
+
         }
+
         // eslint-disable-next-line
     }, [socketData]);
 

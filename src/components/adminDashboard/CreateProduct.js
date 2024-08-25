@@ -53,9 +53,9 @@ export default function ProductForm({productId = null, onClose}) {
             return;
         }
 
-        if (socketData.type === newProductMessageType) {
+        if (socketData.type === newProductMessageType || socketData.type === messageType) {
 
-            if (accountProps.oldToken !== socketData.message.addedByToken)
+            if (socketData.message.addedByToken && accountProps.oldToken !== socketData.message.addedByToken)
                 return;
 
             let apiErrors = {};
@@ -73,12 +73,13 @@ export default function ProductForm({productId = null, onClose}) {
 
 
             if (socketData.message.status === 'success') {
-                onClose();
                 formik.resetForm();
+                onClose();
             }
 
             setIsLoading(false);
         }
+
         // eslint-disable-next-line
     }, [socketData]);
 

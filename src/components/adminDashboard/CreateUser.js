@@ -26,38 +26,72 @@ import {useSnackbar} from 'notistack';
 import Paper from "@mui/material/Paper";
 import {AccountContext} from "../../context/AccountContext";
 
-export default function SignUp({userId = null,onClose}) {
+export default function SignUp({userId = null, onClose}) {
     const {enqueueSnackbar} = useSnackbar();
     const [userData, setUserData] = useState(null);
-    const [errorMessage, setErrorMessage] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const {accountProps} = useContext(AccountContext);
     const {sendSocketMessage, socketData} = useContext(SocketContext);
     const isEditMode = !!userId;
     const messageType = isEditMode ? 'updateUser' : 'createUser';
+    const getUserMessageType = 'getUser';
     const newUserMessageType = 'newUser';
+
+    useEffect(() => {
+        if (!!userId)
+            sendSocketMessage({userId}, getUserMessageType)
+        // eslint-disable-next-line
+    }, []);
 
     useEffect(() => {
         if (!socketData || !socketData.message)
             return;
 
-        if (socketData.type === newUserMessageType) {
+        if (socketData.type === getUserMessageType) {
             if (socketData.message.status === "success" && socketData.message.user) {
-                console.log(socketData.message.addedByToken, accountProps.oldToken)
-                if (socketData.message.addedByToken === accountProps.oldToken) {
-                    setUserData(socketData.message.user);
-                    setIsLoading(false);
-                    onClose();
-                }
+                setUserData(socketData.message.user);
+                setIsLoading(false);
             }
+            return;
+        }
+
+        if (socketData.type === newUserMessageType || socketData.type === messageType) {
+
+            if (socketData.message.addedByToken && accountProps.oldToken !== socketData.message.addedByToken) {
+                return;
+            }
+
+            let apiErrors = {};
+            if (socketData.message.status === 'error') {
+                if (socketData.message.error && socketData.message.error.code === 11000) { // Unique Errors
+                    const nonUniqueKeys = Object.keys(socketData.message.error.keyValue);
+                    nonUniqueKeys.forEach(key => apiErrors[key] = `${socketData.message.error.keyValue[key]} daha önceden kullanılmış.`);
+                } else if (errors) { // Validator Errors
+                    const nonUniqueKeys = Object.keys(errors);
+                    nonUniqueKeys.forEach(key => apiErrors[key] = errors[key].message);
+                }
+                setErrors(apiErrors);
+            }
+
+            if (Object.keys(apiErrors).length === 0 && socketData.message.message && socketData.message.status) {
+                enqueueSnackbar(socketData.message.message, {variant: socketData.message.status});
+            }
+
+            if (socketData.message.status === 'success') {
+                onClose();
+            }
+
+            setIsLoading(false);
+
+
         }
         // eslint-disable-next-line
     }, [socketData]);
 
     const onSubmit = async (values) => {
         setIsLoading(true);
-        const payload = { ...values };
+        const payload = {...values};
         if (isEditMode) {
             payload.userId = userId;
             delete payload.password;
@@ -108,34 +142,6 @@ export default function SignUp({userId = null,onClose}) {
         }
         // eslint-disable-next-line
     }, [userData]);
-
-    useEffect(() => {
-        if (socketData && socketData.type === messageType) {
-            if (socketData.message.message && socketData.message.status) {
-                enqueueSnackbar(socketData.message.message, {variant: socketData.message.status});
-            }
-
-            if (socketData.message.status && socketData.message.status === 'success') {
-                resetForm();
-            }
-
-            if (socketData.message.status && socketData.message.status === 'error')
-                setErrorMessage(socketData.message.message);
-            else setErrorMessage('');
-
-            let apiErrors = {};
-            if (socketData.message.error && socketData.message.error.code === 11000) { // Unique Errors
-                const nonUniqueKeys = Object.keys(socketData.message.error.keyValue);
-                nonUniqueKeys.forEach(key => apiErrors[key] = `${socketData.message.error.keyValue[key]} daha önceden kullanılmış.`);
-            } else if (errors) { // Validator Errors
-                const nonUniqueKeys = Object.keys(errors);
-                nonUniqueKeys.forEach(key => apiErrors[key] = errors[key].message);
-            }
-            setErrors(apiErrors);
-            setIsLoading(false);
-        }
-        // eslint-disable-next-line
-    }, [socketData]);
 
     const handleCheckboxChange = (event) => {
         const {value, checked} = event.target;
@@ -206,7 +212,6 @@ export default function SignUp({userId = null,onClose}) {
                             <Grid container spacing={3}>
                                 <Grid item xs={12} sm={6}>
                                     <TextField
-                                        autoComplete="given-name"
                                         name="firstname"
                                         required
                                         fullWidth
@@ -227,7 +232,6 @@ export default function SignUp({userId = null,onClose}) {
                                         id="lastname"
                                         label="Soy İsim"
                                         name="lastname"
-                                        autoComplete="family-name"
                                         onBlur={handleBlur}
                                         onChange={handleChange}
                                         value={values.lastname}
@@ -242,7 +246,6 @@ export default function SignUp({userId = null,onClose}) {
                                         id="username"
                                         label="Kullanıcı Adı"
                                         name="username"
-                                        autoComplete="username"
                                         value={values.username}
                                         onBlur={handleBlur}
                                         onChange={handleChange}
@@ -261,7 +264,6 @@ export default function SignUp({userId = null,onClose}) {
                                         fullWidth
                                         id="phone"
                                         label="Telefon Numarası"
-                                        autoComplete="tel-local"
                                         InputProps={{
                                             startAdornment: (
                                                 <InputAdornment position="start">+90</InputAdornment>
@@ -280,7 +282,6 @@ export default function SignUp({userId = null,onClose}) {
                                                 label="Şifre"
                                                 type={showPassword ? 'text' : 'password'}
                                                 id="password"
-                                                autoComplete="current-password"
                                                 value={values.password}
                                                 onChange={handleChange}
                                                 onBlur={handleBlur}
@@ -315,7 +316,6 @@ export default function SignUp({userId = null,onClose}) {
                                                 label="Parola Tekrarı"
                                                 type={showPassword ? 'text' : 'password'}
                                                 id="confirmPassword"
-                                                autoComplete="new-password"
                                                 InputProps={{
                                                     endAdornment: (
                                                         <InputAdornment position="end">
@@ -344,11 +344,6 @@ export default function SignUp({userId = null,onClose}) {
                             {!!errors.permissions && (
                                 <Alert sx={{mt: 2}} severity="error">
                                     {errors.permissions}
-                                </Alert>
-                            )}
-                            {!!errorMessage && (
-                                <Alert sx={{mt: 2}} severity="error">
-                                    {errorMessage}
                                 </Alert>
                             )}
                             <Button
@@ -381,7 +376,7 @@ function UserPermissionsCheckboxGroup({onChange, selectedPermissions}) {
             {Object.entries(systemPermissions).map(([key, permission]) => (
                 <FormControlLabel
                     key={key}
-                    control={<Checkbox value={permission.code} onChange={onChange} />}
+                    control={<Checkbox value={permission.code} onChange={onChange}/>}
                     label={permission.description}
                     checked={selectedPermissions.includes(permission.code) || selectedPermissions.includes(systemPermissions.sys_admin.code)}
                 />

@@ -31,10 +31,12 @@ import CloseIcon from "@mui/icons-material/Close";
 import CreateProduct from "./CreateProduct";
 import {useSnackbar} from "notistack";
 import LoadingProductsSkeleton from './LoadingProductsSkeleton'
+import {AccountContext} from "../../context/AccountContext";
 
 export default function ProductManager() {
     const {enqueueSnackbar} = useSnackbar();
     const {sendSocketMessage, socketData, isConnected} = useContext(SocketContext);
+    const {accountProps} = useContext(AccountContext);
     const [isLoading, setIsLoading] = useState(true);
     const [products, setProducts] = useState([]);
     const [anchorEl, setAnchorEl] = useState(null);
@@ -61,8 +63,8 @@ export default function ProductManager() {
             return;
 
         if (socketData.type === newProductMessageType) {
-            if (socketData.message && socketData.message.status === 'success' && socketData.message.product) {
-                setProducts(prevState => [...prevState,socketData.message.product] )
+            if (socketData.message.status === 'success' && socketData.message.product) {
+                setProducts(prevState => [...prevState, socketData.message.product])
                 setIsLoading(false);
             }
             return;
@@ -76,7 +78,16 @@ export default function ProductManager() {
 
                     return product;
                 }));
-                setOpenEditProductDialog(false);
+
+                if (socketData.message.addedByToken && accountProps.oldToken === socketData.message.addedByToken) {
+                    return;
+                }
+
+                if (currentProduct?._id === socketData.message.updatedProduct._id) {
+                    handleCloseEditProductDialog();
+                    enqueueSnackbar("Düzenlediğiniz ürün başka bir kullanıcı tarafından düzenlendi.", {variant: "warning"});
+                }
+
             }
             return
         }
@@ -90,11 +101,18 @@ export default function ProductManager() {
         }
 
         if (socketData.type === deleteProductMessageType) {
-            enqueueSnackbar(socketData.message.message, {variant: socketData.message.status});
 
             if (socketData.message.status === "success")
                 setProducts(prevState => prevState.filter(product => product._id !== socketData.message.deletedProductId));
+
+            if (currentProduct && socketData.message.deletedProductId === currentProduct._id) {
+                handleCloseEditProductDialog();
+                enqueueSnackbar("Düzenlediğiniz ürün başka bir kullanıcı tarafından silindi.", {variant: "warning"});
+            } else enqueueSnackbar(socketData.message.message, {variant: socketData.message.status});
+
         }
+
+
         // eslint-disable-next-line
     }, [socketData]);
 
@@ -240,8 +258,8 @@ export default function ProductManager() {
                                             </Typography>
                                             <Typography variant="body2"
                                                         sx={{
-                                                            marginLeft:'10px',
-                                                            marginRight:'10px',
+                                                            marginLeft: '10px',
+                                                            marginRight: '10px',
                                                             borderRadius: '5px',
                                                             fontWeight: 500,
                                                             display: 'flex',
