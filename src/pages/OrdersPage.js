@@ -17,7 +17,8 @@ import {
     InputLabel,
     LinearProgress,
     IconButton,
-    Tooltip
+    Tooltip,
+    Button
 } from "@mui/material";
 import {
     Kitchen as KitchenIcon,
@@ -26,7 +27,8 @@ import {
     HourglassEmpty as HourglassEmptyIcon,
     CardGiftcard as CardGiftcardIcon,
     HistoryToggleOff,
-    Timer as TimerIcon
+    Timer as TimerIcon,
+    Percent as PercentIcon
 } from "@mui/icons-material";
 import {keyframes} from "@mui/system";
 
@@ -53,7 +55,7 @@ export default function OrdersPage() {
     const updateOrderPaymentStatusMessageType = 'updateOrderPaymentStatus';
     const updateOrderKitchenStatusMessageType = 'updateOrderKitchenStatus';
     const newOrderMessageType = 'newOrder';
-    const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+    const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
     const toggleNotifications = () => {
         setNotificationsEnabled(!notificationsEnabled);
@@ -146,7 +148,7 @@ export default function OrdersPage() {
                 prevOrders
                     .filter(({createdDate, kitchenStatus, paymentStatus}) => {
 
-                        if ( ( paymentStatus === 'Daha Sonra Ödenecek' || kitchenStatus === 'Beklemede' || kitchenStatus === 'Hazırlanıyor' ) && paymentStatus !== 'İptal Edildi'  )
+                        if ((paymentStatus === 'Daha Sonra Ödenecek' || kitchenStatus === 'Beklemede' || kitchenStatus === 'Hazırlanıyor') && paymentStatus !== 'İptal Edildi')
                             return true
 
                         const now = new Date();
@@ -344,37 +346,130 @@ export default function OrdersPage() {
                                             </Typography>
                                         </Stack>
                                     </Stack>
-                                    {order.totalPrice && (
-                                        <Typography
-                                            variant="body1"
-                                            color="primary"
-                                            fontWeight="medium"
-                                            sx={{
-                                                mb: 1,
-                                                display: 'inline-block',
-                                                marginRight: '8px'
-                                            }}
-                                        >
-                                            {order.discountedPrice} ₺
-                                        </Typography>
-                                    )}
+                                    <Stack
+                                        direction="row"
+                                        alignItems="center"
+                                        spacing={1}
+                                        justifyContent="center" // Elementleri iki uçta hizalar
+                                        flexWrap="wrap" // Elemanlar sıkıştığında alt satıra geçmesine izin verir
+                                    >
+                                        <Box display='flex' flexDirection='column' justifyContent='center' width={0.65}>
+                                            <Box sx={{display: 'flex', justifyContent: "center"}}>
+                                                <Typography
+                                                    variant="body1"
+                                                    color="primary"
+                                                    fontWeight="medium"
+                                                    sx={{
+                                                        display: 'inline-block',
+                                                        marginRight: '8px',
+                                                    }}
+                                                >
+                                                    {order.discountedPrice} ₺
+                                                </Typography>
 
-                                    {order.totalPrice !== order.discountedPrice && (
-                                        <Typography
-                                            variant="body2"
-                                            color="textSecondary"
-                                            sx={{
-                                                textDecoration: 'line-through',
-                                                mb: 1,
-                                                display: 'inline-block'
-                                            }}
-                                        >
-                                            {order.totalPrice} ₺
-                                        </Typography>
-                                    )}
+                                                {order.totalPrice !== order.discountedPrice && (
+                                                    <Typography
+                                                        variant="body2"
+                                                        color="textSecondary"
+                                                        sx={{
+                                                            textDecoration: 'line-through',
+                                                            display: 'inline-block',
+                                                        }}
+                                                    >
+                                                        {order.totalPrice} ₺
+                                                    </Typography>
+                                                )}
+                                            </Box>
+
+                                            {/* Alt çizgi */}
+                                            <Box
+                                                sx={{
+                                                    width: '100%',
+                                                    height: '1px',
+                                                    backgroundColor: 'grey.300',
+                                                    mb: 0.7
+                                                }}
+                                            />
+
+                                            {!checkPermissions('f') ? (<>
+                                                {
+                                                    order.totalPrice !== order.discountedPrice && (
+                                                        <Typography
+                                                            variant="body2"
+                                                            color="secondary.light"
+                                                            textAlign='center'
+                                                        >
+                                                            %{Math.round(((order.totalPrice - order.discountedPrice) / order.totalPrice) * 100)} İndirim
+                                                        </Typography>
+                                                    )
+                                                }</>
+                                            ) : (<>
+
+                                                {order.totalPrice === order.discountedPrice ? (
+                                                    <Button
+                                                        variant="contained" // Arka plan rengi ekler
+                                                        size="small"
+                                                        sx={{
+                                                            bgcolor:'#fff',
+                                                            color:'primary.dark',
+                                                            width:0.85,
+                                                            margin:'auto',
+                                                            fontSize: '0.75rem',  // Daha küçük yazı boyutu
+                                                            padding: '4px 8px',   // Daha küçük padding
+                                                            mt: {xs: 1, sm: 0}, // Küçük ekranlarda üstten margin ekler
+                                                            borderRadius: '4px', // Kenarları yuvarlatır
+                                                            boxShadow: 3, // Hafif gölge efekti ekler
+                                                            '&:hover': {
+                                                                backgroundColor: 'primary', // Hover durumunda arka plan rengi
+                                                                color: '#fff', // Hover durumunda yazı rengi
+                                                            },
+                                                            '&:active': {
+                                                                backgroundColor: '#b71c1c', // Aktif durumunda arka plan rengi
+                                                            },
+                                                        }}
+                                                        startIcon={<PercentIcon/>} // İndirim ikonu
+                                                        // onClick={() => handleDiscountClick(order._id)} // İndirim işlevi
+                                                    >
+                                                        İndirim Uygula
+                                                    </Button>
+                                                ) : (
+                                                    <Button
+                                                        variant="contained" // Arka plan rengi ekler
+                                                        size="small"
+                                                        sx={{
+                                                            bgcolor:'#ff7686',
+                                                            color:'#fff',
+                                                            width:0.85,
+                                                            margin:'auto',
+                                                            fontSize: '0.75rem',  // Daha küçük yazı boyutu
+                                                            padding: '4px 8px',   // Daha küçük padding
+                                                            mt: {xs: 1, sm: 0}, // Küçük ekranlarda üstten margin ekler
+                                                            borderRadius: '4px', // Kenarları yuvarlatır
+                                                            boxShadow: 3, // Hafif gölge efekti ekler
+                                                            '&:hover': {
+                                                                backgroundColor: '#fd5164', // Hover durumunda arka plan rengi
+                                                                color: '#fff', // Hover durumunda yazı rengi
+                                                            },
+                                                            '&:active': {
+                                                                backgroundColor: '#1565c0', // Aktif durumunda arka plan rengi
+                                                            },
+                                                        }}
+                                                        startIcon={<>
+                                                            <PercentIcon/>{Math.round(((order.totalPrice - order.discountedPrice) / order.totalPrice) * 100)}</>} // İndirim ikonu
+                                                        // onClick={() => handleDiscountClick(order._id)} // İndirim işlevi
+                                                    >
+                                                        İndirimi Kaldır
+                                                    </Button>
+                                                )}
+
+                                            </>)}
+
+                                        </Box>
+
+                                    </Stack>
 
 
-                                    <Divider sx={{mt: 4}}/>
+                                    {checkPermissions('ef') && <Divider sx={{mt: 4}}/>}
 
                                     <Box>
                                         <Stack spacing={2} flexWrap="wrap">
@@ -404,8 +499,7 @@ export default function OrdersPage() {
                                                                 border: 'none',
                                                             },
                                                             minWidth: 200,
-                                                            textAlign: 'center',
-                                                            mt: 1
+                                                            textAlign: 'center'
                                                         }}
                                                         value={order.paymentStatus}
                                                         onChange={(event) => handlePaymentStatusChange(event, order._id)}
