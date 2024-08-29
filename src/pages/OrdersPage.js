@@ -18,7 +18,12 @@ import {
     LinearProgress,
     IconButton,
     Tooltip,
-    Button
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Slider
 } from "@mui/material";
 import {
     Kitchen as KitchenIcon,
@@ -54,8 +59,19 @@ export default function OrdersPage() {
     const getProductsMessageType = 'getProducts';
     const updateOrderPaymentStatusMessageType = 'updateOrderPaymentStatus';
     const updateOrderKitchenStatusMessageType = 'updateOrderKitchenStatus';
+    const updateOrderDiscountMessageType = 'updateOrderDiscount'
     const newOrderMessageType = 'newOrder';
     const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+    const [currentDiscountOrder, setCurrentDiscountOrder] = useState(null);
+
+    const handleRemoveDiscountClick = (orderId) => {
+        sendSocketMessage({orderId:orderId,discount:0},updateOrderDiscountMessageType);
+    }
+
+    const handleDiscountClick = (orderId) => {
+        const order = orders.find(order => order._id === orderId );
+        setCurrentDiscountOrder(order);
+    }
 
     const toggleNotifications = () => {
         setNotificationsEnabled(!notificationsEnabled);
@@ -77,6 +93,14 @@ export default function OrdersPage() {
     useEffect(() => {
         if (!socketData || !socketData.message)
             return;
+
+        if ( socketData.type === updateOrderDiscountMessageType ){
+            setOrders(prevState => prevState.map(order => {
+                if (order._id === socketData.message.orderId)
+                    return {...order,...socketData.message.newPrices}
+                else return order;
+            }));
+        }
 
 
         if (socketData.type === newOrderMessageType) {
@@ -290,411 +314,493 @@ export default function OrdersPage() {
     `;
 
     return (
-        <Container maxWidth="xl" sx={{mt: 4}}>
-            <Box
-                display="flex"
-                alignItems="start"
-                justifyContent="space-between"
-                padding={1}
-                sx={{borderBottom: '1px solid #ddd', mb: 2}}
-            >
-                <Typography
-                    variant="h4"
-                    component="h1"
-                    gutterBottom
-                    sx={{fontWeight: 'bold'}}
+        <>
+            <Container maxWidth="xl" sx={{mt: 4}}>
+                <Box
+                    display="flex"
+                    alignItems="start"
+                    justifyContent="space-between"
+                    padding={1}
+                    sx={{borderBottom: '1px solid #ddd', mb: 2}}
                 >
-                    Siparişler
-                </Typography>
-                <Tooltip
-                    title={notificationsEnabled ? "Bildirim Seslerini Kapat" : "Bildirim Seslerini Aç"}
-                    arrow
-                >
-                    <IconButton onClick={toggleNotifications}
-                                sx={{color: notificationsEnabled ? 'primary.main' : 'text.secondary'}}>
-                        {notificationsEnabled ? <NotificationsIcon/> : <NotificationsOffIcon/>}
-                    </IconButton>
-                </Tooltip>
-            </Box>
-            {loading ? (
-                <Box sx={{display: "flex", justifyContent: "center", alignItems: "center", height: "80vh"}}>
-                    <CircularProgress/>
+                    <Typography
+                        variant="h4"
+                        component="h1"
+                        gutterBottom
+                        sx={{fontWeight: 'bold'}}
+                    >
+                        Siparişler
+                    </Typography>
+                    <Tooltip
+                        title={notificationsEnabled ? "Bildirim Seslerini Kapat" : "Bildirim Seslerini Aç"}
+                        arrow
+                    >
+                        <IconButton onClick={toggleNotifications}
+                                    sx={{color: notificationsEnabled ? 'primary.main' : 'text.secondary'}}>
+                            {notificationsEnabled ? <NotificationsIcon/> : <NotificationsOffIcon/>}
+                        </IconButton>
+                    </Tooltip>
                 </Box>
-            ) : orders.length > 0 ? (
-                <Masonry
-                    spacing={2}
-                    columns={{
-                        xs: 1,
-                        sm: 2,
-                        md: 3,
-                        xl: 4
-                    }}
-                >
-                    {orders.map((order) => (
-                        <Grid item xs={12} md={6} key={order._id}>
-                            <Card variant="outlined" sx={{borderRadius: 3, boxShadow: 3, overflow: "hidden"}}>
-                                <Box sx={{p: 3}}>
-                                    <Stack direction="row" justifyContent="space-between" alignItems="center"
-                                           sx={{mb: 2}}>
-                                        <Typography variant="h6" component="div" fontWeight="bold">
-                                            {order.customerName}
-                                        </Typography>
-                                        <Stack direction="row" alignItems="center" spacing={1}>
-                                            <TimerIcon color="action"/>
-                                            <Typography variant="body2" color="textSecondary">
-                                                {order.formattedDuration || formatDuration(order.createdDate)}
+                {loading ? (
+                    <Box sx={{display: "flex", justifyContent: "center", alignItems: "center", height: "80vh"}}>
+                        <CircularProgress/>
+                    </Box>
+                ) : orders.length > 0 ? (
+                    <Masonry
+                        spacing={2}
+                        columns={{
+                            xs: 1,
+                            sm: 2,
+                            md: 3,
+                            xl: 4
+                        }}
+                    >
+                        {orders.map((order) => (
+                            <Grid item xs={12} md={6} key={order._id}>
+                                <Card variant="outlined" sx={{borderRadius: 3, boxShadow: 3, overflow: "hidden"}}>
+                                    <Box sx={{p: 3}}>
+                                        <Stack direction="row" justifyContent="space-between" alignItems="center"
+                                               sx={{mb: 2}}>
+                                            <Typography variant="h6" component="div" fontWeight="bold">
+                                                {order.customerName}
                                             </Typography>
-                                        </Stack>
-                                    </Stack>
-                                    <Stack
-                                        direction="row"
-                                        alignItems="center"
-                                        spacing={1}
-                                        justifyContent="center" // Elementleri iki uçta hizalar
-                                        flexWrap="wrap" // Elemanlar sıkıştığında alt satıra geçmesine izin verir
-                                    >
-                                        <Box display='flex' flexDirection='column' justifyContent='center' width={0.65}>
-                                            <Box sx={{display: 'flex', justifyContent: "center"}}>
-                                                <Typography
-                                                    variant="body1"
-                                                    color="primary"
-                                                    fontWeight="medium"
-                                                    sx={{
-                                                        display: 'inline-block',
-                                                        marginRight: '8px',
-                                                    }}
-                                                >
-                                                    {order.discountedPrice} ₺
+                                            <Stack direction="row" alignItems="center" spacing={1}>
+                                                <TimerIcon color="action"/>
+                                                <Typography variant="body2" color="textSecondary">
+                                                    {order.formattedDuration || formatDuration(order.createdDate)}
                                                 </Typography>
-
-                                                {order.totalPrice !== order.discountedPrice && (
+                                            </Stack>
+                                        </Stack>
+                                        <Stack
+                                            direction="row"
+                                            alignItems="center"
+                                            spacing={1}
+                                            justifyContent="center" // Elementleri iki uçta hizalar
+                                            flexWrap="wrap" // Elemanlar sıkıştığında alt satıra geçmesine izin verir
+                                        >
+                                            <Box display='flex' flexDirection='column' justifyContent='center'
+                                                 width={0.65}>
+                                                <Box sx={{display: 'flex', justifyContent: "center"}}>
                                                     <Typography
-                                                        variant="body2"
-                                                        color="textSecondary"
+                                                        variant="body1"
+                                                        color="primary"
+                                                        fontWeight="medium"
                                                         sx={{
-                                                            textDecoration: 'line-through',
                                                             display: 'inline-block',
+                                                            marginRight: '8px',
                                                         }}
                                                     >
-                                                        {order.totalPrice} ₺
+                                                        {order.discountedPrice} ₺
                                                     </Typography>
-                                                )}
-                                            </Box>
 
-                                            {/* Alt çizgi */}
-                                            <Box
-                                                sx={{
-                                                    width: '100%',
-                                                    height: '1px',
-                                                    backgroundColor: 'grey.300',
-                                                    mb: 0.7
-                                                }}
-                                            />
-
-                                            {!checkPermissions('f') ? (<>
-                                                {
-                                                    order.totalPrice !== order.discountedPrice && (
+                                                    {order.totalPrice !== order.discountedPrice && (
                                                         <Typography
                                                             variant="body2"
-                                                            color="secondary.light"
-                                                            textAlign='center'
+                                                            color="textSecondary"
+                                                            sx={{
+                                                                textDecoration: 'line-through',
+                                                                display: 'inline-block',
+                                                            }}
                                                         >
-                                                            %{Math.round(((order.totalPrice - order.discountedPrice) / order.totalPrice) * 100)} İndirim
+                                                            {order.totalPrice} ₺
                                                         </Typography>
-                                                    )
-                                                }</>
-                                            ) : (<>
+                                                    )}
+                                                </Box>
 
-                                                {order.totalPrice === order.discountedPrice ? (
-                                                    <Button
-                                                        variant="contained" // Arka plan rengi ekler
-                                                        size="small"
-                                                        sx={{
-                                                            bgcolor:'#fff',
-                                                            color:'primary.dark',
-                                                            width:0.85,
-                                                            margin:'auto',
-                                                            fontSize: '0.75rem',  // Daha küçük yazı boyutu
-                                                            padding: '4px 8px',   // Daha küçük padding
-                                                            mt: {xs: 1, sm: 0}, // Küçük ekranlarda üstten margin ekler
-                                                            borderRadius: '4px', // Kenarları yuvarlatır
-                                                            boxShadow: 3, // Hafif gölge efekti ekler
-                                                            '&:hover': {
-                                                                backgroundColor: 'primary', // Hover durumunda arka plan rengi
-                                                                color: '#fff', // Hover durumunda yazı rengi
-                                                            },
-                                                            '&:active': {
-                                                                backgroundColor: '#b71c1c', // Aktif durumunda arka plan rengi
-                                                            },
-                                                        }}
-                                                        startIcon={<PercentIcon/>} // İndirim ikonu
-                                                        // onClick={() => handleDiscountClick(order._id)} // İndirim işlevi
-                                                    >
-                                                        İndirim Uygula
-                                                    </Button>
-                                                ) : (
-                                                    <Button
-                                                        variant="contained" // Arka plan rengi ekler
-                                                        size="small"
-                                                        sx={{
-                                                            bgcolor:'#ff7686',
-                                                            color:'#fff',
-                                                            width:0.85,
-                                                            margin:'auto',
-                                                            fontSize: '0.75rem',  // Daha küçük yazı boyutu
-                                                            padding: '4px 8px',   // Daha küçük padding
-                                                            mt: {xs: 1, sm: 0}, // Küçük ekranlarda üstten margin ekler
-                                                            borderRadius: '4px', // Kenarları yuvarlatır
-                                                            boxShadow: 3, // Hafif gölge efekti ekler
-                                                            '&:hover': {
-                                                                backgroundColor: '#fd5164', // Hover durumunda arka plan rengi
-                                                                color: '#fff', // Hover durumunda yazı rengi
-                                                            },
-                                                            '&:active': {
-                                                                backgroundColor: '#1565c0', // Aktif durumunda arka plan rengi
-                                                            },
-                                                        }}
-                                                        startIcon={<>
-                                                            <PercentIcon/>{Math.round(((order.totalPrice - order.discountedPrice) / order.totalPrice) * 100)}</>} // İndirim ikonu
-                                                        // onClick={() => handleDiscountClick(order._id)} // İndirim işlevi
-                                                    >
-                                                        İndirimi Kaldır
-                                                    </Button>
+                                                {/* Alt çizgi */}
+                                                <Box
+                                                    sx={{
+                                                        width: '100%',
+                                                        height: '1px',
+                                                        backgroundColor: 'grey.300',
+                                                        mb: 0.7
+                                                    }}
+                                                />
+
+                                                {!checkPermissions('f') ? (<>
+                                                        {
+                                                            order.totalPrice !== order.discountedPrice && (
+                                                                <Typography
+                                                                    variant="body2"
+                                                                    color="secondary.light"
+                                                                    textAlign='center'
+                                                                >
+                                                                    %{Math.round(((order.totalPrice - order.discountedPrice) / order.totalPrice) * 100)} İndirim
+                                                                </Typography>
+                                                            )
+                                                        }</>
+                                                ) : (<>
+
+                                                    {order.totalPrice === order.discountedPrice ? (
+                                                        <Button
+                                                            variant="contained" // Arka plan rengi ekler
+                                                            size="small"
+                                                            sx={{
+                                                                bgcolor: '#fff',
+                                                                color: 'primary.dark',
+                                                                width: 0.85,
+                                                                margin: 'auto',
+                                                                fontSize: '0.75rem',  // Daha küçük yazı boyutu
+                                                                padding: '4px 8px',   // Daha küçük padding
+                                                                mt: {xs: 1, sm: 0}, // Küçük ekranlarda üstten margin ekler
+                                                                borderRadius: '4px', // Kenarları yuvarlatır
+                                                                boxShadow: 3, // Hafif gölge efekti ekler
+                                                                '&:hover': {
+                                                                    backgroundColor: 'primary', // Hover durumunda arka plan rengi
+                                                                    color: '#fff', // Hover durumunda yazı rengi
+                                                                },
+                                                                '&:active': {
+                                                                    backgroundColor: '#b71c1c', // Aktif durumunda arka plan rengi
+                                                                },
+                                                            }}
+                                                            startIcon={<PercentIcon/>} // İndirim ikonu
+                                                            onClick={() => handleDiscountClick(order._id)} // İndirim işlevi
+                                                        >
+                                                            İndirim Uygula
+                                                        </Button>
+                                                    ) : (
+                                                        <Button
+                                                            variant="contained" // Arka plan rengi ekler
+                                                            size="small"
+                                                            sx={{
+                                                                bgcolor: '#ff7686',
+                                                                color: '#fff',
+                                                                width: 0.85,
+                                                                margin: 'auto',
+                                                                fontSize: '0.75rem',  // Daha küçük yazı boyutu
+                                                                padding: '4px 8px',   // Daha küçük padding
+                                                                mt: {xs: 1, sm: 0}, // Küçük ekranlarda üstten margin ekler
+                                                                borderRadius: '4px', // Kenarları yuvarlatır
+                                                                boxShadow: 3, // Hafif gölge efekti ekler
+                                                                '&:hover': {
+                                                                    backgroundColor: '#fd5164', // Hover durumunda arka plan rengi
+                                                                    color: '#fff', // Hover durumunda yazı rengi
+                                                                },
+                                                                '&:active': {
+                                                                    backgroundColor: '#1565c0', // Aktif durumunda arka plan rengi
+                                                                },
+                                                            }}
+                                                            startIcon={<>
+                                                                <PercentIcon/>{Math.round(((order.totalPrice - order.discountedPrice) / order.totalPrice) * 100)}</>} // İndirim ikonu
+                                                                onClick={() => handleRemoveDiscountClick(order._id)} // İndirim işlevi
+                                                        >
+                                                            İndirimi Kaldır
+                                                        </Button>
+                                                    )}
+
+                                                </>)}
+
+                                            </Box>
+
+                                        </Stack>
+
+
+                                        {checkPermissions('ef') && <Divider sx={{mt: 4}}/>}
+
+                                        <Box>
+                                            <Stack spacing={2} flexWrap="wrap">
+                                                {/* Ödeme Durumu Seçimi */}
+                                                {checkPermissions('e') && order.paymentStatus && (
+                                                    <FormControl fullWidth>
+                                                        <InputLabel
+                                                            id="payment-status-label"
+                                                            sx={{
+                                                                textAlign: 'center',
+                                                                backgroundColor: 'background.paper',
+                                                                paddingX: 1
+                                                            }}
+                                                        >
+                                                            Ödeme Durumu
+                                                        </InputLabel>
+                                                        <Select
+                                                            labelId="payment-status-label"
+                                                            sx={{
+                                                                '& .MuiOutlinedInput-notchedOutline': {
+                                                                    border: 'none',
+                                                                },
+                                                                '&:hover .MuiOutlinedInput-notchedOutline': {
+                                                                    border: 'none',
+                                                                },
+                                                                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                                                    border: 'none',
+                                                                },
+                                                                minWidth: 200,
+                                                                textAlign: 'center'
+                                                            }}
+                                                            value={order.paymentStatus}
+                                                            onChange={(event) => handlePaymentStatusChange(event, order._id)}
+                                                            displayEmpty
+                                                            renderValue={(selected) =>
+                                                                loadingPaymentStatus.includes(order._id) ? (
+                                                                    <LinearProgress sx={{mt: 1.2}}/>
+                                                                ) : (
+                                                                    <Chip
+                                                                        icon={getPaymentStatusIcon(order.paymentStatus)}
+                                                                        label={order.paymentStatus}
+                                                                        color={getPaymentStatusColor(order.paymentStatus)}
+                                                                        sx={{flexGrow: 1, width: 1}}
+                                                                    />
+                                                                )
+                                                            }
+                                                        >
+                                                            <MenuItem
+                                                                value="Daha Sonra Ödenecek"
+                                                                disabled={order.paymentStatus === "Daha Sonra Ödenecek"
+                                                                }>
+                                                                Daha Sonra Ödenecek
+                                                            </MenuItem>
+                                                            <MenuItem value="Hediye"
+                                                                      disabled={order.paymentStatus === "Hediye"}>
+                                                                Hediye
+                                                            </MenuItem>
+                                                            <MenuItem value="İptal Edildi"
+                                                                      disabled={order.paymentStatus === "İptal Edildi"}>
+                                                                İptal Edildi
+                                                            </MenuItem>
+                                                            <MenuItem value="Ödendi"
+                                                                      disabled={order.paymentStatus === "Ödendi"}>
+                                                                Ödendi
+                                                            </MenuItem>
+                                                        </Select>
+                                                    </FormControl>
                                                 )}
+                                                {/* Mutfak Durumu Seçimi */}
+                                                {checkPermissions('g') && order.kitchenStatus && (
+                                                    <FormControl fullWidth>
+                                                        <Divider sx={{mt: 0}}/>
+                                                        <InputLabel
+                                                            id="kitchen-status-label"
+                                                            sx={{
+                                                                textAlign: 'center',
+                                                                backgroundColor: 'background.paper',
+                                                                paddingX: 1
+                                                            }}
+                                                        >
+                                                            Mutfak Durumu
+                                                        </InputLabel>
+                                                        <Select
+                                                            labelId="kitchen-status-label"
+                                                            sx={{
+                                                                '& .MuiOutlinedInput-notchedOutline': {
+                                                                    border: 'none',
+                                                                },
+                                                                '&:hover .MuiOutlinedInput-notchedOutline': {
+                                                                    border: 'none',
+                                                                },
+                                                                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                                                    border: 'none',
+                                                                },
+                                                                minWidth: 200,  // Genişliği artır
+                                                                textAlign: 'center',
+                                                                mt: 1
+                                                            }}
+                                                            value={order.kitchenStatus}
+                                                            onChange={(event) => handleKitchenStatusChange(event, order._id)}
+                                                            displayEmpty
+                                                            renderValue={(selected) =>
+                                                                loadingKitchenStatus.includes(order._id) ? (
+                                                                    <LinearProgress sx={{mt: 1.2}}/>
+                                                                ) : (
+                                                                    <Chip
+                                                                        icon={kitchenStatusIcons[order.paymentStatus !== "İptal Edildi" ? order.kitchenStatus : 'İptal Edildi']}
+                                                                        label={order.paymentStatus !== "İptal Edildi" ? order.kitchenStatus : 'İptal Edildi'}
+                                                                        color={getKitchenStatusColor(order.paymentStatus !== "İptal Edildi" ? order.kitchenStatus : 'İptal Edildi')}
+                                                                        sx={{flexGrow: 1, width: 1}}
+                                                                    />
+                                                                )
+                                                            }
+                                                        >
+                                                            {order.paymentStatus !== "İptal Edildi" ? (
+                                                                [
+                                                                    <MenuItem key="beklemede" value="Beklemede"
+                                                                              disabled={order.kitchenStatus === "Beklemede"}>
+                                                                        Beklemede
+                                                                    </MenuItem>,
+                                                                    <MenuItem key="hazirlanıyor" value="Hazırlanıyor"
+                                                                              disabled={order.kitchenStatus === "Hazırlanıyor"}>
+                                                                        Hazırlanıyor
+                                                                    </MenuItem>,
+                                                                    <MenuItem key="hazırlandı" value="Hazırlandı"
+                                                                              disabled={order.kitchenStatus === "Hazırlandı"}>
+                                                                        Hazırlandı
+                                                                    </MenuItem>
+                                                                ]
+                                                            ) : (
+                                                                <MenuItem value={order.kitchenStatus} disabled={true}>İptal
+                                                                    edilen sipariş hazırlanamaz</MenuItem>
+                                                            )}
 
-                                            </>)}
+                                                        </Select>
+                                                    </FormControl>
+                                                )}
+                                            </Stack>
 
                                         </Box>
 
-                                    </Stack>
+                                    </Box>
+                                    <Divider/>
+                                    <Box sx={{p: 3}}>
+                                        {order.orderNote && (
+                                            <Typography
+                                                variant="body2"
+                                                color="textSecondary"
+                                                sx={{
+                                                    mb: 1,
+                                                    animation: `${fadeInOut} 2.5s infinite`, // Yanıp sönme animasyonu
+                                                    padding: '6px',
+                                                    borderRadius: '4px',
+                                                    display: 'inline-block',
+                                                    textAlign: 'justify',
+                                                    bgcolor: 'rgba(248,203,100,0.96)'
+                                                }}
+                                            >
+                                                <strong>Not:</strong> {order.orderNote}
+                                            </Typography>
 
+                                        )}
+                                        <Typography variant="body2" color="textSecondary" sx={{mb: 1}}>
+                                            <strong>Siparişi Alan:</strong> {order.createdBy}
+                                        </Typography>
+                                        <Typography variant="body2" color="textSecondary" sx={{mb: 1}}>
+                                            <strong>Müşteri Adı:</strong> {order.customerName}
+                                        </Typography>
+                                        <Divider sx={{mb: 2}}/>
+                                        <Typography variant="body1" fontWeight="bold" gutterBottom>
+                                            Ürünler
+                                        </Typography>
+                                        <Grid container spacing={2}>
+                                            {order.orders.map((product) => {
+                                                const savedProduct = products.find(p => p._id === product.product);
 
-                                    {checkPermissions('ef') && <Divider sx={{mt: 4}}/>}
-
-                                    <Box>
-                                        <Stack spacing={2} flexWrap="wrap">
-                                            {/* Ödeme Durumu Seçimi */}
-                                            {checkPermissions('e') && order.paymentStatus && (
-                                                <FormControl fullWidth>
-                                                    <InputLabel
-                                                        id="payment-status-label"
-                                                        sx={{
-                                                            textAlign: 'center',
-                                                            backgroundColor: 'background.paper',
-                                                            paddingX: 1
-                                                        }}
-                                                    >
-                                                        Ödeme Durumu
-                                                    </InputLabel>
-                                                    <Select
-                                                        labelId="payment-status-label"
-                                                        sx={{
-                                                            '& .MuiOutlinedInput-notchedOutline': {
-                                                                border: 'none',
-                                                            },
-                                                            '&:hover .MuiOutlinedInput-notchedOutline': {
-                                                                border: 'none',
-                                                            },
-                                                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                                                border: 'none',
-                                                            },
-                                                            minWidth: 200,
-                                                            textAlign: 'center'
-                                                        }}
-                                                        value={order.paymentStatus}
-                                                        onChange={(event) => handlePaymentStatusChange(event, order._id)}
-                                                        displayEmpty
-                                                        renderValue={(selected) =>
-                                                            loadingPaymentStatus.includes(order._id) ? (
-                                                                <LinearProgress sx={{mt: 1.2}}/>
-                                                            ) : (
-                                                                <Chip
-                                                                    icon={getPaymentStatusIcon(order.paymentStatus)}
-                                                                    label={order.paymentStatus}
-                                                                    color={getPaymentStatusColor(order.paymentStatus)}
-                                                                    sx={{flexGrow: 1, width: 1}}
-                                                                />
-                                                            )
-                                                        }
-                                                    >
-                                                        <MenuItem
-                                                            value="Daha Sonra Ödenecek"
-                                                            disabled={order.paymentStatus === "Daha Sonra Ödenecek"
-                                                            }>
-                                                            Daha Sonra Ödenecek
-                                                        </MenuItem>
-                                                        <MenuItem value="Hediye"
-                                                                  disabled={order.paymentStatus === "Hediye"}>
-                                                            Hediye
-                                                        </MenuItem>
-                                                        <MenuItem value="İptal Edildi"
-                                                                  disabled={order.paymentStatus === "İptal Edildi"}>
-                                                            İptal Edildi
-                                                        </MenuItem>
-                                                        <MenuItem value="Ödendi"
-                                                                  disabled={order.paymentStatus === "Ödendi"}>
-                                                            Ödendi
-                                                        </MenuItem>
-                                                    </Select>
-                                                </FormControl>
-                                            )}
-                                            {/* Mutfak Durumu Seçimi */}
-                                            {checkPermissions('g') && order.kitchenStatus && (
-                                                <FormControl fullWidth>
-                                                    <Divider sx={{mt: 0}}/>
-                                                    <InputLabel
-                                                        id="kitchen-status-label"
-                                                        sx={{
-                                                            textAlign: 'center',
-                                                            backgroundColor: 'background.paper',
-                                                            paddingX: 1
-                                                        }}
-                                                    >
-                                                        Mutfak Durumu
-                                                    </InputLabel>
-                                                    <Select
-                                                        labelId="kitchen-status-label"
-                                                        sx={{
-                                                            '& .MuiOutlinedInput-notchedOutline': {
-                                                                border: 'none',
-                                                            },
-                                                            '&:hover .MuiOutlinedInput-notchedOutline': {
-                                                                border: 'none',
-                                                            },
-                                                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                                                border: 'none',
-                                                            },
-                                                            minWidth: 200,  // Genişliği artır
-                                                            textAlign: 'center',
-                                                            mt: 1
-                                                        }}
-                                                        value={order.kitchenStatus}
-                                                        onChange={(event) => handleKitchenStatusChange(event, order._id)}
-                                                        displayEmpty
-                                                        renderValue={(selected) =>
-                                                            loadingKitchenStatus.includes(order._id) ? (
-                                                                <LinearProgress sx={{mt: 1.2}}/>
-                                                            ) : (
-                                                                <Chip
-                                                                    icon={kitchenStatusIcons[order.paymentStatus !== "İptal Edildi" ? order.kitchenStatus : 'İptal Edildi']}
-                                                                    label={order.paymentStatus !== "İptal Edildi" ? order.kitchenStatus : 'İptal Edildi'}
-                                                                    color={getKitchenStatusColor(order.paymentStatus !== "İptal Edildi" ? order.kitchenStatus : 'İptal Edildi')}
-                                                                    sx={{flexGrow: 1, width: 1}}
-                                                                />
-                                                            )
-                                                        }
-                                                    >
-                                                        {order.paymentStatus !== "İptal Edildi" ? (
-                                                            [
-                                                                <MenuItem key="beklemede" value="Beklemede"
-                                                                          disabled={order.kitchenStatus === "Beklemede"}>
-                                                                    Beklemede
-                                                                </MenuItem>,
-                                                                <MenuItem key="hazirlanıyor" value="Hazırlanıyor"
-                                                                          disabled={order.kitchenStatus === "Hazırlanıyor"}>
-                                                                    Hazırlanıyor
-                                                                </MenuItem>,
-                                                                <MenuItem key="hazırlandı" value="Hazırlandı"
-                                                                          disabled={order.kitchenStatus === "Hazırlandı"}>
-                                                                    Hazırlandı
-                                                                </MenuItem>
-                                                            ]
-                                                        ) : (
-                                                            <MenuItem value={order.kitchenStatus} disabled={true}>İptal
-                                                                edilen sipariş hazırlanamaz</MenuItem>
-                                                        )}
-
-                                                    </Select>
-                                                </FormControl>
-                                            )}
-                                        </Stack>
+                                                return (
+                                                    <Grid item xs={12} key={product._id}>
+                                                        <Paper elevation={4}
+                                                               sx={{p: 3, borderRadius: 4, backgroundColor: '#f9f9f9'}}>
+                                                            <Stack direction="row" spacing={3} alignItems="center">
+                                                                <Typography
+                                                                    variant="h5"
+                                                                    sx={{
+                                                                        fontWeight: 'bold',
+                                                                        transform: 'rotate(-10deg)',
+                                                                        color: '#333'
+                                                                    }}
+                                                                >
+                                                                    {product.quantity}x
+                                                                </Typography>
+                                                                <Box>
+                                                                    <Typography variant="h6" fontWeight="bold"
+                                                                                color="textPrimary">
+                                                                        {savedProduct?.productname || 'Ürün bulunamadı'}
+                                                                    </Typography>
+                                                                    <Typography variant="body2" color="textSecondary">
+                                                                        Boyut: {product.size}
+                                                                    </Typography>
+                                                                    {product.content && (
+                                                                        <Typography variant="body2"
+                                                                                    color="textSecondary">
+                                                                            İçerik: {product.content}
+                                                                        </Typography>
+                                                                    )}
+                                                                </Box>
+                                                            </Stack>
+                                                        </Paper>
+                                                    </Grid>
+                                                );
+                                            })}
+                                        </Grid>
 
                                     </Box>
-
-                                </Box>
-                                <Divider/>
-                                <Box sx={{p: 3}}>
-                                    {order.orderNote && (
-                                        <Typography
-                                            variant="body2"
-                                            color="textSecondary"
-                                            sx={{
-                                                mb: 1,
-                                                animation: `${fadeInOut} 2.5s infinite`, // Yanıp sönme animasyonu
-                                                padding: '6px',
-                                                borderRadius: '4px',
-                                                display: 'inline-block',
-                                                textAlign: 'justify',
-                                                bgcolor: 'rgba(248,203,100,0.96)'
-                                            }}
-                                        >
-                                            <strong>Not:</strong> {order.orderNote}
-                                        </Typography>
-
-                                    )}
-                                    <Typography variant="body2" color="textSecondary" sx={{mb: 1}}>
-                                        <strong>Siparişi Alan:</strong> {order.createdBy}
-                                    </Typography>
-                                    <Typography variant="body2" color="textSecondary" sx={{mb: 1}}>
-                                        <strong>Müşteri Adı:</strong> {order.customerName}
-                                    </Typography>
-                                    <Divider sx={{mb: 2}}/>
-                                    <Typography variant="body1" fontWeight="bold" gutterBottom>
-                                        Ürünler
-                                    </Typography>
-                                    <Grid container spacing={2}>
-                                        {order.orders.map((product) => {
-                                            const savedProduct = products.find(p => p._id === product.product);
-
-                                            return (
-                                                <Grid item xs={12} key={product._id}>
-                                                    <Paper elevation={4}
-                                                           sx={{p: 3, borderRadius: 4, backgroundColor: '#f9f9f9'}}>
-                                                        <Stack direction="row" spacing={3} alignItems="center">
-                                                            <Typography
-                                                                variant="h5"
-                                                                sx={{
-                                                                    fontWeight: 'bold',
-                                                                    transform: 'rotate(-10deg)',
-                                                                    color: '#333'
-                                                                }}
-                                                            >
-                                                                {product.quantity}x
-                                                            </Typography>
-                                                            <Box>
-                                                                <Typography variant="h6" fontWeight="bold"
-                                                                            color="textPrimary">
-                                                                    {savedProduct?.productname || 'Ürün bulunamadı'}
-                                                                </Typography>
-                                                                <Typography variant="body2" color="textSecondary">
-                                                                    Boyut: {product.size}
-                                                                </Typography>
-                                                                {product.content && (
-                                                                    <Typography variant="body2" color="textSecondary">
-                                                                        İçerik: {product.content}
-                                                                    </Typography>
-                                                                )}
-                                                            </Box>
-                                                        </Stack>
-                                                    </Paper>
-                                                </Grid>
-                                            );
-                                        })}
-                                    </Grid>
-
-                                </Box>
-                            </Card>
-                        </Grid>
-                    ))}
-                </Masonry>
-            ) : (
-                <Box sx={{textAlign: "center", py: 5}}>
-                    <Typography variant="h6" color="textSecondary">
-                        Henüz sipariş bulunmamaktadır.
-                    </Typography>
-                </Box>
-            )}
-        </Container>
+                                </Card>
+                            </Grid>
+                        ))}
+                    </Masonry>
+                ) : (
+                    <Box sx={{textAlign: "center", py: 5}}>
+                        <Typography variant="h6" color="textSecondary">
+                            Henüz sipariş bulunmamaktadır.
+                        </Typography>
+                    </Box>
+                )}
+            </Container>
+            <DiscountDialog order={currentDiscountOrder} setCurrentDiscountOrder={setCurrentDiscountOrder}/>
+        </>
     );
 }
 
+function DiscountDialog({order,setCurrentDiscountOrder}) {
+    const [selectedDiscountPercentage, setSelectedDiscountPercentage] = useState(10);
+    const {sendSocketMessage} = useContext(SocketContext);
+    const updateOrderDiscountMessageType = 'updateOrderDiscount';
+
+    const handleCloseDialog = () => {
+        setCurrentDiscountOrder(null);
+    };
+
+    const handleApplyDiscount = () => {
+        sendSocketMessage({orderId:order._id,discount:selectedDiscountPercentage},updateOrderDiscountMessageType);
+        handleCloseDialog();
+    };
+
+    const handleSliderChange = (event, newValue) => {
+        setSelectedDiscountPercentage(newValue);
+    };
+
+    return (
+        <Dialog
+            open={!!order}
+            onClose={handleCloseDialog}
+            fullWidth
+            maxWidth="sm" // Dialog genişliğini ayarla
+            sx={{borderRadius: '8px', boxShadow: 24}} // Yuvarlak köşeler ve gölge ekleyin
+        >
+            <DialogTitle sx={{fontWeight: 'bold', fontSize: '1.25rem', textAlign: 'center'}}>
+                İndirim Uygula
+            </DialogTitle>
+            <DialogContent>
+                <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', p: 2}}>
+                    <Typography textAlign='center' variant="h6" gutterBottom>
+                        Seçilen İndirim Yüzdesi: {selectedDiscountPercentage}%
+                    </Typography>
+                    <Slider
+                        aria-label="İndirim Yüzdesi"
+                        value={selectedDiscountPercentage}
+                        onChange={handleSliderChange}
+                        step={5}
+                        min={0}
+                        max={100}
+                        valueLabelDisplay="auto"
+                        marks={[
+                            {value: 0, label: '0%'},
+                            {value: 25, label: '25%'},
+                            {value: 50, label: '50%'},
+                            {value: 75, label: '75%'},
+                            {value: 100, label: '100%'},
+                        ]}
+                        sx={{
+                            width: '100%',
+                            mt: 2,
+                            '& .MuiSlider-thumb': {
+                                backgroundColor: '#3f51b5', // Slider thumb rengi
+                                border: '2px solid #fff', // Thumb çevresine beyaz sınır ekleyin
+                            },
+                            '& .MuiSlider-track': {
+                                backgroundColor: '#3f51b5', // Slider track rengi
+                            },
+                            '& .MuiSlider-rail': {
+                                backgroundColor: '#b0bec5', // Slider rail rengi
+                            },
+                        }}
+                    />
+                </Box>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={handleCloseDialog} variant="outlined" color="secondary" sx={{mr: 1}}>
+                    Kapat
+                </Button>
+                <Button onClick={handleApplyDiscount} variant="contained" color="primary">
+                    Uygula
+                </Button>
+            </DialogActions>
+        </Dialog>
+    );
+}
