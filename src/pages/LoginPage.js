@@ -34,7 +34,7 @@ export default function SignInSide() {
         if (socketData && socketData.type === messageType) {
             setIsLoading(false);
 
-            if (socketData.message.success && socketData.message.accountProps) {
+            if (socketData.message.status === 'success' && socketData.message.accountProps) {
                 setAccountProps(socketData.message.accountProps);
                 navigate('/');
                 return;
