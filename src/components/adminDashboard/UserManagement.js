@@ -97,7 +97,7 @@ export default function UserManagement() {
         if (socketData.type === 'updateUser') {
             if (socketData.message.status === "success" && socketData.message.updatedUser) {
                 setUsers(prevState => prevState.map(user => {
-                    if (user._id === socketData.message.updatedUser._id)
+                    if (user.id === socketData.message.updatedUser.id)
                         return socketData.message.updatedUser;
 
                     return user;
@@ -107,7 +107,7 @@ export default function UserManagement() {
                     return;
                 }
 
-                if (currentUser?.id === socketData.message.updatedUser._id) {
+                if (currentUser?.id === socketData.message.updatedUser.id) {
                     handleCloseEditUserDialog();
                     enqueueSnackbar("Düzenlediğiniz kullanıcı başka bir kullanıcı tarafından düzenlendi.", {variant: "warning"});
                 }
@@ -126,7 +126,7 @@ export default function UserManagement() {
         if (socketData.type === deleteUserMessageType) {
 
             if (socketData.message.status === "success")
-                setUsers(prevState => prevState.filter(user => user._id !== socketData.message.deletedUserId));
+                setUsers(prevState => prevState.filter(user => user.id !== socketData.message.deletedUserId));
 
             if (currentUser && socketData.message.deletedUserId === currentUser.id) {
                 handleCloseEditUserDialog();
@@ -144,7 +144,7 @@ export default function UserManagement() {
     const handleClick = (event, user) => {
         setAnchorEl(event.currentTarget);
         setCurrentUser({
-            id: user._id,
+            id: user.id,
             firstname: user.firstname,
             lastname: user.lastname
         });
@@ -225,7 +225,7 @@ export default function UserManagement() {
                     const isAdmin = user.permissions.includes('a');
 
                     return (
-                        <div key={user._id}>
+                        <div key={user.id}>
                             <Card variant="outlined" sx={{borderRadius: 2, boxShadow: 2, height: '100%'}}>
                                 <CardHeader
                                     avatar={
@@ -284,7 +284,7 @@ export default function UserManagement() {
                                 {/* Üç noktalı menü */}
                                 <Menu
                                     anchorEl={anchorEl}
-                                    open={Boolean(anchorEl) && currentUser.id === user._id}
+                                    open={Boolean(anchorEl) && currentUser.id === user.id}
                                     onClose={handleClose}
                                     PaperProps={{
                                         sx: {

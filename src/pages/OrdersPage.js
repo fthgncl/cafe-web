@@ -45,7 +45,7 @@ import {SocketContext} from "../context/SocketContext";
 import {AccountContext} from "../context/AccountContext";
 import {useSnackbar} from "notistack";
 import newOrderNotification from '../sounds/newOrderNotification.mp3';
-
+// TODO: Sipariş verilince ses çalmama hatasını gider.
 export default function OrdersPage() {
     const {sendSocketMessage, socketData, isConnected} = useContext(SocketContext);
     const {checkPermissions} = useContext(AccountContext);
@@ -69,7 +69,7 @@ export default function OrdersPage() {
     }
 
     const handleDiscountClick = (orderId) => {
-        const order = orders.find(order => order._id === orderId );
+        const order = orders.find(order => order.id === orderId );
         setCurrentDiscountOrder(order);
     }
 
@@ -96,7 +96,7 @@ export default function OrdersPage() {
 
         if ( socketData.type === updateOrderDiscountMessageType ){
             setOrders(prevState => prevState.map(order => {
-                if (order._id === socketData.message.orderId)
+                if (order.id === socketData.message.orderId)
                     return {...order,...socketData.message.newPrices}
                 else return order;
             }));
@@ -121,7 +121,7 @@ export default function OrdersPage() {
             if (socketData.message.orderInfo) {
                 setLoadingKitchenStatus(prevState => prevState.filter(item => item !== socketData.message.orderInfo.id));
                 setOrders(prevState => prevState.map(order => {
-                    if (order._id === socketData.message.orderInfo.id)
+                    if (order.id === socketData.message.orderInfo.id)
                         return {...order, kitchenStatus: socketData.message.orderInfo.newKitchenStatus}
                     else return order;
                 }));
@@ -133,9 +133,9 @@ export default function OrdersPage() {
         if (socketData.type === updateOrderPaymentStatusMessageType) {
             enqueueSnackbar(socketData.message.message, {variant: socketData.message.status});
             if (socketData.message.updatedOrder) {
-                setLoadingPaymentStatus(prevState => prevState.filter(item => item !== socketData.message.updatedOrder._id));
+                setLoadingPaymentStatus(prevState => prevState.filter(item => item !== socketData.message.updatedOrder.id));
                 setOrders(prevState => prevState.map(order => {
-                    if (order._id === socketData.message.updatedOrder._id)
+                    if (order.id === socketData.message.updatedOrder.id)
                         return {...order, paymentStatus: socketData.message.updatedOrder.paymentStatus}
                     else return order;
                 }));
@@ -190,20 +190,20 @@ export default function OrdersPage() {
     }, []);
 
     const handlePaymentStatusChange = (event, orderId) => {
-        const selectedOrder = orders.find(order => order._id === orderId);
-        setLoadingPaymentStatus(prevState => [...prevState, selectedOrder._id]);
+        const selectedOrder = orders.find(order => order.id === orderId);
+        setLoadingPaymentStatus(prevState => [...prevState, selectedOrder.id]);
         sendSocketMessage({
-            orderId: selectedOrder._id,
+            orderId: selectedOrder.id,
             paymentStatus: event.target.value
         }, updateOrderPaymentStatusMessageType);
 
     };
 
     const handleKitchenStatusChange = (event, orderId) => {
-        const selectedOrder = orders.find(order => order._id === orderId);
-        setLoadingKitchenStatus(prevState => [...prevState, selectedOrder._id]);
+        const selectedOrder = orders.find(order => order.id === orderId);
+        setLoadingKitchenStatus(prevState => [...prevState, selectedOrder.id]);
         sendSocketMessage({
-            orderId: selectedOrder._id,
+            orderId: selectedOrder.id,
             kitchenStatus: event.target.value
         }, updateOrderKitchenStatusMessageType);
     };
@@ -355,8 +355,8 @@ export default function OrdersPage() {
                             xl: 4
                         }}
                     >
-                        {orders.map((order) => (
-                            <Grid item xs={12} md={6} key={order._id}>
+                        {orders.map((order,index) => (
+                            <Grid item xs={12} md={6} key={`order-${index}`}>
                                 <Card variant="outlined" sx={{borderRadius: 3, boxShadow: 3, overflow: "hidden"}}>
                                     <Box sx={{p: 3}}>
                                         <Stack direction="row" justifyContent="space-between" alignItems="center"
@@ -454,7 +454,7 @@ export default function OrdersPage() {
                                                                 },
                                                             }}
                                                             startIcon={<PercentIcon/>} // İndirim ikonu
-                                                            onClick={() => handleDiscountClick(order._id)} // İndirim işlevi
+                                                            onClick={() => handleDiscountClick(order.id)} // İndirim işlevi
                                                         >
                                                             İndirim Uygula
                                                         </Button>
@@ -482,7 +482,7 @@ export default function OrdersPage() {
                                                             }}
                                                             startIcon={<>
                                                                 <PercentIcon/>{Math.round(((order.totalPrice - order.discountedPrice) / order.totalPrice) * 100)}</>} // İndirim ikonu
-                                                                onClick={() => handleRemoveDiscountClick(order._id)} // İndirim işlevi
+                                                                onClick={() => handleRemoveDiscountClick(order.id)} // İndirim işlevi
                                                         >
                                                             İndirimi Kaldır
                                                         </Button>
@@ -528,10 +528,10 @@ export default function OrdersPage() {
                                                                 textAlign: 'center'
                                                             }}
                                                             value={order.paymentStatus}
-                                                            onChange={(event) => handlePaymentStatusChange(event, order._id)}
+                                                            onChange={(event) => handlePaymentStatusChange(event, order.id)}
                                                             displayEmpty
                                                             renderValue={(selected) =>
-                                                                loadingPaymentStatus.includes(order._id) ? (
+                                                                loadingPaymentStatus.includes(order.id) ? (
                                                                     <LinearProgress sx={{mt: 1.2}}/>
                                                                 ) : (
                                                                     <Chip
@@ -595,10 +595,10 @@ export default function OrdersPage() {
                                                                 mt: 1
                                                             }}
                                                             value={order.kitchenStatus}
-                                                            onChange={(event) => handleKitchenStatusChange(event, order._id)}
+                                                            onChange={(event) => handleKitchenStatusChange(event, order.id)}
                                                             displayEmpty
                                                             renderValue={(selected) =>
-                                                                loadingKitchenStatus.includes(order._id) ? (
+                                                                loadingKitchenStatus.includes(order.id) ? (
                                                                     <LinearProgress sx={{mt: 1.2}}/>
                                                                 ) : (
                                                                     <Chip
@@ -669,11 +669,9 @@ export default function OrdersPage() {
                                             Ürünler
                                         </Typography>
                                         <Grid container spacing={2}>
-                                            {order.orders.map((product) => {
-                                                const savedProduct = products.find(p => p._id === product.product);
-
+                                            {order.items.map((product,index) => {
                                                 return (
-                                                    <Grid item xs={12} key={product._id}>
+                                                    <Grid item xs={12} key={`${product.productName}-content${index}`}>
                                                         <Paper elevation={4}
                                                                sx={{p: 3, borderRadius: 4, backgroundColor: '#f9f9f9'}}>
                                                             <Stack direction="row" spacing={3} alignItems="center">
@@ -690,7 +688,7 @@ export default function OrdersPage() {
                                                                 <Box>
                                                                     <Typography variant="h6" fontWeight="bold"
                                                                                 color="textPrimary">
-                                                                        {savedProduct?.productname || 'Ürün bulunamadı'}
+                                                                        {product?.productName || 'Ürün bulunamadı'}
                                                                     </Typography>
                                                                     <Typography variant="body2" color="textSecondary">
                                                                         Boyut: {product.size}
@@ -737,7 +735,7 @@ function DiscountDialog({order,setCurrentDiscountOrder}) {
     };
 
     const handleApplyDiscount = () => {
-        sendSocketMessage({orderId:order._id,discount:selectedDiscountPercentage},updateOrderDiscountMessageType);
+        sendSocketMessage({orderId:order.id,discount:selectedDiscountPercentage},updateOrderDiscountMessageType);
         handleCloseDialog();
     };
 

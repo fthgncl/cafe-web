@@ -1,5 +1,5 @@
 export const cafeName = '1908';
-export const apiSocketAddress = "ws://localhost:8080";
+export const apiSocketAddress = "ws://192.168.1.111:8080";
 export const localStorageAccountName = 'cafe1908-account';
 export const systemPermissions = {
     sys_admin: {

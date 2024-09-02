@@ -155,7 +155,7 @@ export default function OrderEntry() {
         setOrders(prevOrders => {
             let updatedOrders = [...prevOrders];
             const existingOrderIndex = updatedOrders.findIndex(order =>
-                order.product._id === newOrder.product._id &&
+                order.product.id === newOrder.product.id &&
                 order.size === newOrder.size &&
                 order.content === newOrder.content
             );
@@ -182,8 +182,8 @@ export default function OrderEntry() {
 
     const filteredProducts = products.filter(product => {
         const searchTermLower = turkishToLower(searchTerm);
-        const productNameMatch = turkishToLower(product.productname).includes(searchTermLower);
-        const productCategoryMatch = turkishToLower(product.productcategory).includes(searchTermLower);
+        const productNameMatch = turkishToLower(product.productName).includes(searchTermLower);
+        const productCategoryMatch = turkishToLower(product.productCategory).includes(searchTermLower);
         const contentMatch = product.contents.some(content =>
             turkishToLower(content.name).includes(searchTermLower)
         );
@@ -261,7 +261,7 @@ export default function OrderEntry() {
                             <List>
                                 {filteredProducts.map(product => (
                                     <ListItem
-                                        key={product._id}
+                                        key={product.id}
                                         onClick={() => handleProductClick(product)}
                                         sx={{
                                             '&:hover': {backgroundColor: '#f5f5f5'},
@@ -270,8 +270,8 @@ export default function OrderEntry() {
                                         }}
                                     >
                                         <ListItemText
-                                            primary={product.productname}
-                                            secondary={product.productcategory}
+                                            primary={product.productName}
+                                            secondary={product.productCategory}
                                         />
                                         <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 1}}>
                                             {product.contents.map(content => (
@@ -378,7 +378,7 @@ export default function OrderEntry() {
                                                     </Typography>
                                                     <Box>
                                                         <Typography variant="h6" sx={{fontWeight: 'bold'}}>
-                                                            {order.product.productname}
+                                                            {order.product.productName}
                                                         </Typography>
                                                         <Typography variant="body2">
                                                             Boyut: {order.size}
@@ -476,7 +476,7 @@ export default function OrderEntry() {
                     {selectedProduct ? (
                         <Box sx={{display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center'}}>
                             <Typography variant="h6" sx={{textAlign: 'center'}}>
-                                {selectedProduct.productname}
+                                {selectedProduct.productName}
                             </Typography>
                             <FormControl fullWidth error={sizeError}>
                                 <InputLabel>Boyut</InputLabel>

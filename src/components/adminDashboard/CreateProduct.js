@@ -58,7 +58,7 @@ export default function ProductForm({productId = null, onClose}) {
             if (socketData.message.addedByToken && accountProps.oldToken !== socketData.message.addedByToken)
                 return;
 
-            let apiErrors = {};
+            let apiErrors = {}; // TODO: Buranın mysqlden gelen veriye göre güncellenmesi lazım
             if (socketData.message.status === 'error') {
                 if (socketData.message.error && socketData.message.error.code === 11000) { // Unique Errors
                     const nonUniqueKeys = Object.keys(socketData.message.error.keyValue);
@@ -95,8 +95,8 @@ export default function ProductForm({productId = null, onClose}) {
 
     const formik = useFormik({
         initialValues: {
-            productname: '',
-            productcategory: '',
+            productName: '',
+            productCategory: '',
             sizes: [{size: 'Standart', price: ''}],
             contents: []
         },
@@ -109,8 +109,8 @@ export default function ProductForm({productId = null, onClose}) {
             // Formu sıfırla ve kullanıcı verileri ile doldur
             formik.resetForm({
                 values: {
-                    productname: productData.productname || '',
-                    productcategory: productData.productcategory || '',
+                    productName: productData.productName || '',
+                    productCategory: productData.productCategory || '',
                     sizes: productData.sizes || [{size: 'Standart', price: ''}],
                     contents: productData.contents || [],
                 }
@@ -210,14 +210,14 @@ export default function ProductForm({productId = null, onClose}) {
                                             <TextField
                                                 required
                                                 fullWidth
-                                                id="productname"
+                                                id="productName"
                                                 label="Ürün Adı"
-                                                name="productname"
-                                                value={formik.values.productname}
+                                                name="productName"
+                                                value={formik.values.productName}
                                                 onChange={formik.handleChange}
                                                 onBlur={formik.handleBlur}
-                                                error={Boolean(formik.errors.productname) && formik.touched.productname}
-                                                helperText={formik.touched.productname && formik.errors.productname}
+                                                error={Boolean(formik.errors.productName) && formik.touched.productName}
+                                                helperText={formik.touched.productName && formik.errors.productName}
                                             />
                                         </Grid>
 
@@ -225,14 +225,14 @@ export default function ProductForm({productId = null, onClose}) {
                                             <TextField
                                                 required
                                                 fullWidth
-                                                id="productcategory"
+                                                id="productCategory"
                                                 label="Kategori"
-                                                name="productcategory"
-                                                value={formik.values.productcategory}
+                                                name="productCategory"
+                                                value={formik.values.productCategory}
                                                 onChange={formik.handleChange}
                                                 onBlur={formik.handleBlur}
-                                                error={Boolean(formik.errors.productcategory) && formik.touched.productcategory}
-                                                helperText={formik.touched.productcategory && formik.errors.productcategory}
+                                                error={Boolean(formik.errors.productCategory) && formik.touched.productCategory}
+                                                helperText={formik.touched.productCategory && formik.errors.productCategory}
                                             />
                                         </Grid>
 

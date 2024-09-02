@@ -6,11 +6,11 @@ const contentSchema = yup.object().shape({
 });
 
 export const productSchema = yup.object().shape({
-    productname: yup
+    productName: yup
         .string()
         .required('Ürün adı boş bırakılamaz.'),
 
-    productcategory: yup
+    productCategory: yup
         .string()
         .required('Kategori boş bırakılamaz.'),
 

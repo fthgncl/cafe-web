@@ -73,7 +73,7 @@ export default function ProductManager() {
         if (socketData.type === 'updateProduct') {
             if (socketData.message.status === "success" && socketData.message.updatedProduct) {
                 setProducts(prevState => prevState.map(product => {
-                    if (product._id === socketData.message.updatedProduct._id)
+                    if (product.id === socketData.message.updatedProduct.id)
                         return socketData.message.updatedProduct;
 
                     return product;
@@ -83,7 +83,7 @@ export default function ProductManager() {
                     return;
                 }
 
-                if (currentProduct?._id === socketData.message.updatedProduct._id) {
+                if (currentProduct?.id === socketData.message.updatedProduct.id) {
                     handleCloseEditProductDialog();
                     enqueueSnackbar("Düzenlediğiniz ürün başka bir kullanıcı tarafından düzenlendi.", {variant: "warning"});
                 }
@@ -103,9 +103,9 @@ export default function ProductManager() {
         if (socketData.type === deleteProductMessageType) {
 
             if (socketData.message.status === "success")
-                setProducts(prevState => prevState.filter(product => product._id !== socketData.message.deletedProductId));
+                setProducts(prevState => prevState.filter(product => product.id !== socketData.message.deletedProductId));
 
-            if (currentProduct && socketData.message.deletedProductId === currentProduct._id) {
+            if (currentProduct && socketData.message.deletedProductId === currentProduct.id) {
                 handleCloseEditProductDialog();
                 enqueueSnackbar("Düzenlediğiniz ürün başka bir kullanıcı tarafından silindi.", {variant: "warning"});
             } else enqueueSnackbar(socketData.message.message, {variant: socketData.message.status});
@@ -140,7 +140,7 @@ export default function ProductManager() {
     };
 
     const handleConfirmDelete = () => {
-        sendSocketMessage({productId: currentProduct._id}, deleteProductMessageType);
+        sendSocketMessage({productId: currentProduct.id}, deleteProductMessageType);
         setOpenDeleteConfirmDialog(false);
         setCurrentProduct(null);
     };
@@ -197,17 +197,17 @@ export default function ProductManager() {
                 </div>
 
                 {products.map((product) => (
-                    <div key={product._id}>
+                    <div key={`product-${product.id}`}>
                         <Card variant="outlined" sx={{borderRadius: 2, boxShadow: 2, height: '100%'}}>
                             <CardHeader
                                 title={
                                     <Typography variant="h6" noWrap>
-                                        {product.productname}
+                                        {product.productName}
                                     </Typography>
                                 }
                                 subheader={
                                     <Typography variant="body2" color="textPrimary">
-                                        {`Kategori: ${product.productcategory}`}
+                                        {`Kategori: ${product.productCategory}`}
                                     </Typography>
                                 }
                                 action={
@@ -234,9 +234,9 @@ export default function ProductManager() {
                                         mb: 2, // Alt boşluk
                                     }}
                                 >
-                                    {product.sizes.map((size) => (
+                                    {product.sizes.map((size,index) => (
                                         <Box
-                                            key={size._id}
+                                            key={`${product.productName}-size${index}`}
                                             color="primary"
                                             sx={{
                                                 bgcolor: 'primary.light',
@@ -279,8 +279,8 @@ export default function ProductManager() {
                                 </Typography>
                                 <List dense>
                                     {product.contents.length ? (
-                                        product.contents.map((content) => (
-                                            <ListItem key={content._id} disableGutters>
+                                        product.contents.map((content,index) => (
+                                            <ListItem key={`${product.productName}-content${index}`} disableGutters>
                                                 <ListItemIcon>
                                                     <InfoIcon fontSize="small" color="primary"/>
                                                 </ListItemIcon>
@@ -299,7 +299,7 @@ export default function ProductManager() {
 
                             <Menu
                                 anchorEl={anchorEl}
-                                open={Boolean(anchorEl) && currentProduct._id === product._id}
+                                open={Boolean(anchorEl) && currentProduct.id === product.id}
                                 onClose={handleClose}
                                 PaperProps={{
                                     sx: {
@@ -411,7 +411,7 @@ export default function ProductManager() {
                 </DialogTitle>
                 <DialogContent className="custom-scrollbar" sx={{overflowY: 'auto'}}>
                     {currentProduct &&
-                        <CreateProduct productId={currentProduct._id} onClose={handleCloseEditProductDialog}/>}
+                        <CreateProduct productId={currentProduct.id} onClose={handleCloseEditProductDialog}/>}
                 </DialogContent>
             </Dialog>
 

@@ -48,6 +48,7 @@ export default function SignUp({userId = null, onClose}) {
         if (!socketData || !socketData.message)
             return;
 
+        console.log(socketData);
         if (socketData.type === getUserMessageType) {
             if (socketData.message.status === "success" && socketData.message.user) {
                 setUserData(socketData.message.user);
@@ -62,7 +63,7 @@ export default function SignUp({userId = null, onClose}) {
                 return;
             }
 
-            let apiErrors = {};
+            let apiErrors = {}; // TODO: Buranın mysqlden gelen veriye göre güncellenmesi lazım
             if (socketData.message.status === 'error') {
                 if (socketData.message.error && socketData.message.error.code === 11000) { // Unique Errors
                     const nonUniqueKeys = Object.keys(socketData.message.error.keyValue);
