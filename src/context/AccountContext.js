@@ -33,12 +33,11 @@ export const AccountProvider = ({ children }) => {
         if (storedAccountProps) {
             try {
                 const parsedProps = JSON.parse(storedAccountProps);
-                if (parsedProps.exp && isSessionValid(parsedProps.exp)) {
+                if (parsedProps.tokenLifeTime && parsedProps.tokenLifeTime > 0) {
                     setAccountProps(parsedProps);
                     setIsActive(true);
 
-                    const timeUntilExpiration = parsedProps.exp - Date.now();
-                    timeoutRef.current = setTimeout(logout, timeUntilExpiration);
+                    timeoutRef.current = setTimeout(logout, parsedProps.tokenLifeTime);
                 } else {
                     console.warn("Session expired.");
                     logout();
@@ -57,20 +56,14 @@ export const AccountProvider = ({ children }) => {
         };
     }, []);
 
-    const isSessionValid = (expirationTime) => {
-        const currentTime = Date.now();
-        return expirationTime > currentTime;
-    };
-
     const updateAccountProps = (newAccountProps) => {
         localStorage.setItem(localStorageAccountName, JSON.stringify(newAccountProps));
         setAccountProps(newAccountProps);
 
-        const timeUntilExpiration = newAccountProps.exp - Date.now();
         if (timeoutRef.current) {
             clearTimeout(timeoutRef.current);
         }
-        timeoutRef.current = setTimeout(logout, timeUntilExpiration);
+        timeoutRef.current = setTimeout(logout, newAccountProps.tokenLifeTime);
 
         setIsActive(true);
     };
