@@ -45,12 +45,11 @@ import {SocketContext} from "../context/SocketContext";
 import {AccountContext} from "../context/AccountContext";
 import {useSnackbar} from "notistack";
 import newOrderNotification from '../sounds/newOrderNotification.mp3';
-// TODO: Sipariş verilince ses çalmama hatasını gider.
+
 export default function OrdersPage() {
     const {sendSocketMessage, socketData, isConnected} = useContext(SocketContext);
     const {checkPermissions} = useContext(AccountContext);
     const {enqueueSnackbar} = useSnackbar();
-    const [products, setProducts] = useState([]);
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [loadingPaymentStatus, setLoadingPaymentStatus] = useState([]);
@@ -62,6 +61,7 @@ export default function OrdersPage() {
     const updateOrderDiscountMessageType = 'updateOrderDiscount'
     const newOrderMessageType = 'newOrder';
     const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+    const [userInteracted, setUserInteracted] = useState(false);
     const [currentDiscountOrder, setCurrentDiscountOrder] = useState(null);
 
     const handleRemoveDiscountClick = (orderId) => {
@@ -75,13 +75,32 @@ export default function OrdersPage() {
 
     const toggleNotifications = () => {
         setNotificationsEnabled(!notificationsEnabled);
-        // Burada bildirim seslerini açma/kapatma işlemlerini yapabilirsiniz.
     };
 
     const playNotificationSound = () => {
+
+        if (!notificationsEnabled || !userInteracted) {
+            return;
+        }
+
         const audio = new Audio(newOrderNotification);
         audio.play().catch(error => console.error("Ses çalma hatası:", error));
     };
+
+    useEffect(() => {
+        const handleUserInteraction = () => { // Kullanıcı etkileşim yapmadan bildirim sesi çalmak hata oluşturduğu için burada ilk etkileşimi bekliyoruz.
+            setNotificationsEnabled(true);
+            setUserInteracted(true); // Kullanıcı etkileşimi kaydedilir
+        };
+
+        document.addEventListener('click', handleUserInteraction);
+        document.addEventListener('keydown', handleUserInteraction);
+
+        return () => {
+            document.removeEventListener('click', handleUserInteraction);
+            document.removeEventListener('keydown', handleUserInteraction);
+        };
+    }, []);
 
     useEffect(() => {
         if (isConnected) {
@@ -158,7 +177,6 @@ export default function OrdersPage() {
 
         if (socketData.type === getProductsMessageType) {
             if (socketData.message.products) {
-                setProducts(socketData.message.products);
                 sendSocketMessage({}, getOrdersMessageType);
             }
         }
