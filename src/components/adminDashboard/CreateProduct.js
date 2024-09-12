@@ -58,12 +58,14 @@ export default function ProductForm({productId = null, onClose}) {
             if (socketData.message.addedByToken && accountProps.oldToken !== socketData.message.addedByToken)
                 return;
 
-            let apiErrors = {}; // TODO: Buranın mysqlden gelen veriye göre güncellenmesi lazım
-            if (socketData.message.status === 'error') {
-                if (socketData.message.error && socketData.message.error.code === 11000) { // Unique Errors
-                    const nonUniqueKeys = Object.keys(socketData.message.error.keyValue);
-                    nonUniqueKeys.forEach(key => apiErrors[key] = `${socketData.message.error.keyValue[key]} daha önceden kullanılmış.`);
+            let apiErrors = {};
+            if (socketData.message.error && socketData.message.error.code === 'ER_DUP_ENTRY') {
+                const errorMessage = socketData.message.error.sqlMessage;
+                if (errorMessage.includes('productName')) {
+                    apiErrors.productName = "Bu isimde kayıtlı ürün bulunmaktadır.";
                 }
+
+
                 formik.setErrors(apiErrors);
             }
 
