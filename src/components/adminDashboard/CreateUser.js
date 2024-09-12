@@ -48,7 +48,7 @@ export default function SignUp({userId = null, onClose}) {
         if (!socketData || !socketData.message)
             return;
 
-        console.log(socketData);
+        // Kullanıcı verisini almak için
         if (socketData.type === getUserMessageType) {
             if (socketData.message.status === "success" && socketData.message.user) {
                 setUserData(socketData.message.user);
@@ -57,35 +57,47 @@ export default function SignUp({userId = null, onClose}) {
             return;
         }
 
+        // Yeni kullanıcı veya mesaj verisi geldiğinde
         if (socketData.type === newUserMessageType || socketData.type === messageType) {
 
+            // Token uyumsuzluğu kontrolü
             if (socketData.message.addedByToken && accountProps.oldToken !== socketData.message.addedByToken) {
                 return;
             }
 
-            let apiErrors = {}; // TODO: Buranın mysqlden gelen veriye göre güncellenmesi lazım
+            let apiErrors = {};
+
+            // Hata durumunu kontrol et
             if (socketData.message.status === 'error') {
-                if (socketData.message.error && socketData.message.error.code === 11000) { // Unique Errors
-                    const nonUniqueKeys = Object.keys(socketData.message.error.keyValue);
-                    nonUniqueKeys.forEach(key => apiErrors[key] = `${socketData.message.error.keyValue[key]} daha önceden kullanılmış.`);
-                } else if (errors) { // Validator Errors
-                    const nonUniqueKeys = Object.keys(errors);
-                    nonUniqueKeys.forEach(key => apiErrors[key] = errors[key].message);
+
+                // MySQL unique constraint hatası (ER_DUP_ENTRY)
+                if (socketData.message.error && socketData.message.error.code === 'ER_DUP_ENTRY') {
+                    const sqlMessage = socketData.message.error.sqlMessage;
+
+                    // Hangi alanın unique ihlali yaptığını kontrol et
+                    if (sqlMessage.includes('username')) {
+                        apiErrors.username = "Bu kullanıcı adı zaten alınmış.";
+                    }
+                    if (sqlMessage.includes('phone')) {
+                        apiErrors.phone = "Bu telefon numarası zaten kullanılıyor.";
+                    }
                 }
+
+                // Formik ile hataları set et
                 setErrors(apiErrors);
             }
 
+            // Başarılı mesajı işleme al
             if (Object.keys(apiErrors).length === 0 && socketData.message.message && socketData.message.status) {
-                enqueueSnackbar(socketData.message.message, {variant: socketData.message.status});
+                enqueueSnackbar(socketData.message.message, { variant: socketData.message.status });
             }
 
+            // Başarılı durum sonrası
             if (socketData.message.status === 'success') {
                 onClose();
             }
 
             setIsLoading(false);
-
-
         }
         // eslint-disable-next-line
     }, [socketData]);
