@@ -1,3 +1,4 @@
+import React, {useContext, useEffect, useState} from 'react';
 import {
     Box,
     Card,
@@ -11,16 +12,32 @@ import {
     Grid,
     Divider
 } from '@mui/material';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import DataRangeSelector from '../DataRangeSelector';
-import { useContext, useEffect, useState } from "react";
-import { SocketContext } from "../../context/SocketContext";
+import {SocketContext} from '../../context/SocketContext';
+import {axisClasses} from '@mui/x-charts/ChartsAxis';
+import {chartsGridClasses} from '@mui/x-charts/ChartsGrid';
+import {BarChart} from '@mui/x-charts/BarChart';
+
+function formatDateToCustomFormat(dateString) {
+    // Tarih nesnesi oluştur
+    const date = new Date(dateString);
+
+    // Format seçeneklerini ayarla
+    const options = {
+        day: 'numeric',
+        month: 'long',
+        weekday: 'long' // Haftanın gününü ekler
+    };
+
+    // Tarihi belirtilen formatta döndür
+    return new Intl.DateTimeFormat('tr-TR', options).format(date);
+}
 
 export default function SalesReport() {
-    const { sendSocketMessage, socketData } = useContext(SocketContext);
+    const {sendSocketMessage, socketData} = useContext(SocketContext);
     const getSalesMessageType = 'getSales';
     const [totalSales, setTotalSales] = useState(0);
     const [totalOrders, setTotalOrders] = useState(0);
@@ -39,7 +56,7 @@ export default function SalesReport() {
         // Calculate top products
         const productSales = salesData.reduce((acc, sale) => {
             if (!acc[sale.productName]) {
-                acc[sale.productName] = { amount: 0, sales: 0 };
+                acc[sale.productName] = {amount: 0, sales: 0};
             }
             acc[sale.productName].amount += sale.quantity;
             acc[sale.productName].sales += sale.totalPrice;
@@ -56,9 +73,10 @@ export default function SalesReport() {
 
         // Prepare data for the chart
         const chartData = salesData.reduce((acc, sale) => {
-            const date = new Date(sale.createdDate).toLocaleDateString();
+            const date = formatDateToCustomFormat(sale.createdDate);
+
             if (!acc[date]) {
-                acc[date] = { date, sales: 0 };
+                acc[date] = {date, sales: 0};
             }
             acc[date].sales += sale.totalPrice;
             return acc;
@@ -86,13 +104,13 @@ export default function SalesReport() {
     const avgOrderValue = totalOrders === 0 ? 0 : (totalSales / totalOrders).toFixed(2);
 
     return (
-        <Box sx={{ width: '100%', padding: 2, backgroundColor: '#f4f6f8' }}>
+        <Box sx={{width: '100%', padding: 2, backgroundColor: '#f4f6f8'}}>
             {/* DataRangeSelector Component */}
-            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4 }}>
-                <DataRangeSelector changeDataRange={changeDataRange} />
+            <Box sx={{display: 'flex', justifyContent: 'center', mb: 4}}>
+                <DataRangeSelector changeDataRange={changeDataRange}/>
             </Box>
 
-            <Divider sx={{ my: 4 }} />
+            <Divider sx={{my: 4}}/>
 
             {/* Info Cards */}
             <Grid container spacing={3}>
@@ -106,7 +124,7 @@ export default function SalesReport() {
                     }}>
                         <CardContent>
                             <Box display="flex" alignItems="center">
-                                <TrendingUpIcon fontSize="large" />
+                                <TrendingUpIcon fontSize="large"/>
                                 <Box ml={2}>
                                     <Typography variant="h6">Toplam Satış</Typography>
                                     <Typography variant="h4" fontWeight="bold">₺{totalSales.toFixed(2)}</Typography>
@@ -125,7 +143,7 @@ export default function SalesReport() {
                     }}>
                         <CardContent>
                             <Box display="flex" alignItems="center">
-                                <ShoppingCartIcon fontSize="large" />
+                                <ShoppingCartIcon fontSize="large"/>
                                 <Box ml={2}>
                                     <Typography variant="h6">Toplam Sipariş</Typography>
                                     <Typography variant="h4" fontWeight="bold">{totalOrders}</Typography>
@@ -144,7 +162,7 @@ export default function SalesReport() {
                     }}>
                         <CardContent>
                             <Box display="flex" alignItems="center">
-                                <ReceiptLongIcon fontSize="large" />
+                                <ReceiptLongIcon fontSize="large"/>
                                 <Box ml={2}>
                                     <Typography variant="h6">Ort. Sipariş Değeri</Typography>
                                     <Typography variant="h4" fontWeight="bold">₺{avgOrderValue}</Typography>
@@ -155,23 +173,31 @@ export default function SalesReport() {
                 </Grid>
             </Grid>
 
-            <Divider sx={{ my: 4 }} />
+            <Divider sx={{my: 4}}/>
 
             {/* Sales Graph */}
-            <Card sx={{ mb: 4 }}>
-                <CardContent>
-                    <Typography variant="h6" gutterBottom>Son 30 Gün Satış Grafiği</Typography>
-                    <ResponsiveContainer width="100%" height={300}>
-                        <LineChart data={salesData}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="date" />
-                            <YAxis />
-                            <Tooltip />
-                            <Line type="monotone" dataKey="sales" stroke="#3f51b5" strokeWidth={2} />
-                        </LineChart>
-                    </ResponsiveContainer>
-                </CardContent>
-            </Card>
+            {salesData.length > 1 && (
+                <Card sx={{mb: 4}}>
+                    <CardContent>
+                        <Typography variant="h6" gutterBottom>Son 30 Gün Satış Grafiği</Typography>
+                        <div style={{width: '100%', height: 300}}>
+                            <BarChart
+                                dataset={salesData}
+                                xAxis={[{scaleType: 'band', dataKey: 'date'}]}
+                                yAxis={[{label: 'Satış (₺)'}]}
+                                series={[{dataKey: 'sales', label: 'Satış'}]}
+                                grid={{horizontal: true}}
+                                sx={{
+                                    [`& .${axisClasses.left} .${axisClasses.label}`]: {
+                                        transform: 'translateX(-10px)',
+                                    },
+                                    [`& .${chartsGridClasses.line}`]: {strokeDasharray: '5 3', strokeWidth: 2},
+                                }}
+                            />
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
 
             {/* Top Selling Products */}
             <Card>
