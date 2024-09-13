@@ -12,7 +12,8 @@ function DatePickerComponent({changeDataRange}) {
 
     const [dateRange, setDateRange] = useState(() => {
         const today = new Date();
-        const yesterday = new Date();
+        const yesterday = new Date(today);
+        yesterday.setDate(today.getDate() - 1); // Bugünden bir gün önce
 
         return {
             startDate: yesterday,
