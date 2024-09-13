@@ -16,48 +16,74 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import DataRangeSelector from '../DataRangeSelector';
-import {useContext, useEffect} from "react";
-import {SocketContext} from "../../context/SocketContext";
-
-const data = [
-    { date: '14 Ağu', sales: 4000 },
-    { date: '17 Ağu', sales: 3000 },
-    { date: '20 Ağu', sales: 2000 },
-    { date: '26 Ağu', sales: 2780 },
-    { date: '29 Ağu', sales: 1890 },
-    { date: '1 Eyl', sales: 2390 },
-    { date: '4 Eyl', sales: 3490 },
-];
-
-const topProducts = [
-    { name: 'Köy tereyağı', amount: 12, percentage: 20, sales: 4200 },
-    { name: 'Çörekotu yağı', amount: 6, percentage: 7, sales: 1500 },
-    { name: 'Biber salçası', amount: 4, percentage: 5, sales: 1120 },
-    { name: 'Domates salçası', amount: 7, percentage: 4, sales: 875 },
-    { name: 'Peynir', amount: 3, percentage: 4, sales: 840 },
-];
+import { useContext, useEffect, useState } from "react";
+import { SocketContext } from "../../context/SocketContext";
 
 export default function SalesReport() {
-    const {sendSocketMessage, socketData} = useContext(SocketContext);
+    const { sendSocketMessage, socketData } = useContext(SocketContext);
     const getSalesMessageType = 'getSales';
+    const [totalSales, setTotalSales] = useState(0);
+    const [totalOrders, setTotalOrders] = useState(0);
+    const [topProducts, setTopProducts] = useState([]);
+    const [salesData, setSalesData] = useState([]);
+
+    const analyzeSales = (sales) => {
+        let salesData = sales || [];
+
+        const totalSalesAmount = salesData.reduce((acc, sale) => acc + sale.totalPrice, 0);
+        const totalOrdersCount = salesData.reduce((acc, sale) => acc + sale.quantity, 0);
+
+        setTotalSales(totalSalesAmount);
+        setTotalOrders(totalOrdersCount);
+
+        // Calculate top products
+        const productSales = salesData.reduce((acc, sale) => {
+            if (!acc[sale.productName]) {
+                acc[sale.productName] = { amount: 0, sales: 0 };
+            }
+            acc[sale.productName].amount += sale.quantity;
+            acc[sale.productName].sales += sale.totalPrice;
+            return acc;
+        }, {});
+
+        const topProductsData = Object.keys(productSales).map(productName => ({
+            name: productName,
+            amount: productSales[productName].amount,
+            sales: productSales[productName].sales
+        }));
+
+        setTopProducts(topProductsData);
+
+        // Prepare data for the chart
+        const chartData = salesData.reduce((acc, sale) => {
+            const date = new Date(sale.createdDate).toLocaleDateString();
+            if (!acc[date]) {
+                acc[date] = { date, sales: 0 };
+            }
+            acc[date].sales += sale.totalPrice;
+            return acc;
+        }, {});
+
+        setSalesData(Object.values(chartData));
+    };
 
     useEffect(() => {
-        if (!socketData || !socketData.message)
-            return;
+        if (!socketData || !socketData.message) return;
 
         if (socketData.type === getSalesMessageType) {
             if (socketData.message.status === "success" && socketData.message.sales) {
-                console.log(socketData.message)
+                analyzeSales(socketData.message.sales);
             }
-
         }
 
         // eslint-disable-next-line
     }, [socketData]);
 
     const changeDataRange = (dateRange) => {
-        sendSocketMessage(dateRange,getSalesMessageType);
-    }
+        sendSocketMessage(dateRange, getSalesMessageType);
+    };
+
+    const avgOrderValue = totalOrders === 0 ? 0 : (totalSales / totalOrders).toFixed(2);
 
     return (
         <Box sx={{ width: '100%', padding: 2, backgroundColor: '#f4f6f8' }}>
@@ -83,7 +109,7 @@ export default function SalesReport() {
                                 <TrendingUpIcon fontSize="large" />
                                 <Box ml={2}>
                                     <Typography variant="h6">Toplam Satış</Typography>
-                                    <Typography variant="h4" fontWeight="bold">₺22,729</Typography>
+                                    <Typography variant="h4" fontWeight="bold">₺{totalSales.toFixed(2)}</Typography>
                                 </Box>
                             </Box>
                         </CardContent>
@@ -102,7 +128,7 @@ export default function SalesReport() {
                                 <ShoppingCartIcon fontSize="large" />
                                 <Box ml={2}>
                                     <Typography variant="h6">Toplam Sipariş</Typography>
-                                    <Typography variant="h4" fontWeight="bold">16</Typography>
+                                    <Typography variant="h4" fontWeight="bold">{totalOrders}</Typography>
                                 </Box>
                             </Box>
                         </CardContent>
@@ -121,7 +147,7 @@ export default function SalesReport() {
                                 <ReceiptLongIcon fontSize="large" />
                                 <Box ml={2}>
                                     <Typography variant="h6">Ort. Sipariş Değeri</Typography>
-                                    <Typography variant="h4" fontWeight="bold">₺1,421</Typography>
+                                    <Typography variant="h4" fontWeight="bold">₺{avgOrderValue}</Typography>
                                 </Box>
                             </Box>
                         </CardContent>
@@ -136,7 +162,7 @@ export default function SalesReport() {
                 <CardContent>
                     <Typography variant="h6" gutterBottom>Son 30 Gün Satış Grafiği</Typography>
                     <ResponsiveContainer width="100%" height={300}>
-                        <LineChart data={data}>
+                        <LineChart data={salesData}>
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="date" />
                             <YAxis />
@@ -156,7 +182,6 @@ export default function SalesReport() {
                             <TableRow>
                                 <TableCell>Ürün Adı</TableCell>
                                 <TableCell>Adet</TableCell>
-                                <TableCell>Toplamın %'si</TableCell>
                                 <TableCell>Brüt Satış (₺)</TableCell>
                             </TableRow>
                         </TableHead>
@@ -165,8 +190,7 @@ export default function SalesReport() {
                                 <TableRow key={index}>
                                     <TableCell>{product.name}</TableCell>
                                     <TableCell>{product.amount}</TableCell>
-                                    <TableCell>{product.percentage}%</TableCell>
-                                    <TableCell>₺{product.sales}</TableCell>
+                                    <TableCell>₺{product.sales.toFixed(2)}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>

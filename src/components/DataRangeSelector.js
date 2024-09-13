@@ -8,12 +8,17 @@ import { useTheme } from "@mui/material/styles";
 
 function DatePickerComponent({changeDataRange}) {
     const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('md')); // Mobil kontrol
+    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-    const [dateRange, setDateRange] = useState({
-        startDate: new Date(),
-        endDate: new Date(),
-        key: 'selection'
+    const [dateRange, setDateRange] = useState(() => {
+        const today = new Date();
+        const yesterday = new Date();
+
+        return {
+            startDate: yesterday,
+            endDate: today,
+            key: 'selection'
+        };
     });
 
     useEffect(() => {

@@ -12,7 +12,7 @@ import SalesReport from "../components/adminDashboard/SalesReport";
 
 function AdminDashboard() {
     const {checkPermissions} = useContext(AccountContext);
-    const [selectedTab, setSelectedTab] = useState(false);
+    const [selectedTab, setSelectedTab] = useState(2);
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const isSysAdmin = checkPermissions("a");
