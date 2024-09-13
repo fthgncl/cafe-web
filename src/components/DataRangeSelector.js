@@ -6,7 +6,7 @@ import 'react-date-range/dist/theme/default.css';
 import { useMediaQuery, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, List, ListItem, ListItemButton } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 
-function DatePickerComponent() {
+function DatePickerComponent({changeDataRange}) {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md')); // Mobil kontrol
 
@@ -16,11 +16,14 @@ function DatePickerComponent() {
         key: 'selection'
     });
 
+    useEffect(() => {
+        changeDataRange(dateRange)
+    }, [dateRange]);
+
     const [dialogOpen, setDialogOpen] = useState(false);
 
     const handleSelect = (ranges) => {
         setDateRange(ranges.selection);
-        console.log("Seçilen tarih aralığı:", ranges.selection);
     };
 
     const handleDialogOpen = () => {

@@ -16,6 +16,8 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import DataRangeSelector from '../DataRangeSelector';
+import {useContext, useEffect} from "react";
+import {SocketContext} from "../../context/SocketContext";
 
 const data = [
     { date: '14 Ağu', sales: 4000 },
@@ -36,11 +38,32 @@ const topProducts = [
 ];
 
 export default function SalesReport() {
+    const {sendSocketMessage, socketData} = useContext(SocketContext);
+    const getSalesMessageType = 'getSales';
+
+    useEffect(() => {
+        if (!socketData || !socketData.message)
+            return;
+
+        if (socketData.type === getSalesMessageType) {
+            if (socketData.message.status === "success" && socketData.message.sales) {
+                console.log(socketData.message)
+            }
+
+        }
+
+        // eslint-disable-next-line
+    }, [socketData]);
+
+    const changeDataRange = (dateRange) => {
+        sendSocketMessage(dateRange,getSalesMessageType);
+    }
+
     return (
         <Box sx={{ width: '100%', padding: 2, backgroundColor: '#f4f6f8' }}>
             {/* DataRangeSelector Component */}
             <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4 }}>
-                <DataRangeSelector />
+                <DataRangeSelector changeDataRange={changeDataRange} />
             </Box>
 
             <Divider sx={{ my: 4 }} />
