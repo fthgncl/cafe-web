@@ -1,9 +1,21 @@
-import React from 'react';
-import { Box, Card, CardContent, Typography, Table, TableBody, TableCell, TableHead, TableRow, Grid, Divider, IconButton } from '@mui/material';
+import {
+    Box,
+    Card,
+    CardContent,
+    Typography,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableRow,
+    Grid,
+    Divider
+} from '@mui/material';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+import DataRangeSelector from '../DataRangeSelector';
 
 const data = [
     { date: '14 Ağu', sales: 4000 },
@@ -23,13 +35,26 @@ const topProducts = [
     { name: 'Peynir', amount: 3, percentage: 4, sales: 840 },
 ];
 
-const SalesReport = () => {
+export default function SalesReport() {
     return (
-        <Box sx={{ width: '100%', padding: 3, backgroundColor: '#f4f6f8' }}>
+        <Box sx={{ width: '100%', padding: 2, backgroundColor: '#f4f6f8' }}>
+            {/* DataRangeSelector Component */}
+            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4 }}>
+                <DataRangeSelector />
+            </Box>
+
+            <Divider sx={{ my: 4 }} />
+
             {/* Info Cards */}
             <Grid container spacing={3}>
                 <Grid item xs={12} sm={4}>
-                    <Card sx={{ backgroundColor: '#2196f3', color: 'white', height: '100%', display:'flex', alignItems:'center' }}>
+                    <Card sx={{
+                        backgroundColor: '#2196f3',
+                        color: 'white',
+                        height: '100%',
+                        display: 'flex',
+                        alignItems: 'center'
+                    }}>
                         <CardContent>
                             <Box display="flex" alignItems="center">
                                 <TrendingUpIcon fontSize="large" />
@@ -42,7 +67,13 @@ const SalesReport = () => {
                     </Card>
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                    <Card sx={{ backgroundColor: '#4caf50', color: 'white', height: '100%', display:'flex', alignItems:'center' }}>
+                    <Card sx={{
+                        backgroundColor: '#4caf50',
+                        color: 'white',
+                        height: '100%',
+                        display: 'flex',
+                        alignItems: 'center'
+                    }}>
                         <CardContent>
                             <Box display="flex" alignItems="center">
                                 <ShoppingCartIcon fontSize="large" />
@@ -55,7 +86,13 @@ const SalesReport = () => {
                     </Card>
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                    <Card sx={{ backgroundColor: '#ff9800', color: 'white', height: '100%', display:'flex', alignItems:'center' }}>
+                    <Card sx={{
+                        backgroundColor: '#ff9800',
+                        color: 'white',
+                        height: '100%',
+                        display: 'flex',
+                        alignItems: 'center'
+                    }}>
                         <CardContent>
                             <Box display="flex" alignItems="center">
                                 <ReceiptLongIcon fontSize="large" />
@@ -68,7 +105,6 @@ const SalesReport = () => {
                     </Card>
                 </Grid>
             </Grid>
-
 
             <Divider sx={{ my: 4 }} />
 
@@ -116,6 +152,4 @@ const SalesReport = () => {
             </Card>
         </Box>
     );
-};
-
-export default SalesReport;
+}
