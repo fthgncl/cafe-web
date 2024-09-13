@@ -8,6 +8,7 @@ import { useTheme } from '@mui/material/styles';
 import UserManagement from '../components/adminDashboard/UserManagement';
 import ProductManager from '../components/adminDashboard/ProductManager';
 import {AccountContext} from "../context/AccountContext";
+import SalesReport from "../components/adminDashboard/SalesReport";
 
 function AdminDashboard() {
     const {checkPermissions} = useContext(AccountContext);
@@ -29,7 +30,7 @@ function AdminDashboard() {
             case 1:
                 return <ProductManager />;
             case 2:
-                return <Box textAlign="center">Satış Raporları İçeriği</Box>; // Bu kısımları bileşenlerle değiştirin
+                return <SalesReport/>;
             default:
                 return null;
         }
