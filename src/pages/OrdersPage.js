@@ -114,6 +114,7 @@ export default function OrdersPage() {
             return;
 
         if ( socketData.type === updateOrderDiscountMessageType ){
+            enqueueSnackbar(socketData.message.message, {variant: socketData.message.status});
             setOrders(prevState => prevState.map(order => {
                 if (order.id === socketData.message.orderId)
                     return {...order,...socketData.message.newPrices}
