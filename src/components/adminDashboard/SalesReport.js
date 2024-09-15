@@ -44,6 +44,7 @@ export default function SalesReport() {
     const [totalDiscount, setTotalDiscount] = useState(0);
     const [totalSalesProducts, setTotalSalesProducts] = useState(0);
     const [topProducts, setTopProducts] = useState([]);
+    const [topProfitableProducts, setTopProfitableProducts] = useState([]);
     const [salesData, setSalesData] = useState([]);
     const [orderCount, setOrderCount] = useState(0);
     const getSalesMessageType = 'getAnalyticsData';
@@ -70,13 +71,14 @@ export default function SalesReport() {
             return acc;
         }, {});
 
-        const topProductsData = Object.keys(productSales).map(productName => ({
+        const productsData = Object.keys(productSales).map(productName => ({
             name: productName,
             amount: productSales[productName].amount,
             sales: productSales[productName].sales
-        })).sort((a, b) => b.amount - a.amount);
+        }));
 
-        setTopProducts(topProductsData);
+        setTopProducts([...productsData].sort((a, b) => b.amount - a.amount));
+        setTopProfitableProducts([...productsData].sort((a, b) => b.sales - a.sales));
 
         // Prepare data for the chart
         const chartData = salesData.reduce((acc, sale) => {
@@ -119,7 +121,6 @@ export default function SalesReport() {
         },
         amountCell: {
             width: '30%',  // Adet için orta genişlik
-            fontWeight: 'bold',
             textAlign: 'center'
         },
         salesCell: {
@@ -183,7 +184,7 @@ export default function SalesReport() {
                         <TableHead>
                             <TableRow>
                                 <TableCell style={tableStyles.productCell}>Ürün Adı</TableCell>
-                                <TableCell style={tableStyles.amountCell}>Adet</TableCell>
+                                <TableCell style={tableStyles.amountCell} sx={{fontWeight: 'bold'}}>Adet</TableCell>
                                 <TableCell style={tableStyles.salesCell}>Brüt Satış (₺)</TableCell>
                             </TableRow>
                         </TableHead>
@@ -191,8 +192,33 @@ export default function SalesReport() {
                             {topProducts.map((product, index) => (
                                 <TableRow key={index}>
                                     <TableCell style={tableStyles.productCell}>{product.name}</TableCell>
-                                    <TableCell style={tableStyles.amountCell}>{product.amount}</TableCell>
+                                    <TableCell style={tableStyles.amountCell} sx={{fontWeight: 'bold'}}>{product.amount}</TableCell>
                                     <TableCell style={tableStyles.salesCell}>₺{product.sales}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
+
+            {/* Most Profitable Products */}
+            <Card sx={{my: 4}}>
+                <CardContent>
+                    <Typography variant="h6" gutterBottom>En Çok Kazandıran Ürünler</Typography>
+                    <Table>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell style={tableStyles.productCell}>Ürün Adı</TableCell>
+                                <TableCell style={tableStyles.amountCell}>Adet</TableCell>
+                                <TableCell style={tableStyles.salesCell} sx={{fontWeight: 'bold'}} >Brüt Satış (₺)</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {topProfitableProducts.map((product, index) => (
+                                <TableRow key={index}>
+                                    <TableCell style={tableStyles.productCell}>{product.name}</TableCell>
+                                    <TableCell style={tableStyles.amountCell}>{product.amount}</TableCell>
+                                    <TableCell style={tableStyles.salesCell} sx={{fontWeight: 'bold'}} >₺{product.sales}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
