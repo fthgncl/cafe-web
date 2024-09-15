@@ -161,8 +161,8 @@ export default function SalesReport() {
                             xAxis={[{scaleType: 'band', dataKey: 'date'}]}
                             yAxis={[{label: 'Satış (₺)'}]}
                             series={[
-                                {dataKey: 'sales', label: 'Satış', color:'#2196f3'},
-                                {dataKey: 'discount', label: 'İndirim', color:'#9b27af'}
+                                {dataKey: 'sales', label: 'Satış', color:'#2196f3', valueFormatter: (value) => (value === null ? '' : `${value} ₺`),},
+                                {dataKey: 'discount', label: 'İndirim', color:'#9b27af', valueFormatter: (value) => (value === null ? '' : `${value} ₺`),}
                             ]}
                             grid={{horizontal: true}}
                             sx={{
