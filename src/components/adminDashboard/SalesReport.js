@@ -88,8 +88,8 @@ export default function SalesReport() {
             if (!acc[date]) {
                 acc[date] = {date, sales: 0, discount: 0};
             }
-            acc[date].sales += sale.totalPrice * sale.quantity;
-            acc[date].discount += (sale.totalPrice - sale.discountedPrice) * sale.quantity;
+            acc[date].sales += sale.totalPrice;
+            acc[date].discount += sale.totalPrice - sale.discountedPrice;
             return acc;
         }, {});
 
