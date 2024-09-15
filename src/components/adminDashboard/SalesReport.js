@@ -112,6 +112,22 @@ export default function SalesReport() {
     const avgSalesProductValue = totalSalesProducts === 0 ? 0 : (totalSales / totalSalesProducts).toFixed(0);
     const avgOrderValue = orderCount === 0 ? 0 : (totalSales / orderCount).toFixed(0);
 
+    const tableStyles = {
+        productCell: {
+            width: '40%',  // Ürün adının bulunduğu hücre geniş olacak
+            textAlign: 'left'
+        },
+        amountCell: {
+            width: '30%',  // Adet için orta genişlik
+            fontWeight: 'bold',
+            textAlign: 'center'
+        },
+        salesCell: {
+            width: '30%',  // Satış bilgisi için orta genişlik
+            textAlign: 'right'
+        }
+    };
+
     return (
         <Box sx={{width: '100%', padding: 2, backgroundColor: '#f4f6f8'}}>
             {/* DataRangeSelector Component */}
@@ -166,17 +182,17 @@ export default function SalesReport() {
                     <Table>
                         <TableHead>
                             <TableRow>
-                                <TableCell>Ürün Adı</TableCell>
-                                <TableCell>Adet</TableCell>
-                                <TableCell>Brüt Satış (₺)</TableCell>
+                                <TableCell style={tableStyles.productCell}>Ürün Adı</TableCell>
+                                <TableCell style={tableStyles.amountCell}>Adet</TableCell>
+                                <TableCell style={tableStyles.salesCell}>Brüt Satış (₺)</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
                             {topProducts.map((product, index) => (
                                 <TableRow key={index}>
-                                    <TableCell>{product.name}</TableCell>
-                                    <TableCell>{product.amount}</TableCell>
-                                    <TableCell>₺{product.sales}</TableCell>
+                                    <TableCell style={tableStyles.productCell}>{product.name}</TableCell>
+                                    <TableCell style={tableStyles.amountCell}>{product.amount}</TableCell>
+                                    <TableCell style={tableStyles.salesCell}>₺{product.sales}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
