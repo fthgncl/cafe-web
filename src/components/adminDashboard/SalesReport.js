@@ -88,7 +88,7 @@ export default function SalesReport() {
             if (!acc[date]) {
                 acc[date] = {date, sales: 0, discount: 0};
             }
-            acc[date].sales += sale.totalPrice;
+            acc[date].sales += sale.discountedPrice;
             acc[date].discount += sale.totalPrice - sale.discountedPrice;
             return acc;
         }, {});
@@ -158,21 +158,34 @@ export default function SalesReport() {
                     <div style={{width: '100%', height: 300}}>
                         <BarChart
                             dataset={salesData}
-                            xAxis={[{scaleType: 'band', dataKey: 'date'}]}
-                            yAxis={[{label: 'Satış (₺)'}]}
+                            xAxis={[{ scaleType: 'band', dataKey: 'date' }]}
+                            yAxis={[{ label: 'Satış (₺)' }]}
                             series={[
-                                {dataKey: 'sales', label: 'Satış', color:'#2196f3', valueFormatter: (value) => (value === null ? '' : `${value} ₺`),},
-                                {dataKey: 'discount', label: 'İndirim', color:'#9b27af', valueFormatter: (value) => (value === null ? '' : `${value} ₺`),}
+                                {
+                                    dataKey: 'discount',
+                                    label: 'İndirim',
+                                    color: '#9b27af',
+                                    valueFormatter: (value) => (value === null ? '' : `${value} ₺`),
+                                    stack: 'total'
+                                },
+                                {
+                                    dataKey: 'sales',
+                                    label: 'Satış',
+                                    color: '#2196f3',
+                                    valueFormatter: (value) => (value === null ? '' : `${value} ₺`),
+                                    stack: 'total'
+                                }
                             ]}
-                            grid={{horizontal: true}}
+                            grid={{ horizontal: true }}
                             sx={{
                                 [`& .${axisClasses.left} .${axisClasses.label}`]: {
                                     transform: 'translateX(-10px)',
                                 },
-                                [`& .${chartsGridClasses.line}`]: {strokeDasharray: '5 3', strokeWidth: 2},
+                                [`& .${chartsGridClasses.line}`]: { strokeDasharray: '5 3', strokeWidth: 2 },
                             }}
-                            barLabel={(item, context) => context.bar.height < 30 || context.bar.width < 60 ? null : `${item.value} ₺` }
+                            barLabel={(item, context) => context.bar.height < 16 || context.bar.width < 60 ? null : `${item.value} ₺`}
                         />
+
                     </div>
                 </CardContent>
             </Card>
