@@ -1,10 +1,21 @@
-import { DateRangePicker, defaultInputRanges, defaultStaticRanges } from 'react-date-range';
-import { tr } from 'date-fns/locale';
-import { useState, useEffect } from 'react';
+import {DateRangePicker, defaultInputRanges, defaultStaticRanges} from 'react-date-range';
+import {tr} from 'date-fns/locale';
+import {useState, useEffect} from 'react';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
-import { useMediaQuery, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, List, ListItem, ListItemButton } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
+import {
+    useMediaQuery,
+    Box,
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    List,
+    ListItem,
+    ListItemButton
+} from "@mui/material";
+import {useTheme} from "@mui/material/styles";
 
 function DatePickerComponent({changeDataRange}) {
     const theme = useTheme();
@@ -24,6 +35,8 @@ function DatePickerComponent({changeDataRange}) {
 
     useEffect(() => {
         changeDataRange(dateRange)
+
+        // eslint-disable-next-line
     }, [dateRange]);
 
     const [dialogOpen, setDialogOpen] = useState(false);
@@ -132,7 +145,7 @@ function DatePickerComponent({changeDataRange}) {
                 </DialogActions>
             </Dialog>
 
-            <Box sx={{ width: '100%',display:'flex', justifyContent:'center', maxWidth: '900px', mt: 2 }}>
+            <Box sx={{width: '100%', display: 'flex', justifyContent: 'center', maxWidth: '900px', mt: 2}}>
                 {/* Normal tarih aralığı seçimi */}
                 <DateRangePicker
                     dateDisplayFormat={"d MMMM yyyy"}
@@ -143,8 +156,8 @@ function DatePickerComponent({changeDataRange}) {
                     rangeColors={['#3d91ff']}
                     direction={isMobile ? "vertical" : "horizontal"}
                     months={isMobile ? 1 : 2}
-                    staticRanges={!isMobile?defaultStaticRanges:[]}
-                    inputRanges={!isMobile?inputRange:[]}
+                    staticRanges={!isMobile ? defaultStaticRanges : []}
+                    inputRanges={!isMobile ? inputRange : []}
                 />
             </Box>
         </Box>

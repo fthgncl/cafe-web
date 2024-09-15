@@ -8,20 +8,20 @@ export const userSchema = (isEditMode) => yup.object().shape({
 
     firstname: yup
         .string()
-        .min(3, 'İsminiz en az ${min} karakter içermelidir.')
-        .max(15, 'İsminiz ${max} karakterden daha fazla olamaz.')
+        .min(3, ({ min }) => `İsminiz en az ${min} karakter içermelidir.`)
+        .max(15, ({ max }) => `İsminiz ${max} karakterden daha fazla olamaz.`)
         .required('İsim boş bırakılamaz.'),
 
     lastname: yup
         .string()
-        .min(3, 'Soyisminiz en az ${min} karakter içermelidir.')
-        .max(15, 'Soyisminiz ${max} karakterden daha fazla olamaz.')
+        .min(3, ({ min }) => `Soyisminiz en az ${min} karakter içermelidir.`)
+        .max(15, ({ max }) => `Soyisminiz ${max} karakterden daha fazla olamaz.`)
         .required('Soyisim boş bırakılamaz.'),
 
     username: yup
         .string()
-        .min(3, 'Kullanıcı adınız en az ${min} karakter içermelidir.')
-        .max(15, "Kullanıcı adınız ${max} karakterden daha fazla olamaz.")
+        .min(3, ({ min }) => `Kullanıcı adınız en az ${min} karakter içermelidir.`)
+        .max(15, ({ max }) => `Kullanıcı adınız ${max} karakterden daha fazla olamaz.`)
         .matches(usernameRules, {
             message: 'Kullanıcı adı boşluk içermemelidir.',
         })
@@ -38,7 +38,7 @@ export const userSchema = (isEditMode) => yup.object().shape({
         password: yup
             .string()
             .required('Lütfen bir şifre belirleyiniz.')
-            .min(6, 'Şifre en az ${min} haneli olmalıdır.')
+            .min(6, ({ min }) => `Şifre en az ${min} haneli olmalıdır.`)
             .matches(passwordRules, {
                 message: 'Şifre en az bir büyük, bir küçük harf ve bir sayı içermelidir.',
             }),
