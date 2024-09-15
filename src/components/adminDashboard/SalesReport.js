@@ -14,7 +14,6 @@ import {
 } from '@mui/material';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import DiscountIcon from '@mui/icons-material/Discount';
 import EmojiFoodBeverageIcon from '@mui/icons-material/EmojiFoodBeverage';
 import TimelineIcon from '@mui/icons-material/Timeline';
