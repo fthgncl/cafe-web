@@ -74,7 +74,7 @@ export default function SalesReport() {
             name: productName,
             amount: productSales[productName].amount,
             sales: productSales[productName].sales
-        }));
+        })).sort((a, b) => b.amount - a.amount);
 
         setTopProducts(topProductsData);
 
