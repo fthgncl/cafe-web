@@ -22,6 +22,7 @@ import {SocketContext} from '../../context/SocketContext';
 import {axisClasses} from '@mui/x-charts/ChartsAxis';
 import {chartsGridClasses} from '@mui/x-charts/ChartsGrid';
 import {BarChart} from '@mui/x-charts/BarChart';
+import { PieChart } from '@mui/x-charts/PieChart'
 
 function formatDateToCustomFormat(dateString) {
     // Tarih nesnesi oluştur
