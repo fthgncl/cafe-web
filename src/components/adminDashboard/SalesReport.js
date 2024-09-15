@@ -153,7 +153,7 @@ export default function SalesReport() {
             {/* Sales Graph */}
             <Card sx={{mb: 4}}>
                 <CardContent>
-                    <Typography variant="h6" gutterBottom>Son 30 Gün Satış Grafiği</Typography>
+                    <Typography variant="h6" gutterBottom>Satış Grafiği</Typography>
                     <div style={{width: '100%', height: 300}}>
                         <BarChart
                             dataset={salesData}
@@ -225,6 +225,74 @@ export default function SalesReport() {
                     </Table>
                 </CardContent>
             </Card>
+
+            <Card sx={{ my: 4, p: 3, boxShadow: 3, borderRadius: 2 }}>
+                <CardContent>
+                    {/* Grafiklerin Grid ile hizalanması ve alt satıra geçince ortalanması */}
+                    <Grid container spacing={3} justifyContent="center" alignItems="center">
+                        {/* En Çok Satan Ürünler Grafiği */}
+                        <Grid item xs={12} md={6} display="flex" flexDirection="column" alignItems="center">
+                            <Typography variant="h6" gutterBottom>
+                                En Çok Satan Ürünler
+                            </Typography>
+                            <PieChart
+                                series={[
+                                    {
+                                        data: topProducts.map((product, index) => ({
+                                            id: index,
+                                            value: product.amount,
+                                            label: product.name,
+                                        })),
+                                        highlightScope: { fade: 'global', highlight: 'item' },
+                                        innerRadius: 30,
+                                        outerRadius: 100,
+                                        paddingAngle: 3,
+                                        cornerRadius: 5,
+                                        startAngle: -45,
+                                        endAngle: 315,
+                                        valueFormatter: ({value}) => (value === null ? '' : `${value} adet`),
+                                    },
+                                ]}
+                                width={400}
+                                height={200}
+                            />
+                        </Grid>
+
+                        {/* En Çok Kazandıran Ürünler Grafiği */}
+                        <Grid item xs={12} md={6} display="flex" flexDirection="column" alignItems="center">
+                            <Typography variant="h6" gutterBottom>
+                                En Çok Kazandıran Ürünler
+                            </Typography>
+                            <PieChart
+                                series={[
+                                    {
+                                        data: topProducts.map((product, index) => ({
+                                            id: index,
+                                            value: product.sales,
+                                            label: product.name,
+                                        })),
+                                        highlightScope: { fade: 'global', highlight: 'item' },
+                                        arcLabelMinAngle: 35,
+                                        innerRadius: 30,
+                                        outerRadius: 100,
+                                        paddingAngle: 3,
+                                        cornerRadius: 5,
+                                        startAngle: -45,
+                                        endAngle: 315,
+                                        valueFormatter: ({value}) => (value === null ? '' : `${value} ₺`),
+                                    },
+                                ]}
+                                width={400}
+                                height={200}
+                            />
+                        </Grid>
+                    </Grid>
+                </CardContent>
+            </Card>
+
+
+
+
         </Box>
     );
 }
