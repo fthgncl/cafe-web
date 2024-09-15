@@ -27,7 +27,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "react-scripts build && xcopy /E /I /Y build C:\\Users\\genca\\Desktop\\cafe-web-build && cd C:\\Users\\genca\\Desktop\\cafe-web-build && git add . && git commit -m \"auto build\"",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
