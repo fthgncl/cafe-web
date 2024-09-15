@@ -1,6 +1,6 @@
 import {DateRangePicker, defaultInputRanges, defaultStaticRanges} from 'react-date-range';
 import {tr} from 'date-fns/locale';
-import {useState, useEffect} from 'react';
+import {useState, useEffect, useContext} from 'react';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 import {
@@ -16,10 +16,13 @@ import {
     ListItemButton
 } from "@mui/material";
 import {useTheme} from "@mui/material/styles";
+import {SocketContext} from "../context/SocketContext";
 
 function DatePickerComponent({changeDataRange}) {
+    const {socketData} = useContext(SocketContext);
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+    const updatedSalesMessageType = 'updatedSales';
 
     const [dateRange, setDateRange] = useState(() => {
         const today = new Date();
@@ -38,6 +41,18 @@ function DatePickerComponent({changeDataRange}) {
 
         // eslint-disable-next-line
     }, [dateRange]);
+
+    useEffect(() => {
+        if (!socketData || !socketData.message) return;
+
+        if (socketData.type === updatedSalesMessageType) {
+            if (socketData.message.status === "success") {
+                changeDataRange(dateRange);
+            }
+        }
+
+        // eslint-disable-next-line
+    }, [socketData]);
 
     const [dialogOpen, setDialogOpen] = useState(false);
 
