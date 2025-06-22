@@ -552,8 +552,10 @@ export default function OrderEntry() {
                                     const size = selectedProduct.sizes.find(size => size.size === selectedSize);
                                     if (size) {
                                         const basePrice = size.price * quantity;
-                                        const extraFee = selectedProduct.contents.find(content => content.name === selectedContent)?.extraFee || 0;
+                                        const matchedContent = selectedProduct.contents.find(content => content.name === selectedContent);
+                                        const extraFee = matchedContent ? (matchedContent.extraFee * quantity) : 0;
                                         return `Fiyat : ${basePrice + extraFee} ₺`;
+
                                     }
                                 }
                             })()}
