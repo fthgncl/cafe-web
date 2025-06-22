@@ -53,9 +53,9 @@ export default function SalesReport() {
     const analyzeOrdersData = (data) => {
         setOrderCount(data.orderCount || 0);
         const salesData = data.sales || [];
-
-        const totalSalesAmount = salesData.reduce((acc, sale) => acc + sale.totalPrice * sale.quantity, 0);
-        const totalDisc = salesData.reduce((acc, sale) => acc + (sale.totalPrice - sale.discountedPrice) * sale.quantity, 0);
+        console.log(salesData);
+        const totalSalesAmount = salesData.reduce((acc, sale) => acc + sale.totalPrice, 0);
+        const totalDisc = salesData.reduce((acc, sale) => acc + (sale.totalPrice - sale.discountedPrice), 0);
         const totalSalesProducts = salesData.reduce((acc, sale) => acc + sale.quantity, 0);
 
         setTotalDiscount(totalDisc);
