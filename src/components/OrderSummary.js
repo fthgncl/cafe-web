@@ -37,7 +37,7 @@ const OrderSummary = ({orders, clearOrders, calculateTotalPrice}) => {
     const [isLoading, setIsLoading] = useState(false);
     const [isSummaryOpen, setIsSummaryOpen] = useState(true);
     const [orderNote, setOrderNote] = useState('');
-    const [customerName, setCustomerName] = useState('');
+    const [customerName, setCustomerName] = useState('#');
     const [customerNameError, setCustomerNameError] = useState(false);
     const [paymentStatus, setPaymentStatus] = useState('');
     const [paymentStatusError, setPaymentStatusError] = useState(false);
