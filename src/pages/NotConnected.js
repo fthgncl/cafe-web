@@ -56,7 +56,7 @@ const ConnectionErrorPage = () => {
                 >
                     Lütfen internet bağlantınızı kontrol edin veya daha sonra tekrar deneyin.
                 </Typography>
-                <Button
+                {/*<Button
                     variant="contained"
                     color="primary"
                     onClick={handleReload}
@@ -64,7 +64,7 @@ const ConnectionErrorPage = () => {
                 >
                     <RefreshIcon sx={{ mr: 1 }} />
                     Yenile
-                </Button>
+                </Button>*/}
             </Box>
         </Container>
     );
