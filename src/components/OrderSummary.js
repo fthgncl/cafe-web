@@ -39,7 +39,7 @@ const OrderSummary = ({orders, clearOrders, calculateTotalPrice}) => {
     const [orderNote, setOrderNote] = useState('');
     const [customerName, setCustomerName] = useState('#');
     const [customerNameError, setCustomerNameError] = useState(false);
-    const [paymentStatus, setPaymentStatus] = useState('');
+    const [paymentStatus, setPaymentStatus] = useState(PaymentStatusEnum.PAID);
     const [paymentStatusError, setPaymentStatusError] = useState(false);
     const [discount, setDiscount] = useState(0);
     const [showDiscountField, setShowDiscountField] = useState(false);
